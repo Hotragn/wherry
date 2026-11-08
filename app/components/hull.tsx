@@ -24,7 +24,7 @@ export function HullGauge({ left, total }: { left: bigint; total: bigint }) {
         fill="var(--w-surface)"
       />
       <g clipPath="url(#hold)">
-        <rect x="0" y={top} width="240" height="96" fill="var(--w-accent)" />
+        <rect x="0" y={top} width="240" height="96" fill="var(--w-brand)" />
         <path
           d={`M0 ${top} q10 -3 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0`}
           fill="none"

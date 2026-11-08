@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { BuiltWith } from "./components/built-with";
+import { Logo } from "./components/logo";
+import { HeroStage } from "./components/hero-stage";
 import { RiverHero } from "./components/river-hero";
 import { Ticket } from "./components/ticket";
 import { Addr, WhatsThis } from "./components/ui";
@@ -43,90 +46,122 @@ const SAFETY = [
 export default function Landing() {
   return (
     <div className="min-h-dvh overflow-x-clip">
-      <header className="mx-auto flex max-w-page flex-wrap items-center justify-between gap-3 px-4 py-5 md:px-8">
-        <Link href="/" className="display text-3xl">
-          Wherry
-        </Link>
-        <nav aria-label="Page" className="flex items-center gap-5 text-sm">
-          <a href="#how" className="link">
+      <header className="relative z-10 mx-auto flex max-w-page items-center justify-between gap-3 px-4 py-5 md:px-8">
+        <Logo size={44} className="text-3xl" />
+        <nav aria-label="Page" className="flex items-center gap-1 rounded-full border border-line bg-surface p-1 text-sm shadow-1">
+          <a href="#how" className="rounded-full px-3 py-1.5 font-medium hover:bg-sunk">
             How it works
           </a>
-          <a href="#safe" className="link hidden sm:inline">
-            Is it safe?
+          <a href="#safe" className="hidden rounded-full px-3 py-1.5 font-medium hover:bg-sunk sm:inline">
+            Is it safe
           </a>
-          <span className="label rounded-sm border-2 border-ink px-2 py-1 text-ink">Devnet · test money</span>
+          <Link href="/app" className="rounded-full bg-accent px-3 py-1.5 font-medium text-on-accent">
+            Open app
+          </Link>
         </nav>
       </header>
 
       <main>
-        <section className="mx-auto grid max-w-page gap-8 px-4 pb-16 pt-6 md:px-8 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] lg:items-end lg:gap-x-12 lg:pt-10">
-          <div className="flex flex-col gap-6">
-            <span className="label text-ink">Offline payments on Solana</span>
-            <h1 className="text-[clamp(52px,8.6vw,124px)]">The ferry for your money when the network&apos;s&nbsp;gone.</h1>
-          </div>
-          <div className="flex flex-col gap-6 lg:pb-3">
-            <p className="text-xl leading-snug">
-              Your phone pays the shop with a signed ferry ticket, even with no signal. The money was locked on Solana first, so the ticket is good.
-            </p>
-            <div className="flex flex-wrap items-center gap-6">
-              <Link href="/app" className="btn btn-sail">
-                Try the crossing
-              </Link>
-              <a href="#how" className="link">
-                How it works
-              </a>
+        <div className="relative isolate -mt-24 pt-24">
+          <div aria-hidden className="w-beams -z-10" />
+          <section className="relative mx-auto grid max-w-page items-center gap-10 px-4 pb-14 pt-6 md:px-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:pt-12">
+            <div className="flex flex-col gap-7">
+              <p className="label">Offline · Signed · Settled on Solana</p>
+              <div className="relative">
+                <svg aria-hidden viewBox="0 0 600 300" className="pointer-events-none absolute -left-16 top-24 -z-10 hidden w-[760px] text-ink/20 lg:block">
+                  <path d="M10 290 C 160 330, 520 300, 590 120" fill="none" stroke="currentColor" strokeWidth="1" />
+                </svg>
+                <h1 className="headline-fade max-w-[720px] text-[clamp(56px,8.4vw,120px)]">
+                  Pay with <em className="font-normal italic">no signal.</em> Get paid when it&apos;s back.
+                </h1>
+                <span aria-hidden className="absolute bottom-6 right-0 hidden text-3xl text-ink lg:block">✦</span>
+              </div>
+              <p className="max-w-[540px] text-xl text-muted">
+                Your phone pays a shop with a signed ferry ticket, even in airplane mode. The money was locked on Solana first, so the ticket is always good.
+              </p>
+              <div className="flex flex-wrap items-center gap-4">
+                <Link href="/app/owner" className="btn btn-sail">
+                  Start the demo
+                </Link>
+                <a href="#how" className="btn btn-quiet">
+                  How it works
+                </a>
+              </div>
+              <nav aria-label="Demo in three steps" className="flex flex-col gap-2">
+                <span className="label">Judges: the whole demo is 3 pages</span>
+                <ol className="flex flex-wrap items-center gap-2 text-sm">
+                  {[
+                    ["/app/owner", "1", "Owner", "lock $40"],
+                    ["/app/phone", "2", "Phone", "pay offline"],
+                    ["/app/shop", "3", "Shop", "check + collect"],
+                  ].map(([href, n, role, what], i) => (
+                    <li key={href} className="flex items-center gap-2">
+                      {i > 0 && (
+                        <span aria-hidden className="text-muted">
+                          →
+                        </span>
+                      )}
+                      <Link href={href} className="flex items-center gap-2 rounded-full border border-line px-3 py-1.5 hover:border-ink">
+                        <span className="mono grid h-5 w-5 place-items-center rounded-full bg-accent text-xs text-on-accent">{n}</span>
+                        <span className="font-semibold">{role}</span>
+                        <span className="text-muted">{what}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
             </div>
-          </div>
-          <div className="lg:col-span-2">
-            <RiverHero />
-          </div>
+            <HeroStage />
+            <div aria-hidden className="absolute right-0 top-10 hidden flex-col items-center gap-3 xl:flex">
+              <span className="mono text-xs text-ink">01</span>
+              <span className="h-24 w-px bg-line" />
+              <span className="mono text-xs text-muted">02</span>
+              <span className="mono text-xs text-muted">03</span>
+            </div>
+          </section>
+        </div>
+
+        <BuiltWith />
+
+        <section aria-label="Watch a crossing" className="mx-auto max-w-page px-4 pb-20 md:px-8">
+          <RiverHero />
         </section>
 
-        <section id="how" aria-labelledby="how-title" className="border-y-2 border-ink bg-surface">
-          <div className="mx-auto grid max-w-page gap-12 px-4 py-16 md:px-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)]">
-            <div className="flex flex-col gap-10">
-              <div className="flex flex-col gap-3">
-                <span className="label text-ink">How it works</span>
-                <h2 id="how-title" className="text-[clamp(40px,6vw,72px)]">
-                  Three steps. One of them needs no signal.
-                </h2>
-              </div>
-              <ol className="flex flex-col">
-                {STEPS.map((s) => (
-                  <li key={s.n} className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-x-4 border-t-2 border-ink py-6 sm:grid-cols-[6rem_minmax(0,1fr)]">
-                    <span className="mono text-4xl leading-none sm:text-5xl" aria-hidden>
-                      {s.n}
-                    </span>
-                    <div className="flex flex-col gap-2">
-                      <span className="label">{s.when}</span>
-                      <h3 className="text-3xl">{s.title}</h3>
-                      <p className="max-w-[52ch]">{s.text}</p>
-                      <WhatsThis term={s.term}>{s.tech}</WhatsThis>
+        <section id="how" aria-labelledby="how-title" className="mx-auto max-w-page px-4 pb-20 md:px-8">
+          <h2 id="how-title" className="mb-10 max-w-[680px] text-[clamp(36px,5vw,60px)]">
+            Three steps. Only the first one needs a signal.
+          </h2>
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:grid-rows-2">
+            {STEPS.map((s, i) => (
+              <article
+                key={s.n}
+                className={`paper flex flex-col gap-3 p-6 md:p-8 ${i === 1 ? "lg:col-start-2 lg:row-span-2 lg:row-start-1 bg-night text-on-night" : ""}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className={`mono grid h-9 w-9 place-items-center rounded-full text-sm ${i === 1 ? "bg-accent text-on-accent" : "bg-accent text-on-accent"}`}>{s.n}</span>
+                  <span className={`text-sm font-medium ${i === 1 ? "text-on-night-muted" : "text-muted"}`}>{s.when}</span>
+                </div>
+                <h3 className="text-3xl">{s.title}</h3>
+                <p className={`max-w-[52ch] ${i === 1 ? "text-on-night-muted" : "text-muted"}`}>{s.text}</p>
+                <WhatsThis term={s.term}>{s.tech}</WhatsThis>
+                {i === 1 && (
+                  <div className="mt-auto flex justify-center pt-6">
+                    <div className="w-full max-w-sm -rotate-2">
+                      <Ticket serial={7} shopName="Amara's kiosk" amount={3_500_000n} tab="7QcwJ8Jwj4W74Ypq58U5jgBrxwHDvxquGwic2xzPr4MM" />
                     </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-            <div className="flex flex-col gap-4 lg:sticky lg:top-8 lg:self-start lg:pt-28">
-              <span className="label text-ink">This is a ferry ticket</span>
-              <div className="-rotate-2">
-                <Ticket serial={7} shopName="Amara's kiosk" amount={3_500_000n} tab="7QcwJ8Jwj4W74Ypq58U5jgBrxwHDvxquGwic2xzPr4MM" onPaper />
-              </div>
-              <p className="max-w-[36ch] text-sm text-muted">
-                Your phone signs it in a few milliseconds. The stub tears off when the shop collects the money.
-              </p>
-            </div>
+                  </div>
+                )}
+              </article>
+            ))}
           </div>
         </section>
 
-        <section aria-label="Why offline matters" className="bg-night text-on-night">
-          <div className="mx-auto grid max-w-page gap-10 px-4 py-20 md:px-8 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]">
+        <section aria-label="Why offline matters" className="mx-auto max-w-page px-4 pb-20 md:px-8">
+          <div className="grid gap-10 rounded-3xl bg-night p-8 text-on-night md:p-14 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
             <div className="flex flex-col gap-5">
-              <span className="label text-on-night-muted">April 28, 2025 · Spain and Portugal</span>
-              <p className="display text-[clamp(40px,6.5vw,84px)]">
-                The power went out. In-store card payments fell <span className="bg-accent px-2 text-ink">55%</span>.
-              </p>
-              <p className="text-sm text-on-night-muted">Source: Banco de España, Financial Stability Report, autumn 2025.</p>
+              <p className="text-sm text-on-night-muted">April 28, 2025 · Spain and Portugal</p>
+              <p className="display text-[clamp(36px,5vw,64px)]">The power went out. In-store card payments fell 55%.</p>
+              <p className="text-sm text-on-night-muted">Banco de España, Financial Stability Report, autumn 2025.</p>
             </div>
             <div className="flex flex-col justify-end gap-4">
               <p className="@container flex flex-col">
@@ -135,29 +170,23 @@ export default function Landing() {
                 <span className="text-on-night-muted">people were offline in 2025 (ITU).</span>
               </p>
               <p className="text-on-night-muted">
-                When the network drops, card payments stop and the shop eats the loss. Some offline payment ideas hand the shop a promise the payer can still empty.
-                Wherry hands it money that was locked before the signal went.
+                When the network drops, card payments stop and the shop eats the loss. Wherry hands the shop money that was locked before the signal went.
               </p>
             </div>
           </div>
         </section>
 
-        <section id="safe" aria-labelledby="safe-title">
-          <div className="mx-auto grid max-w-page gap-12 px-4 py-20 md:px-8 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
-            <div className="flex flex-col gap-3">
-              <span className="label text-ink">Is my money safe?</span>
-              <h2 id="safe-title" className="text-[clamp(40px,5vw,64px)]">
-                The shop sees its worst case before it says yes.
-              </h2>
-            </div>
-            <dl className="grid gap-x-10 sm:grid-cols-2">
-              {SAFETY.map(([term, text], i) => (
-                <div key={term} className="flex flex-col gap-1 border-t-2 border-ink py-5">
-                  <dt className="flex items-baseline gap-3 text-lg font-bold">
-                    <span className="mono text-sm text-muted">{String(i + 1).padStart(2, "0")}</span>
-                    {term}
-                  </dt>
-                  <dd>{text}</dd>
+        <section id="safe" aria-labelledby="safe-title" className="mx-auto max-w-page px-4 pb-20 md:px-8">
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
+            <h2 id="safe-title" className="text-[clamp(36px,4.5vw,56px)]">
+              Is my money safe? Here&apos;s how it&apos;s protected.
+            </h2>
+            <dl className="grid gap-x-10 gap-y-2 sm:grid-cols-2">
+              {SAFETY.map(([term, text]) => (
+                <div key={term} className="flex flex-col gap-2 py-4">
+                  <div aria-hidden className="h-px w-full bg-line" />
+                  <dt className="pt-3 text-lg font-semibold">{term}</dt>
+                  <dd className="text-muted">{text}</dd>
                 </div>
               ))}
             </dl>
@@ -165,15 +194,15 @@ export default function Landing() {
         </section>
 
         <section aria-label="Try it" className="mx-auto max-w-page px-4 pb-20 md:px-8">
-          <div className="paper flex flex-col gap-5 p-6 md:flex-row md:items-center md:justify-between md:p-10">
+          <div className="paper flex flex-col gap-6 p-8 md:flex-row md:items-center md:justify-between md:p-12">
             <div className="flex flex-col gap-2">
               <h2 className="text-4xl">Try it with two windows.</h2>
-              <p className="max-w-[56ch]">
+              <p className="max-w-[56ch] text-muted">
                 One window is the customer&apos;s phone, one is the shop. Lock test dollars, switch off the network, pay with a ticket, then collect when you&apos;re back.
               </p>
             </div>
-            <Link href="/app" className="link shrink-0 text-lg">
-              Open the app →
+            <Link href="/app" className="btn btn-quiet shrink-0">
+              Open the app
             </Link>
           </div>
         </section>
@@ -181,7 +210,7 @@ export default function Landing() {
 
       <footer className="bg-night text-on-night">
         <div className="mx-auto flex max-w-page flex-col gap-3 px-4 py-10 text-sm md:px-8">
-          <span className="display text-3xl">Wherry</span>
+          <span className="display text-2xl">Wherry</span>
           <span className="flex flex-wrap items-baseline gap-2 text-on-night-muted">
             Program on Solana devnet:
             <span className="text-on-night [&_a]:text-on-night [&_button]:text-on-night">
@@ -189,6 +218,13 @@ export default function Landing() {
             </span>
           </span>
           <span className="text-on-night-muted">Devnet only. Test dollars are not money. Built for the MLH Solana Hackathon, November 2026.</span>
+          <span className="text-on-night-muted">
+            Fluid orb by{" "}
+            <a className="link" href="https://www.rareui.com" target="_blank" rel="noreferrer">
+              Rare UI
+            </a>
+            . Type: Cormorant Garamond, Geist and Paper Mono (OFL).
+          </span>
         </div>
       </footer>
     </div>

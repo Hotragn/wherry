@@ -1,135 +1,175 @@
-// Doggett, the Wherry mascot: a chubby little Thames wherry with a saffron sail, big eyes and a blush.
-// Hand-built SVG, colours from the tokens. Reads at 32 px: bean hull, triangle sail, two eyes.
-// Never more than one on screen; only the waiting dots move, and not under reduced motion.
+// Doggett, the Wherry mascot (v4), drawn from the owner's mascot sheets (design/mascot/owner-mascot-*.png):
+// a glowing egg-shaped plush sitting in a little amber wherry with a waving flag, over a champagne wave.
+// Only the three brand colours. `glow` adds the soft 3D light and fur used at hero sizes; small sizes stay flat.
+// Reads at 16 px: egg, two eyes, boat, flag. Only the waiting dots move, and not under reduced motion.
 
 export type Pose = "welcome" | "waiting" | "success" | "error";
 
 const TITLES: Record<Pose, string> = {
-  welcome: "Doggett the wherry, sail up, smiling",
-  waiting: "Doggett the wherry, sail furled, rowing and waiting",
-  success: "Doggett the wherry, sail full, payment landed",
-  error: "Doggett the wherry, listing to one side, something went wrong",
+  welcome: "Doggett, a glowing egg-shaped plush in a little boat with a flag, smiling",
+  waiting: "Doggett in his boat, looking up and waiting",
+  success: "Doggett in his boat, eyes closed with a big smile",
+  error: "Doggett in a tilting boat, looking worried",
 };
 
-const ink = "var(--w-ink)";
-const fog = "var(--w-surface)";
-const sail = "var(--w-accent)";
+const MOCHA = "var(--w-mocha)";
+const CHAMP = "var(--w-champagne)";
+const AMBER = "var(--w-amber)";
 
-const Water = () => (
-  <>
-    <path d="M4 86 q7 -5 14 0 t14 0 t14 0 t14 0 t14 0 t14 0 t14 0" fill="none" stroke={ink} strokeWidth="2.6" strokeLinecap="round" />
-    <path d="M22 92 q5 -3 10 0 t10 0" fill="none" stroke="var(--w-muted)" strokeWidth="2" strokeLinecap="round" />
-    <path d="M60 92 q5 -3 10 0 t10 0" fill="none" stroke="var(--w-muted)" strokeWidth="2" strokeLinecap="round" />
-  </>
+const Defs = ({ glow }: { glow: boolean }) => (
+  <defs>
+    <radialGradient id="dg4-egg" cx="38%" cy="26%" r="85%">
+      <stop offset="0" stopColor={CHAMP} />
+      <stop offset=".6" stopColor="color-mix(in srgb, var(--w-amber) 14%, var(--w-champagne))" />
+      <stop offset="1" stopColor="color-mix(in srgb, var(--w-amber) 38%, var(--w-champagne))" />
+    </radialGradient>
+    {/* warm light from inside the plush, low in the body, as in the 3D sheet */}
+    <radialGradient id={glow ? "dg4-inner-lit" : "dg4-inner-flat"} cx="50%" cy="80%" r="55%">
+      <stop offset="0" stopColor={AMBER} stopOpacity={glow ? 0.55 : 0} />
+      <stop offset="1" stopColor={AMBER} stopOpacity="0" />
+    </radialGradient>
+    <linearGradient id="dg4-hull" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stopColor={AMBER} />
+      <stop offset="1" stopColor="color-mix(in srgb, var(--w-mocha) 35%, var(--w-amber))" />
+    </linearGradient>
+    <filter id="dg4-fuzz" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="9" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+  </defs>
 );
-const Hull = () => (
-  <>
-    <path d="M8 55 C30 60 66 59 90 51 C88 72 72 84 49 84 C26 84 11 73 8 55 Z" fill={ink} />
-    <path d="M13 58.5 C36 62.5 64 61.5 85 55.5" fill="none" stroke={sail} strokeWidth="3" strokeLinecap="round" />
-  </>
-);
+
+const EGG = "M70 18 C95 18 110 46 110 74 C110 98 96 106 70 106 C44 106 30 98 30 74 C30 46 45 18 70 18 Z";
+
+function Boat() {
+  return (
+    <>
+      <line x1="118" y1="90" x2="118" y2="16" stroke={CHAMP} strokeWidth="3.6" strokeLinecap="round" />
+      <path d="M120 17 C130 13 137 22 150 17 L146 27 L150 37 C137 42 130 33 120 36 Z" fill={AMBER} />
+      <path d="M16 92 L144 86 Q138 118 98 121 L56 122 Q26 119 16 92 Z" fill="url(#dg4-hull)" />
+      <path d="M20 95 L140 89" stroke={CHAMP} strokeWidth="2.6" strokeLinecap="round" opacity=".85" />
+      <path d="M32 107 Q82 112 132 103" fill="none" stroke={MOCHA} strokeWidth="1.8" strokeLinecap="round" opacity=".35" />
+    </>
+  );
+}
+const Wave = () => <path d="M12 130 Q38 120 64 128 T116 126 T152 120" fill="none" stroke={CHAMP} strokeWidth="4" strokeLinecap="round" />;
+
+function Egg({ glow }: { glow: boolean }) {
+  return (
+    <g filter={glow ? "url(#dg4-fuzz)" : undefined}>
+      <path d={EGG} fill="url(#dg4-egg)" />
+      <path d={EGG} fill={glow ? "url(#dg4-inner-lit)" : "url(#dg4-inner-flat)"} />
+    </g>
+  );
+}
 const Cheeks = () => (
   <>
-    <ellipse cx="27" cy="74" rx="4" ry="2.4" fill={sail} opacity=".75" />
-    <ellipse cx="67" cy="72.5" rx="4" ry="2.4" fill={sail} opacity=".75" />
+    <ellipse cx="52" cy="74" rx="6" ry="3.8" fill={AMBER} opacity=".45" />
+    <ellipse cx="88" cy="74" rx="6" ry="3.8" fill={AMBER} opacity=".45" />
   </>
 );
-const Eyes = ({ look = 0, drop = 0 }: { look?: number; drop?: number }) => (
+const Eyes = ({ dy = 0 }: { dy?: number }) => (
   <>
-    <ellipse cx="38" cy="69" rx="6.2" ry="7" fill={fog} />
-    <ellipse cx="57" cy="68" rx="6.2" ry="7" fill={fog} />
-    <circle cx={38.6 + look} cy={70 + drop} r="3.6" fill={ink} />
-    <circle cx={57.6 + look} cy={69 + drop} r="3.6" fill={ink} />
-    <circle cx={37.4 + look} cy={68.4 + drop} r="1.3" fill={fog} />
-    <circle cx={56.4 + look} cy={67.4 + drop} r="1.3" fill={fog} />
+    <circle cx="60" cy={64 + dy} r="4.6" fill={MOCHA} />
+    <circle cx="80" cy={64 + dy} r="4.6" fill={MOCHA} />
+    <circle cx="58.6" cy={62.4 + dy} r="1.5" fill={CHAMP} />
+    <circle cx="78.6" cy={62.4 + dy} r="1.5" fill={CHAMP} />
   </>
 );
-const Mast = ({ top = 12 }: { top?: number }) => (
-  <line x1="49" y1="56" x2="49" y2={top} stroke={ink} strokeWidth="3.4" strokeLinecap="round" />
+const Paws = () => (
+  <>
+    <ellipse cx="50" cy="91" rx="9" ry="6.5" fill="url(#dg4-egg)" />
+    <ellipse cx="90" cy="89" rx="9" ry="6.5" fill="url(#dg4-egg)" />
+  </>
 );
-const Pennant = () => <path d="M49 12 L61 15.5 L49 19 Z" fill={ink} />;
 
-function Body({ pose }: { pose: Pose }) {
-  switch (pose) {
-    case "welcome":
-      return (
+function PoseArt({ pose, glow }: { pose: Pose; glow: boolean }) {
+  const face = (() => {
+    switch (pose) {
+      case "welcome":
+        return (
+          <>
+            <Eyes />
+            <path d="M64 74 Q70 80 76 74" fill="none" stroke={MOCHA} strokeWidth="2.6" strokeLinecap="round" />
+          </>
+        );
+      case "waiting":
+        return (
+          <>
+            <Eyes dy={-3} />
+            <circle cx="70" cy="76" r="2.6" fill={MOCHA} />
+          </>
+        );
+      case "success":
+        return (
+          <>
+            <path d="M54.5 65 Q60 59 65.5 65" fill="none" stroke={MOCHA} strokeWidth="3" strokeLinecap="round" />
+            <path d="M74.5 65 Q80 59 85.5 65" fill="none" stroke={MOCHA} strokeWidth="3" strokeLinecap="round" />
+            <path d="M62 72 Q70 82 78 72 Z" fill={MOCHA} />
+          </>
+        );
+      case "error":
+        return (
+          <>
+            <Eyes dy={1.5} />
+            <path d="M53 57 L63 54" stroke={MOCHA} strokeWidth="2.4" strokeLinecap="round" />
+            <path d="M87 57 L77 54" stroke={MOCHA} strokeWidth="2.4" strokeLinecap="round" />
+            <path d="M63 77 Q66.5 74 70 77 T77 77" fill="none" stroke={MOCHA} strokeWidth="2.4" strokeLinecap="round" />
+          </>
+        );
+    }
+  })();
+  const tilt = pose === "error" ? "rotate(-9 80 100)" : undefined;
+  return (
+    <>
+      <Wave />
+      {pose === "waiting" && (
         <>
-          <Water />
-          <Mast />
-          <Pennant />
-          <path d="M52.5 18 Q74 30 78 50.5 L52.5 52.5 Z" fill={sail} stroke={ink} strokeWidth="2.6" strokeLinejoin="round" />
-          <path d="M56 46 L72 44.6" stroke={ink} strokeWidth="1.8" strokeLinecap="round" opacity=".55" />
-          <Hull />
-          <Cheeks />
-          <Eyes look={0.6} drop={0.4} />
-          <path d="M42.5 76.5 Q47.5 81 52.5 76.5" fill="none" stroke={fog} strokeWidth="2.6" strokeLinecap="round" />
+          <circle className="w-dot w-dot-1" cx="56" cy="6" r="3.6" fill={CHAMP} />
+          <circle className="w-dot w-dot-2" cx="70" cy="6" r="3.6" fill={CHAMP} />
+          <circle className="w-dot w-dot-3" cx="84" cy="6" r="3.6" fill={CHAMP} />
         </>
-      );
-    case "waiting":
-      return (
-        <>
-          <Water />
-          <circle className="w-dot w-dot-1" cx="36" cy="26" r="3.6" fill={ink} />
-          <circle className="w-dot w-dot-2" cx="48" cy="26" r="3.6" fill={ink} />
-          <circle className="w-dot w-dot-3" cx="60" cy="26" r="3.6" fill={ink} />
-          <Mast top={38} />
-          <rect x="49" y="44" width="30" height="8" rx="4" fill={sail} stroke={ink} strokeWidth="2.4" />
-          <line x1="22" y1="62" x2="8" y2="86" stroke={ink} strokeWidth="3.4" strokeLinecap="round" />
-          <ellipse cx="7" cy="88" rx="5.5" ry="2.6" transform="rotate(-58 7 88)" fill={ink} />
-          <Hull />
-          <Cheeks />
-          <Eyes look={-1.6} drop={-1.2} />
-          <path d="M44 77.5 L51 77.5" fill="none" stroke={fog} strokeWidth="2.6" strokeLinecap="round" />
-        </>
-      );
-    case "success":
-      return (
-        <>
-          <Water />
-          <Mast />
-          <Pennant />
-          <path d="M52.5 16 Q84 24 82 51 L52.5 52.5 Z" fill={sail} stroke={ink} strokeWidth="2.6" strokeLinejoin="round" />
-          <circle cx="80" cy="14" r="10.5" fill="var(--w-ok)" stroke={ink} strokeWidth="2" />
-          <path d="M75 14.5 L79 18.5 L86 10.5" fill="none" stroke={fog} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-          <Hull />
-          <Cheeks />
-          <path d="M32.5 70 Q38 63 43.5 70" fill="none" stroke={fog} strokeWidth="3.2" strokeLinecap="round" />
-          <path d="M51.5 69 Q57 62 62.5 69" fill="none" stroke={fog} strokeWidth="3.2" strokeLinecap="round" />
-          <path d="M41 75 Q47.5 83 54 75 Z" fill={fog} />
-        </>
-      );
-    case "error":
-      return (
-        <>
-          <Water />
-          <path d="M20 26 Q26 36 20 42 Q14 36 20 26 Z" fill="var(--w-err)" />
-          <g transform="rotate(-12 48 68)">
-            <Mast top={16} />
-            <path d="M52.5 22 Q64 36 70 51 L52.5 52.5 Z" fill={sail} stroke={ink} strokeWidth="2.6" strokeLinejoin="round" />
-            <Hull />
-            <Cheeks />
-            <Eyes drop={2} />
-            <path d="M31 59.5 L42 62" stroke={fog} strokeWidth="2.6" strokeLinecap="round" />
-            <path d="M64 58.5 L53 61" stroke={fog} strokeWidth="2.6" strokeLinecap="round" />
-            <path d="M43 79 Q47.5 75.5 52 79" fill="none" stroke={fog} strokeWidth="2.6" strokeLinecap="round" />
-          </g>
-        </>
-      );
-  }
+      )}
+      {pose === "success" && <path d="M18 30 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 Z" fill={CHAMP} />}
+      {pose === "error" && <path d="M22 26 Q28 36 22 42 Q16 36 22 26 Z" fill={AMBER} />}
+      <g transform={tilt}>
+        <Egg glow={glow} />
+        <Cheeks />
+        {face}
+        <Boat />
+        <Paws />
+      </g>
+    </>
+  );
 }
 
-export function Doggett({ pose, size = 72, className = "", decorative = false }: { pose: Pose; size?: number; className?: string; decorative?: boolean }) {
+export function Doggett({
+  pose,
+  size = 72,
+  className = "",
+  decorative = false,
+  glow,
+}: {
+  pose: Pose;
+  size?: number;
+  className?: string;
+  decorative?: boolean;
+  /** soft inner light and fur; defaults on at 120 px and up */
+  glow?: boolean;
+}) {
+  const lit = glow ?? size >= 120;
   return (
     <svg
-      viewBox="0 0 96 96"
+      viewBox="0 0 160 140"
       width={size}
-      height={size}
-      className={`shrink-0 ${className}`}
+      height={(size * 140) / 160}
+      className={`shrink-0 overflow-visible ${className}`}
       role={decorative ? undefined : "img"}
       aria-hidden={decorative || undefined}
       aria-label={decorative ? undefined : TITLES[pose]}
     >
-      <Body pose={pose} />
+      <Defs glow={lit} />
+      <PoseArt pose={pose} glow={lit} />
     </svg>
   );
 }

@@ -7,7 +7,7 @@ import { Doggett } from "./components/doggett";
 export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <main className="mx-auto flex min-h-dvh max-w-[52rem] flex-col justify-center gap-5 px-4 py-16">
-      <Doggett pose="error" size={88} />
+      <Doggett pose="error" size={140} />
       <h1 className="text-5xl md:text-7xl">Something went wrong on this page</h1>
       <p className="text-lg">Your phone key, shop key and queued vouchers are stored in this browser and are safe. Try again.</p>
       <div className="flex flex-wrap gap-4">

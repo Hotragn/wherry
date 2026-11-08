@@ -171,7 +171,7 @@ export default function PlayPage() {
           {purchases.length === 0 ? (
             <p className="text-muted">No power-ups yet.</p>
           ) : (
-            <ul className="flex flex-col divide-y-2 divide-ink border-y-2 border-ink">
+            <ul className="flex flex-col divide-y divide-line border-y border-line">
               {purchases.map((p) => (
                 <DropRow key={p.code} p={p} proof={proofs[p.code]} now={now} />
               ))}

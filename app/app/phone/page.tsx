@@ -220,7 +220,7 @@ export default function PhonePage() {
       {!online && (
         <p
           role="status"
-          className="flex items-center gap-3 rounded-sm border-2 border-ink bg-accent px-4 py-3 text-lg font-bold"
+          className="flex items-center gap-3 rounded-2xl bg-night px-5 py-4 text-lg font-semibold text-on-night"
         >
           <span aria-hidden className="mono">
             [....]
@@ -449,7 +449,7 @@ export default function PhonePage() {
               </p>
             </div>
           ) : (
-            <ul className="flex flex-col divide-y-2 divide-ink border-y-2 border-ink">
+            <ul className="flex flex-col divide-y divide-line border-y border-line">
               {mine.map((h) => (
                 <li
                   key={h.code}

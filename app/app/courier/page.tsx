@@ -44,7 +44,6 @@ export default function CourierPage() {
     <div className="flex max-w-3xl flex-col gap-8">
       <FirstRun role="courier" />
       <div className="flex flex-col gap-3">
-        <span className="label text-ink">Anyone can collect for a shop</span>
         <h1 className="text-5xl md:text-7xl">Carry the tickets across.</h1>
         <p className="max-w-[60ch] text-lg">
           The first phone to find a signal collects for everyone. Shops hand you their ferry tickets with a signed note that lets you collect them and keep a small fee. The
@@ -53,7 +52,7 @@ export default function CourierPage() {
         <WhatsThis term="Courier authorization">A note the shop signs with its own key. It names a fee cap (1%, at most $0.05 a ticket) and expires after 48 hours. Solana checks it onchain.</WhatsThis>
       </div>
 
-      <section aria-label="Your courier key" className="flex flex-wrap items-baseline gap-x-6 gap-y-2 border-y-2 border-ink py-4 text-sm">
+      <section aria-label="Your courier key" className="flex flex-wrap items-baseline gap-x-6 gap-y-2 border-y border-line py-4 text-sm">
         <span>
           Courier key: <Addr value={me.address} />
         </span>

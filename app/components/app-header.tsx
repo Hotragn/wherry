@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useOnline } from "../lib/use-online";
 import { StepLine } from "./guide";
+import { Logo } from "./logo";
 
 const ROLES = [
   { href: "/app/owner", label: "Owner", n: 1 },
@@ -17,12 +18,10 @@ export function AppHeader() {
   const path = usePathname();
   const online = useOnline();
   return (
-    <header className="border-b-2 border-ink">
+    <header className="sticky top-0 z-20 border-b border-line bg-base/85 backdrop-blur">
       <div className="mx-auto flex max-w-page flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
-        <Link href="/" className="display text-3xl">
-          Wherry
-        </Link>
-        <nav aria-label="Roles" className="order-3 flex w-full flex-wrap gap-1 sm:order-none sm:w-auto">
+        <Logo size={36} />
+        <nav aria-label="Roles" className="order-3 flex w-full gap-1 overflow-x-auto rounded-full border border-line bg-surface p-1 shadow-1 [scrollbar-width:none] sm:order-none sm:w-auto">
           {ROLES.map((r) => {
             const active = path === r.href;
             return (
@@ -30,7 +29,7 @@ export function AppHeader() {
                 key={r.href}
                 href={r.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-sm border-2 px-2.5 py-1.5 font-bold sm:px-3 ${active ? "border-ink bg-accent text-ink shadow-1" : "border-transparent text-muted hover:border-ink hover:text-ink"}`}
+                className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium sm:px-4 ${active ? "bg-accent text-on-accent" : "text-muted hover:bg-sunk hover:text-ink"}`}
               >
                 {r.n > 0 && (
                   <span className="mono mr-1 text-xs" aria-hidden>
@@ -43,7 +42,7 @@ export function AppHeader() {
           })}
         </nav>
         <span
-          className={`ml-auto flex items-center gap-2 rounded-sm border-2 px-3 py-1 text-sm font-bold ${online ? "border-transparent text-muted" : "border-ink bg-surface text-ink"}`}
+          className={`ml-auto flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium ${online ? "text-muted" : "bg-night text-on-night"}`}
           role="status"
           aria-live="polite"
         >
