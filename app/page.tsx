@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BuiltWith } from "./components/built-with";
 import { HeroStage } from "./components/hero-stage";
 import { RiverHero } from "./components/river-hero";
 import { Ticket } from "./components/ticket";
@@ -44,7 +45,7 @@ const SAFETY = [
 export default function Landing() {
   return (
     <div className="min-h-dvh overflow-x-clip">
-      <header className="mx-auto flex max-w-page items-center justify-between gap-3 px-4 py-5 md:px-8">
+      <header className="relative z-10 mx-auto flex max-w-page items-center justify-between gap-3 px-4 py-5 md:px-8">
         <Link href="/" className="display flex items-center gap-2 text-2xl">
           <span aria-hidden className="grid h-9 w-9 place-items-center rounded-full bg-accent text-on-accent">
             <span className="text-lg leading-none">W</span>
@@ -65,35 +66,66 @@ export default function Landing() {
       </header>
 
       <main>
-        <section className="mx-auto grid max-w-page items-center gap-10 px-4 pb-10 pt-6 md:px-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:pt-14">
-          <div className="flex flex-col gap-7">
-            <p className="label">Offline · Signed · Settled on Solana</p>
-            <h1 className="headline-fade max-w-[720px] text-[clamp(56px,8.4vw,120px)]">
-              Pay with <em className="font-normal italic">no signal.</em> Get paid when it&apos;s back.
-            </h1>
-            <p className="max-w-[540px] text-xl text-muted">
-              Wherry is a ferry for your money when the network&apos;s gone. Your phone pays the shop with a signed ticket, offline. The money was locked on Solana first, so the
-              ticket is always good.
-            </p>
-            <div className="flex flex-wrap items-center gap-4">
-              <Link href="/app" className="btn btn-sail">
-                Try the crossing
-              </Link>
-              <a href="#how" className="btn btn-quiet">
-                How it works
-              </a>
+        <div className="relative isolate -mt-24 pt-24">
+          <div aria-hidden className="w-beams -z-10" />
+          <section className="relative mx-auto grid max-w-page items-center gap-10 px-4 pb-14 pt-6 md:px-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:pt-12">
+            <div className="flex flex-col gap-7">
+              <p className="label">Offline · Signed · Settled on Solana</p>
+              <div className="relative">
+                <svg aria-hidden viewBox="0 0 600 300" className="pointer-events-none absolute -left-16 top-24 -z-10 hidden w-[760px] text-ink/20 lg:block">
+                  <path d="M10 290 C 160 330, 520 300, 590 120" fill="none" stroke="currentColor" strokeWidth="1" />
+                </svg>
+                <h1 className="headline-fade max-w-[720px] text-[clamp(56px,8.4vw,120px)]">
+                  Pay with <em className="font-normal italic">no signal.</em> Get paid when it&apos;s back.
+                </h1>
+                <span aria-hidden className="absolute bottom-6 right-0 hidden text-3xl text-ink lg:block">✦</span>
+              </div>
+              <p className="max-w-[540px] text-xl text-muted">
+                Your phone pays a shop with a signed ferry ticket, even in airplane mode. The money was locked on Solana first, so the ticket is always good.
+              </p>
+              <div className="flex flex-wrap items-center gap-4">
+                <Link href="/app/owner" className="btn btn-sail">
+                  Start the demo
+                </Link>
+                <a href="#how" className="btn btn-quiet">
+                  How it works
+                </a>
+              </div>
+              <nav aria-label="Demo in three steps" className="flex flex-col gap-2">
+                <span className="label">Judges: the whole demo is 3 pages</span>
+                <ol className="flex flex-wrap items-center gap-2 text-sm">
+                  {[
+                    ["/app/owner", "1", "Owner", "lock $40"],
+                    ["/app/phone", "2", "Phone", "pay offline"],
+                    ["/app/shop", "3", "Shop", "check + collect"],
+                  ].map(([href, n, role, what], i) => (
+                    <li key={href} className="flex items-center gap-2">
+                      {i > 0 && (
+                        <span aria-hidden className="text-muted">
+                          →
+                        </span>
+                      )}
+                      <Link href={href} className="flex items-center gap-2 rounded-full border border-line px-3 py-1.5 hover:border-ink">
+                        <span className="mono grid h-5 w-5 place-items-center rounded-full bg-accent text-xs text-on-accent">{n}</span>
+                        <span className="font-semibold">{role}</span>
+                        <span className="text-muted">{what}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
             </div>
-            <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted">
-              {["Test money only", "Solana devnet", "Works in airplane mode"].map((t) => (
-                <li key={t} className="flex items-center gap-2">
-                  <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand" />
-                  {t}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <HeroStage />
-        </section>
+            <HeroStage />
+            <div aria-hidden className="absolute right-0 top-10 hidden flex-col items-center gap-3 xl:flex">
+              <span className="mono text-xs text-ink">01</span>
+              <span className="h-24 w-px bg-line" />
+              <span className="mono text-xs text-muted">02</span>
+              <span className="mono text-xs text-muted">03</span>
+            </div>
+          </section>
+        </div>
+
+        <BuiltWith />
 
         <section aria-label="Watch a crossing" className="mx-auto max-w-page px-4 pb-20 md:px-8">
           <RiverHero />
