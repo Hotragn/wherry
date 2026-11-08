@@ -29,7 +29,7 @@ export function PlaySound({ code }: { code: string }) {
         {state === "playing" ? "Playing… hold the phone near the shop" : state === "done" ? "Play the sound again" : "Pay by sound"}
       </button>
       <span className="text-sm text-muted" aria-live="polite">
-        {state === "failed" ? "This phone couldn't play it. Show the QR instead." : "About 12 s of chirps. The shop taps Listen first."}
+        {state === "failed" ? "This phone couldn't play it. Show the QR instead." : "Works best in a quiet room. About 12 s of chirps; the shop taps Listen first. The QR is quicker."}
       </span>
     </div>
   );
@@ -73,7 +73,7 @@ export function ListenButton({ onCode }: { onCode: (code: string, seconds: numbe
         </>
       ) : (
         <button type="button" className="btn btn-quiet" onClick={listen}>
-          Listen for a voucher
+          Listen for a voucher (works best in a quiet room)
         </button>
       )}
       {(state.s === "heard" || state.s === "failed") && (
