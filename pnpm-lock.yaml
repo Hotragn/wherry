@@ -20,9 +20,6 @@ importers:
       '@solana/kit':
         specifier: 8.6.0
         version: 8.6.0(typescript@5.9.3)
-      '@solana/kit-client-rpc':
-        specifier: 0.15.1
-        version: 0.15.1(@solana/kit@8.6.0(typescript@5.9.3))
       '@solana/kit-plugin-rpc':
         specifier: 0.23.0
         version: 0.23.0(@solana/kit@8.6.0(typescript@5.9.3))
@@ -44,24 +41,27 @@ importers:
       '@wallet-standard/features':
         specifier: ^1.1.0
         version: 1.1.1
+      idb-keyval:
+        specifier: 6.2.2
+        version: 6.2.2
+      jsqr:
+        specifier: 1.4.0
+        version: 1.4.0
       next:
         specifier: 16.4.3
         version: 16.4.3(@babel/core@7.29.13(supports-color@7.2.0))(@types/node@20.19.43)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      next-themes:
-        specifier: ^0.4.6
-        version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react:
         specifier: 19.2.3
         version: 19.2.3
       react-dom:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
-      sonner:
-        specifier: ^2.0.7
-        version: 2.0.8(@types/react@19.3.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       swr:
         specifier: ^2.2.0
         version: 2.5.1(react@19.2.3)
+      uqr:
+        specifier: 0.1.2
+        version: 0.1.2
       ws:
         specifier: ^8.18.3
         version: 8.22.1
@@ -699,32 +699,10 @@ packages:
       typescript:
         optional: true
 
-  '@solana/kit-client-rpc@0.15.1':
-    resolution: {integrity: sha512-MrhqGU5bpVducAv0YfimmL7xj1m7xdUoiAVHYmk+Ks9ZUw5Xfk+DB76y3VGWqlB0VQdOqqHfvox//AHN2Cym5Q==}
-    deprecated: 'Deprecated: use createClient from @solana/kit with payer() from @solana/kit-plugin-signer and solanaRpc() from @solana/kit-plugin-rpc instead. See the README for migration.'
-    peerDependencies:
-      '@solana/kit': ^7.0.0
-
-  '@solana/kit-plugin-instruction-plan@0.13.0':
-    resolution: {integrity: sha512-9RA94e0LLtVLN+bvGclpu8l0lAXGOGS72DxPIQ1VyGZs7vK/WTwPOqKnWhjJs2Cv/SDJ2xsCAhYkXr0UltVrOg==}
-    peerDependencies:
-      '@solana/kit': ^7.0.0
-
   '@solana/kit-plugin-instruction-plan@0.23.0':
     resolution: {integrity: sha512-TjL2oL0fWPrzwxwbaaRaog66jDlDokVQ1+ONR9EdYiVeLYl797WqtEU3YF5D1im2DXrbrUO3Lf3XOr7h6Ok4SQ==}
     peerDependencies:
       '@solana/kit': ^8.6.0
-
-  '@solana/kit-plugin-payer@0.15.1':
-    resolution: {integrity: sha512-Uv5XgVxrKJx5OKbeB//cg9buxuwDArL9p6sfKopkudlEhgmQbpaEUy8+BBFi6EQTK4exijW1Omr1MqCT1U/fnA==}
-    deprecated: 'Deprecated: use @solana/kit-plugin-signer instead — same payer plugins plus new identity() and signer() variants.'
-    peerDependencies:
-      '@solana/kit': ^7.0.0
-
-  '@solana/kit-plugin-rpc@0.15.0':
-    resolution: {integrity: sha512-Abymr7WLP9yQ6ixCCv+tKzjoWpAkxJ90JWzL+pfkTAFGTpVk9N0myhMcO2ohl6yztJRMOxsw1CXWjcVecxxUlg==}
-    peerDependencies:
-      '@solana/kit': ^7.0.0
 
   '@solana/kit-plugin-rpc@0.23.0':
     resolution: {integrity: sha512-BsCpiD2sm8XJGyhqSBHFZgm6mNslomAf1572DFt9eRb+GMb0jN5rdWTiDvoFcPn95h+Pe2GLx+F4AWsTWxrkjA==}
@@ -1832,6 +1810,9 @@ packages:
   hermes-parser@0.25.1:
     resolution: {integrity: sha512-6pEjquH3rqaI6cYAXYPcz9MS4rY6R4ngRgrgfDshRptUZIc3lw0MCIJIGDj9++mfySOuPTHB4nrSW99BCvOPIA==}
 
+  idb-keyval@6.2.2:
+    resolution: {integrity: sha512-yjD9nARJ/jb1g+CvD0tlhUHOrJ9Sy0P8T9MF3YaLlHnSRpwPfpTX0XIvpmw3gAJUmEu3FiICLBDPXVwyEvrleg==}
+
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
     engines: {node: '>= 4'}
@@ -2009,6 +1990,9 @@ packages:
 
   jsonify@0.0.1:
     resolution: {integrity: sha512-2/Ki0GcmuqSrgFyelQq9M05y7PS0mEwuIzrf3f1fPqkVDVRvZrPZtVSMHxdgo8Aq0sxAOb/cr2aqqA3LeWHVPg==}
+
+  jsqr@1.4.0:
+    resolution: {integrity: sha512-dxLob7q65Xg2DvstYkRpkYtmKm2sPJ9oFhrhmudT1dZvNFFTlroai3AWSpLey/w5vMcLBXRgOJsbXpdN9HzU/A==}
 
   jsx-ast-utils@3.3.5:
     resolution: {integrity: sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ==}
@@ -2204,12 +2188,6 @@ packages:
 
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
-
-  next-themes@0.4.6:
-    resolution: {integrity: sha512-pZvgD5L0IEvX5/9GWyHMf3m8BKiVQwsCMHfoFosXtXBMnaS0ZnIJ9ST4b4NqLVKDEm8QBxoNNGNaBv2JNF6XNA==}
-    peerDependencies:
-      react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
-      react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
 
   next@16.4.3:
     resolution: {integrity: sha512-OqxKTGi9u80FydydsMNYNjnuje9Au+kvHlt2GZ//ftdpDHm1dxKqAaENoOOTX5wKzn+9vaKUNIfZeyZUuLhCnA==}
@@ -2460,16 +2438,6 @@ packages:
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
 
-  sonner@2.0.8:
-    resolution: {integrity: sha512-UM/ByIoFra8yzV75n1o0Puu0bw5U/9UNnDacrJNspekBewIfsQ3D6ez1nvlWpt7aTsO6rujQtifBpycwIivqlg==}
-    peerDependencies:
-      '@types/react': ^18.0.0 || ^19.0.0
-      react: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
-      react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-
   source-map-js@1.2.2:
     resolution: {integrity: sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==}
     engines: {node: '>=0.10.0'}
@@ -2615,6 +2583,9 @@ packages:
     hasBin: true
     peerDependencies:
       browserslist: '>= 4.21.0'
+
+  uqr@0.1.2:
+    resolution: {integrity: sha512-MJu7ypHq6QasgF5YRTjqscSzQp/W11zoUk6kvmlH+fmWEs63Y0Eib13hYFwAzagRJcVY8WVnlV+eBDUGMJ5IbA==}
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
@@ -3247,29 +3218,9 @@ snapshots:
     transitivePeerDependencies:
       - fastestsmallesttextencoderdecoder
 
-  '@solana/kit-client-rpc@0.15.1(@solana/kit@8.6.0(typescript@5.9.3))':
-    dependencies:
-      '@solana/kit': 8.6.0(typescript@5.9.3)
-      '@solana/kit-plugin-instruction-plan': 0.13.0(@solana/kit@8.6.0(typescript@5.9.3))
-      '@solana/kit-plugin-payer': 0.15.1(@solana/kit@8.6.0(typescript@5.9.3))
-      '@solana/kit-plugin-rpc': 0.15.0(@solana/kit@8.6.0(typescript@5.9.3))
-
-  '@solana/kit-plugin-instruction-plan@0.13.0(@solana/kit@8.6.0(typescript@5.9.3))':
-    dependencies:
-      '@solana/kit': 8.6.0(typescript@5.9.3)
-
   '@solana/kit-plugin-instruction-plan@0.23.0(@solana/kit@8.6.0(typescript@5.9.3))':
     dependencies:
       '@solana/kit': 8.6.0(typescript@5.9.3)
-
-  '@solana/kit-plugin-payer@0.15.1(@solana/kit@8.6.0(typescript@5.9.3))':
-    dependencies:
-      '@solana/kit': 8.6.0(typescript@5.9.3)
-
-  '@solana/kit-plugin-rpc@0.15.0(@solana/kit@8.6.0(typescript@5.9.3))':
-    dependencies:
-      '@solana/kit': 8.6.0(typescript@5.9.3)
-      '@solana/kit-plugin-instruction-plan': 0.13.0(@solana/kit@8.6.0(typescript@5.9.3))
 
   '@solana/kit-plugin-rpc@0.23.0(@solana/kit@8.6.0(typescript@5.9.3))':
     dependencies:
@@ -4624,6 +4575,8 @@ snapshots:
     dependencies:
       hermes-estree: 0.25.1
 
+  idb-keyval@6.2.2: {}
+
   ignore@5.3.2: {}
 
   ignore@7.0.14: {}
@@ -4802,6 +4755,8 @@ snapshots:
 
   jsonify@0.0.1: {}
 
+  jsqr@1.4.0: {}
+
   jsx-ast-utils@3.3.5:
     dependencies:
       array-includes: 3.2.0
@@ -4955,11 +4910,6 @@ snapshots:
   napi-postinstall@0.3.8: {}
 
   natural-compare@1.4.0: {}
-
-  next-themes@0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
-    dependencies:
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
 
   next@16.4.3(@babel/core@7.29.13(supports-color@7.2.0))(@types/node@20.19.43)(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
@@ -5275,13 +5225,6 @@ snapshots:
 
   sisteransi@1.0.5: {}
 
-  sonner@2.0.8(@types/react@19.3.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
-    dependencies:
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-    optionalDependencies:
-      '@types/react': 19.3.0
-
   source-map-js@1.2.2: {}
 
   stable-hash@0.0.5: {}
@@ -5482,6 +5425,8 @@ snapshots:
       browserslist: 4.29.5
       escalade: 3.2.0
       picocolors: 1.1.1
+
+  uqr@0.1.2: {}
 
   uri-js@4.4.1:
     dependencies:

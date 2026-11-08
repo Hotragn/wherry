@@ -1,94 +1,296 @@
 @import "tailwindcss";
+@import "../design/tokens.css";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
-:root {
-  --background: #ffffff;
-  --foreground: #0a0a0a;
-  --primary: #171717;
-  --primary-foreground: #fafafa;
-  --muted: #737373;
-  --muted-foreground: #737373;
-  --card: #ffffff;
-  --card-foreground: #0a0a0a;
-  --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
-  --border: #e5e5e5;
-  --border-low: #f5f5f5;
-  --input: #e5e5e5;
-  --accent: #f5f5f5;
-  --accent-foreground: #171717;
-  --cream: #f5f5f5;
-  --destructive: #ef4444;
-  --destructive-foreground: #ef4444;
-  --ring: #a3a3a3;
-  --radius: 0.625rem;
-  --secondary: #f5f5f5;
-  --secondary-foreground: #171717;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-}
-
-.dark {
-  --background: #0a0a0a;
-  --foreground: #fafafa;
-  --primary: #fafafa;
-  --primary-foreground: #171717;
-  --muted: #a3a3a3;
-  --muted-foreground: #737373;
-  --card: #171717;
-  --card-foreground: #fafafa;
-  --popover: #171717;
-  --popover-foreground: #fafafa;
-  --border: #262626;
-  --border-low: rgba(38, 38, 38, 0.5);
-  --input: #262626;
-  --accent: #262626;
-  --accent-foreground: #fafafa;
-  --cream: #262626;
-  --destructive: #ef4444;
-  --destructive-foreground: #ef4444;
-  --ring: #525252;
-  --secondary: #262626;
-  --secondary-foreground: #fafafa;
-}
-
+/* Tailwind reads only the brand tokens: the default palette, fonts, radii and shadows are switched off. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-border: var(--border);
-  --color-border-low: var(--border-low);
-  --color-input: var(--input);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-cream: var(--cream);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-ring: var(--ring);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --color-*: initial;
+  --color-base: var(--w-base);
+  --color-surface: var(--w-surface);
+  --color-sunk: var(--w-sunk);
+  --color-ink: var(--w-ink);
+  --color-muted: var(--w-muted);
+  --color-line: var(--w-line);
+  --color-accent: var(--w-accent);
+  --color-on-accent: var(--w-on-accent);
+  --color-ok: var(--w-ok);
+  --color-err: var(--w-err);
+  --color-warn: var(--w-warn);
+  --color-night: var(--w-night);
+  --color-on-night: var(--w-on-night);
+  --color-on-night-muted: var(--w-on-night-muted);
+
+  --font-*: initial;
+  --font-display: var(--w-font-display);
+  --font-text: var(--w-font-text);
+  --font-mono: var(--w-font-mono);
+
+  --text-xs: var(--w-text-xs);
+  --text-sm: var(--w-text-sm);
+  --text-base: var(--w-text-md);
+  --text-lg: var(--w-text-lg);
+  --text-xl: var(--w-text-xl);
+  --text-2xl: var(--w-text-2xl);
+  --text-3xl: var(--w-text-3xl);
+  --text-4xl: var(--w-text-4xl);
+  --text-5xl: var(--w-text-5xl);
+
+  --radius-*: initial;
+  --radius-sm: var(--w-radius-sm);
+  --radius-md: var(--w-radius-md);
+  --radius-lg: var(--w-radius-lg);
+  --radius-full: var(--w-radius-pill);
+
+  --shadow-*: initial;
+  --shadow-1: var(--w-shadow-1);
+  --shadow-2: var(--w-shadow-2);
+  --shadow-lift: var(--w-shadow-lift);
+
+  --ease-boat: var(--w-ease);
+  --container-page: var(--w-max-page);
+  --container-text: var(--w-max-text);
+}
+
+/* Bind the token font stacks to the self-hosted Google Fonts from the root layout. */
+:root {
+  --w-font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --w-font-text: var(--font-instrument), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --w-font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 @layer base {
-  * {
-    @apply border-border outline-transparent;
+  html {
+    background: var(--w-base);
+    color: var(--w-ink);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    font-family: var(--w-font-text);
+    font-size: var(--w-text-md);
+    line-height: var(--w-leading-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--w-font-display);
+    line-height: var(--w-leading-tight);
+    font-weight: 700;
+  }
+  :focus-visible {
+    outline: 2px solid var(--w-focus);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--w-line);
+  }
+}
+
+@layer components {
+  .label {
+    font-size: var(--w-text-xs);
+    letter-spacing: var(--w-tracking-label);
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--w-muted);
+  }
+  .mono {
+    font-family: var(--w-font-mono);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .paper {
+    background: var(--w-surface);
+    border: 1.5px solid var(--w-line);
+    border-radius: var(--w-radius-lg);
+    box-shadow: var(--w-shadow-2);
   }
 
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-family: var(--font-sans);
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--w-space-2);
+    min-height: 44px;
+    padding: var(--w-space-3) var(--w-space-5);
+    border-radius: var(--w-radius-pill);
+    font: 600 var(--w-text-md) / 1.2 var(--w-font-text);
+    cursor: pointer;
+    transition:
+      transform var(--w-dur-fast) var(--w-ease),
+      box-shadow var(--w-dur) var(--w-ease),
+      background-color var(--w-dur) var(--w-ease);
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  /* The one red sail per screen. */
+  .btn-sail {
+    background: var(--w-accent);
+    color: var(--w-on-accent);
+    box-shadow: var(--w-shadow-2);
+  }
+  .btn-sail:hover:not(:disabled) {
+    box-shadow: var(--w-shadow-lift);
+  }
+  .btn-quiet {
+    background: var(--w-surface);
+    color: var(--w-ink);
+    border: 1.5px solid var(--w-muted);
+  }
+  .btn-quiet:hover:not(:disabled) {
+    background: var(--w-sunk);
+  }
+  /* Primary action on night bands: never accent there (2.42:1). */
+  .btn-night {
+    background: var(--w-surface);
+    color: var(--w-ink);
+  }
+  .link {
+    color: var(--w-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--w-muted);
+    text-underline-offset: 3px;
+  }
+  .link:hover {
+    text-decoration-color: var(--w-ink);
+  }
+
+  .field {
+    width: 100%;
+    min-height: 44px;
+    padding: var(--w-space-2) var(--w-space-3);
+    background: var(--w-surface);
+    color: var(--w-ink);
+    border: 1.5px solid var(--w-muted);
+    border-radius: var(--w-radius-sm);
+    font: 500 var(--w-text-md) var(--w-font-text);
+  }
+  .field:focus-visible {
+    outline-offset: 0;
+  }
+
+  /* Ferry ticket: paper, side notches cut to the page colour, perforated divider. */
+  .ticket {
+    position: relative;
+    background: var(--w-surface);
+    border: 1.5px solid var(--w-line);
+    border-radius: var(--w-radius-md);
+    box-shadow: var(--w-shadow-2);
+  }
+  .ticket::before,
+  .ticket::after {
+    content: "";
+    position: absolute;
+    top: var(--notch-y, 50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--notch-bg, var(--w-base));
+    border: 1.5px solid var(--w-line);
+    transform: translateY(-50%);
+  }
+  .ticket::before {
+    left: -9px;
+    clip-path: inset(0 0 0 50%);
+  }
+  .ticket::after {
+    right: -9px;
+    clip-path: inset(0 50% 0 0);
+  }
+  .perf {
+    border-top: 2px dashed var(--w-line);
+  }
+  .stamp {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 10px;
+    border: 2px solid var(--w-ok);
+    border-radius: var(--w-radius-sm);
+    color: var(--w-ok);
+    font: 700 var(--w-text-sm) / 1.1 var(--w-font-text);
+    letter-spacing: var(--w-tracking-label);
+    text-transform: uppercase;
+    transform: rotate(-6deg);
+  }
+}
+
+/* Doggett's waiting dots: the only loop. Off under reduced motion (tokens.css). */
+@keyframes w-dot {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+.w-dot {
+  animation: w-dot var(--w-dur-row) var(--w-ease) infinite;
+}
+.w-dot-2 {
+  animation-delay: 200ms;
+}
+.w-dot-3 {
+  animation-delay: 400ms;
+}
+
+/* A boat arriving on the far bank of The Crossing. */
+@keyframes w-cross {
+  from {
+    transform: translateX(calc(-1 * var(--cross-distance, 120px)));
+    opacity: 0.4;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.w-arrive {
+  animation: w-cross var(--w-dur-slow) var(--w-ease) both;
+}
+@media (max-width: 639px) {
+  @keyframes w-cross {
+    from {
+      transform: translateY(calc(-1 * var(--cross-distance, 80px)));
+      opacity: 0.4;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+}
+@keyframes w-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.w-rise {
+  animation: w-rise var(--w-dur-slow) var(--w-ease) both;
+}
+
+/* Printing the shop sticker: only the sticker shows. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0 auto auto 0;
+    box-shadow: none;
   }
 }

@@ -14,7 +14,7 @@ import type { TransactionSigner } from "@solana/kit";
 import type { WalletConnector, WalletSession } from "./types";
 import { discoverWallets, watchWallets } from "./standard";
 import { createWalletSigner } from "./signer";
-import { useCluster } from "../../components/cluster-context";
+import { CHAIN } from "../config.ts";
 
 const WALLET_STATUS = {
   DISCONNECTED: "disconnected",
@@ -38,11 +38,10 @@ type WalletContextValue = {
 
 const WalletContext = createContext<WalletContextValue | null>(null);
 
-const STORAGE_KEY = "solana:last-connector";
+const STORAGE_KEY = "wherry:last-wallet";
 
 export function WalletProvider({ children }: PropsWithChildren) {
-  const { cluster } = useCluster();
-  const chain = `solana:${cluster}`;
+  const chain = CHAIN;
 
   const [connectors, setConnectors] = useState<WalletConnector[]>(() =>
     typeof window === "undefined" ? [] : discoverWallets()

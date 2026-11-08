@@ -71,3 +71,18 @@ export function ed25519Instruction(
   data.set(message, MSG);
   return { programAddress: ED25519_PROGRAM_ADDRESS, data };
 }
+
+/** Offline check a shop runs: does this signature cover these exact voucher bytes for `merchant`? */
+export async function verifyVoucherSignature(
+  programId: Address,
+  merchant: Address,
+  v: { tab: Address; devicePk: Uint8Array; mint: Address; amount: bigint; serial: number; voucherExpiresAt: bigint; nonce: Uint8Array; signature: Uint8Array },
+): Promise<boolean> {
+  const message = voucherBytes({ ...v, programId, merchant });
+  try {
+    const key = await crypto.subtle.importKey("raw", v.devicePk as BufferSource, { name: "Ed25519" }, false, ["verify"]);
+    return await crypto.subtle.verify({ name: "Ed25519" }, key, v.signature as BufferSource, message as BufferSource);
+  } catch {
+    return false;
+  }
+}

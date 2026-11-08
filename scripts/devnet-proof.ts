@@ -4,7 +4,6 @@
 // Run: node scripts/devnet-proof.ts   (keys live in keys/, which is gitignored)
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import {
-  type Address,
   type Instruction,
   type KeyPairSigner,
   type Signature,
