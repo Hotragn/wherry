@@ -67,3 +67,22 @@ Not verified: a real wallet extension (Phantom etc.) in the Owner view; I used t
 | Studio reveals seed, commits round 1 | `2nrbnoD4RgKxZDFgVZfiuC8YFYZHR59YPxXaLkgvPMeTiUvhd9Lk6PjqfXB7ZypqXkxDhDi4c22E9zCk4uikLULe` (1.0 s) |
 | Player checks | sha256(seed) matches the commitment seen before buying; roll 81 → Oar polish (common) |
 Game PDA: `DtnGwjM1qHsQ7E4GugU1w4CnE31W7X3MAxnixVviwZ3N` (studio = the shop key `6LNV…PsXm`).
+
+## M3 review fixes (05:05)
+- Game vouchers carry their seed round in nonce bytes 0–3; buying needs a commitment seen online; sealed drops show "Round N not revealed for 2 h"; the proof checks the round. Known limit and next step in README.
+- Tighten-only proven in tests: rules decline + model accept → decline; junk/unknown reason/timeout → rules decide (23/23 tests).
+- AI line: "Looks fine: … first tab from this customer. (1.7 s, on this device)" / "Caution: …"; preload button; "Rules only on this device" without WebGPU.
+- Guided path: /app "Try it in 60 seconds", numbered role tabs, step line, Next link at the end of each view.
+
+## M4: production-build rehearsal of the demo script (fresh origin, new keys)
+| Step | Result |
+|---|---|
+| Owner opens a $40 tab (test wallet) | `3beWsDgCJ2xBA9QnmZbzdg97s3RJ5SJnPxaByJFu1saut8RbeJUWZh8WyQTckiKtq3488CnrcvYeJHEtWAdFF6m5`, 0.5 s |
+| Studio commits seed, round 0 | `3QfN3kEwYUvJERhVBj9apE9wXnbB1X8Pveuaqhg1g1wAbDy9dAK8Pc49cWD5HGXMtknzbqak4r7NnXSRBuvmyhbN`, 0.7 s |
+| Shop checks 3 vouchers offline | "checked offline in <1 ms", "AI OFFICER Looks fine: 8% of this tab, first tab from this customer. (1.7 s, on this device)" |
+| 4th voucher ($12) | declined: "over your $15.00 limit for one customer"; risk circuit shows Tripped |
+| Settle 3 in one tx | `5dwbbrL6gRzX9HL7168V9KQWGiQMWrzYFZP2j2yNrXZ7jiG2Uh2VRmFfUCRdBfySxEiGQefVoCZbYntWhEYP2iPX`, 0.8 s, $6.75 in, fee 0.00002 SOL |
+| Replay No. 0001 | rejected |
+| Power-up bought (round 0 in nonce), settled | `5Wd9Zbo5GykmSytGRRHJNfC3sfJJ6CjMZscTfUjRXiS9K4sND2AUbhA9qNeEMWuMEeZ2sWpdETCHQMVhEH58dtNG`, 0.9 s |
+| Seed revealed | `59iQvt8c5UdCo97pQjXbvqR2F2vvZu7ZokzpxwRW4knzyQW8eBVQdPsG5Sz2i3EecUdMkRqNZAdqiZ1GKoWcb1J7`, 0.8 s |
+| Player's proof | ✓ Oar polish; sha256(seed) matches; round in voucher 0 |

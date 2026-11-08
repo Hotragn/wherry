@@ -48,6 +48,8 @@ export function assess(input: {
   if (pending.some((p) => p.tab === v.tab && p.serial === v.serial)) {
     return decline(`Already accepted: ${serialLabel(v.serial)} is in your queue.`);
   }
+  // Onchain truth first (from the last sync), then this shop's own history, which catches replays before a sync.
+  if (tab && usedBit(tab.used, v.serial)) return decline(`Already settled onchain: ${serialLabel(v.serial)}.`);
   if (input.seen?.some((p) => p.tab === v.tab && p.serial === v.serial)) {
     return decline(`Replay: ${serialLabel(v.serial)} was already taken here.`);
   }
