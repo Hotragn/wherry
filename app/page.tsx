@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BuiltWith } from "./components/built-with";
+import { Logo } from "./components/logo";
 import { HeroStage } from "./components/hero-stage";
 import { RiverHero } from "./components/river-hero";
 import { Ticket } from "./components/ticket";
@@ -46,12 +47,7 @@ export default function Landing() {
   return (
     <div className="min-h-dvh overflow-x-clip">
       <header className="relative z-10 mx-auto flex max-w-page items-center justify-between gap-3 px-4 py-5 md:px-8">
-        <Link href="/" className="display flex items-center gap-2 text-2xl">
-          <span aria-hidden className="grid h-9 w-9 place-items-center rounded-full bg-accent text-on-accent">
-            <span className="text-lg leading-none">W</span>
-          </span>
-          Wherry
-        </Link>
+        <Logo size={44} className="text-3xl" />
         <nav aria-label="Page" className="flex items-center gap-1 rounded-full border border-line bg-surface p-1 text-sm shadow-1">
           <a href="#how" className="rounded-full px-3 py-1.5 font-medium hover:bg-sunk">
             How it works

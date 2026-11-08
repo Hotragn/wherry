@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useOnline } from "../lib/use-online";
 import { StepLine } from "./guide";
+import { Logo } from "./logo";
 
 const ROLES = [
   { href: "/app/owner", label: "Owner", n: 1 },
@@ -19,9 +20,7 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-base/85 backdrop-blur">
       <div className="mx-auto flex max-w-page flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
-        <Link href="/" className="display text-2xl">
-          Wherry
-        </Link>
+        <Logo size={36} />
         <nav aria-label="Roles" className="order-3 flex w-full gap-1 overflow-x-auto rounded-full border border-line bg-surface p-1 shadow-1 [scrollbar-width:none] sm:order-none sm:w-auto">
           {ROLES.map((r) => {
             const active = path === r.href;

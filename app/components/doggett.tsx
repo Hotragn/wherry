@@ -1,174 +1,175 @@
-// Doggett, the Wherry mascot (v3): a soft plush ferryman who holds the product, an emerald ferry ticket,
-// and wears an amber paper-boat hat. Made only from the three brand colours (mocha, champagne, amber). Hand-built SVG with a fur filter.
-// Reads at 32 px: cream blob, two eyes, red hat, green ticket. One Doggett per screen; only the waiting dots move.
+// Doggett, the Wherry mascot (v4), drawn from the owner's mascot sheets (design/mascot/owner-mascot-*.png):
+// a glowing egg-shaped plush sitting in a little amber wherry with a waving flag, over a champagne wave.
+// Only the three brand colours. `glow` adds the soft 3D light and fur used at hero sizes; small sizes stay flat.
+// Reads at 16 px: egg, two eyes, boat, flag. Only the waiting dots move, and not under reduced motion.
 
 export type Pose = "welcome" | "waiting" | "success" | "error";
 
 const TITLES: Record<Pose, string> = {
-  welcome: "Doggett, a plush ferryman in a paper-boat hat, holding a ferry ticket and smiling",
-  waiting: "Doggett holding a ferry ticket, looking up and waiting",
-  success: "Doggett with eyes closed and a big smile, holding a stamped ferry ticket",
-  error: "Doggett looking worried, holding a crumpled ferry ticket",
+  welcome: "Doggett, a glowing egg-shaped plush in a little boat with a flag, smiling",
+  waiting: "Doggett in his boat, looking up and waiting",
+  success: "Doggett in his boat, eyes closed with a big smile",
+  error: "Doggett in a tilting boat, looking worried",
 };
 
-const ink = "var(--w-mocha)";
-const face = "var(--w-champagne)";
-const red = "var(--w-amber)";
+const MOCHA = "var(--w-mocha)";
+const CHAMP = "var(--w-champagne)";
+const AMBER = "var(--w-amber)";
 
-/** Shared defs. Identical in every instance, so repeated ids resolve to the same paint. */
-const Defs = () => (
+const Defs = ({ glow }: { glow: boolean }) => (
   <defs>
-    <radialGradient id="dg3-fur" cx="40%" cy="28%" r="80%">
-      <stop offset="0" stopColor="var(--w-fur)" />
-      <stop offset="1" stopColor="var(--w-fur-shade)" />
+    <radialGradient id="dg4-egg" cx="38%" cy="26%" r="85%">
+      <stop offset="0" stopColor={CHAMP} />
+      <stop offset=".6" stopColor="color-mix(in srgb, var(--w-amber) 14%, var(--w-champagne))" />
+      <stop offset="1" stopColor="color-mix(in srgb, var(--w-amber) 38%, var(--w-champagne))" />
     </radialGradient>
-    <filter id="dg3-fuzz" x="-10%" y="-10%" width="120%" height="120%">
-      <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="4" />
-      <feDisplacementMap in="SourceGraphic" scale="2.4" />
+    {/* warm light from inside the plush, low in the body, as in the 3D sheet */}
+    <radialGradient id={glow ? "dg4-inner-lit" : "dg4-inner-flat"} cx="50%" cy="80%" r="55%">
+      <stop offset="0" stopColor={AMBER} stopOpacity={glow ? 0.55 : 0} />
+      <stop offset="1" stopColor={AMBER} stopOpacity="0" />
+    </radialGradient>
+    <linearGradient id="dg4-hull" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stopColor={AMBER} />
+      <stop offset="1" stopColor="color-mix(in srgb, var(--w-mocha) 35%, var(--w-amber))" />
+    </linearGradient>
+    <filter id="dg4-fuzz" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="9" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
     </filter>
   </defs>
 );
 
-const Body = () => (
-  <>
-    <ellipse cx="45" cy="134" rx="10" ry="5" fill="url(#dg3-fur)" filter="url(#dg3-fuzz)" />
-    <ellipse cx="75" cy="134" rx="10" ry="5" fill="url(#dg3-fur)" filter="url(#dg3-fuzz)" />
-    <path
-      d="M60 22 C87 22 98 42 98 66 L99 104 C99 124 84 134 60 134 C36 134 21 124 21 104 L22 66 C22 42 33 22 60 22 Z"
-      fill="url(#dg3-fur)"
-      filter="url(#dg3-fuzz)"
-    />
-  </>
-);
-const FacePatch = () => <rect x="36" y="42" width="48" height="36" rx="18" fill={face} stroke="var(--w-fur-shade)" strokeWidth=".8" />;
+const EGG = "M70 18 C95 18 110 46 110 74 C110 98 96 106 70 106 C44 106 30 98 30 74 C30 46 45 18 70 18 Z";
+
+function Boat() {
+  return (
+    <>
+      <line x1="118" y1="90" x2="118" y2="16" stroke={CHAMP} strokeWidth="3.6" strokeLinecap="round" />
+      <path d="M120 17 C130 13 137 22 150 17 L146 27 L150 37 C137 42 130 33 120 36 Z" fill={AMBER} />
+      <path d="M16 92 L144 86 Q138 118 98 121 L56 122 Q26 119 16 92 Z" fill="url(#dg4-hull)" />
+      <path d="M20 95 L140 89" stroke={CHAMP} strokeWidth="2.6" strokeLinecap="round" opacity=".85" />
+      <path d="M32 107 Q82 112 132 103" fill="none" stroke={MOCHA} strokeWidth="1.8" strokeLinecap="round" opacity=".35" />
+    </>
+  );
+}
+const Wave = () => <path d="M12 130 Q38 120 64 128 T116 126 T152 120" fill="none" stroke={CHAMP} strokeWidth="4" strokeLinecap="round" />;
+
+function Egg({ glow }: { glow: boolean }) {
+  return (
+    <g filter={glow ? "url(#dg4-fuzz)" : undefined}>
+      <path d={EGG} fill="url(#dg4-egg)" />
+      <path d={EGG} fill={glow ? "url(#dg4-inner-lit)" : "url(#dg4-inner-flat)"} />
+    </g>
+  );
+}
 const Cheeks = () => (
   <>
-    <ellipse cx="43" cy="66" rx="5" ry="3" fill={red} opacity=".22" />
-    <ellipse cx="77" cy="66" rx="5" ry="3" fill={red} opacity=".22" />
+    <ellipse cx="52" cy="74" rx="6" ry="3.8" fill={AMBER} opacity=".45" />
+    <ellipse cx="88" cy="74" rx="6" ry="3.8" fill={AMBER} opacity=".45" />
   </>
 );
-const Eyes = ({ dx = 0, dy = 0 }: { dx?: number; dy?: number }) => (
+const Eyes = ({ dy = 0 }: { dy?: number }) => (
   <>
-    <circle cx={51 + dx} cy={58 + dy} r="3.6" fill={ink} />
-    <circle cx={69 + dx} cy={58 + dy} r="3.6" fill={ink} />
-    <circle cx={50 + dx} cy={56.8 + dy} r="1.2" fill={face} />
-    <circle cx={68 + dx} cy={56.8 + dy} r="1.2" fill={face} />
+    <circle cx="60" cy={64 + dy} r="4.6" fill={MOCHA} />
+    <circle cx="80" cy={64 + dy} r="4.6" fill={MOCHA} />
+    <circle cx="58.6" cy={62.4 + dy} r="1.5" fill={CHAMP} />
+    <circle cx="78.6" cy={62.4 + dy} r="1.5" fill={CHAMP} />
   </>
-);
-/** A folded paper boat worn as a hat. */
-const Hat = ({ tilt = 0 }: { tilt?: number }) => (
-  <g transform={`rotate(${tilt} 60 26)`}>
-    <path d="M60 2 L76 26 L44 26 Z" fill={red} opacity=".85" />
-    <path d="M28 24 L92 24 L82 36 L38 36 Z" fill={red} />
-    <path d="M60 2 L60 26" stroke={ink} strokeWidth="1.2" opacity=".35" />
-  </g>
-);
-/** The product: an emerald ferry ticket with a dashed stub and a mono fare. */
-const TicketCard = ({ stamped = false, crumpled = false }: { stamped?: boolean; crumpled?: boolean }) => (
-  <g transform={crumpled ? "rotate(9 60 98)" : "rotate(-5 60 98)"}>
-    <rect x="30" y="84" width="60" height="30" rx="5" fill={face} stroke={ink} strokeWidth="1.6" />
-    <circle cx="78" cy="84" r="3" fill="url(#dg3-fur)" />
-    <circle cx="78" cy="114" r="3" fill="url(#dg3-fur)" />
-    <line x1="78" y1="88" x2="78" y2="110" stroke={ink} strokeWidth="1.2" strokeDasharray="2 2" opacity=".6" />
-    <text x="35" y="95" fontSize="6" fill={ink} opacity=".8" fontFamily="var(--w-font-mono)">
-      No.7
-    </text>
-    <text x="35" y="108" fontSize="11" fill={ink} fontFamily="var(--w-font-mono)" fontWeight="600">
-      $3.50
-    </text>
-    {stamped && (
-      <g transform="rotate(-14 62 98)">
-        <rect x="46" y="90" width="30" height="14" rx="2" fill={face} stroke={red} strokeWidth="1.6" />
-        <path d="M54 97 L58 101 L66 93" fill="none" stroke={red} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </g>
-    )}
-    {crumpled && <path d="M30 96 L40 92 L48 99 L58 93" fill="none" stroke={ink} strokeWidth="1" opacity=".5" />}
-  </g>
 );
 const Paws = () => (
   <>
-    <ellipse cx="30" cy="100" rx="9" ry="8" fill="url(#dg3-fur)" filter="url(#dg3-fuzz)" />
-    <ellipse cx="90" cy="100" rx="9" ry="8" fill="url(#dg3-fur)" filter="url(#dg3-fuzz)" />
+    <ellipse cx="50" cy="91" rx="9" ry="6.5" fill="url(#dg4-egg)" />
+    <ellipse cx="90" cy="89" rx="9" ry="6.5" fill="url(#dg4-egg)" />
   </>
 );
 
-function PoseArt({ pose }: { pose: Pose }) {
-  switch (pose) {
-    case "welcome":
-      return (
+function PoseArt({ pose, glow }: { pose: Pose; glow: boolean }) {
+  const face = (() => {
+    switch (pose) {
+      case "welcome":
+        return (
+          <>
+            <Eyes />
+            <path d="M64 74 Q70 80 76 74" fill="none" stroke={MOCHA} strokeWidth="2.6" strokeLinecap="round" />
+          </>
+        );
+      case "waiting":
+        return (
+          <>
+            <Eyes dy={-3} />
+            <circle cx="70" cy="76" r="2.6" fill={MOCHA} />
+          </>
+        );
+      case "success":
+        return (
+          <>
+            <path d="M54.5 65 Q60 59 65.5 65" fill="none" stroke={MOCHA} strokeWidth="3" strokeLinecap="round" />
+            <path d="M74.5 65 Q80 59 85.5 65" fill="none" stroke={MOCHA} strokeWidth="3" strokeLinecap="round" />
+            <path d="M62 72 Q70 82 78 72 Z" fill={MOCHA} />
+          </>
+        );
+      case "error":
+        return (
+          <>
+            <Eyes dy={1.5} />
+            <path d="M53 57 L63 54" stroke={MOCHA} strokeWidth="2.4" strokeLinecap="round" />
+            <path d="M87 57 L77 54" stroke={MOCHA} strokeWidth="2.4" strokeLinecap="round" />
+            <path d="M63 77 Q66.5 74 70 77 T77 77" fill="none" stroke={MOCHA} strokeWidth="2.4" strokeLinecap="round" />
+          </>
+        );
+    }
+  })();
+  const tilt = pose === "error" ? "rotate(-9 80 100)" : undefined;
+  return (
+    <>
+      <Wave />
+      {pose === "waiting" && (
         <>
-          <Body />
-          <FacePatch />
-          <Cheeks />
-          <Eyes />
-          <path d="M54 67 Q60 72 66 67" fill="none" stroke={ink} strokeWidth="2.2" strokeLinecap="round" />
-          <Hat tilt={-6} />
-          <TicketCard />
-          <Paws />
+          <circle className="w-dot w-dot-1" cx="56" cy="6" r="3.6" fill={CHAMP} />
+          <circle className="w-dot w-dot-2" cx="70" cy="6" r="3.6" fill={CHAMP} />
+          <circle className="w-dot w-dot-3" cx="84" cy="6" r="3.6" fill={CHAMP} />
         </>
-      );
-    case "waiting":
-      return (
-        <>
-          <Body />
-          <FacePatch />
-          <Cheeks />
-          <Eyes dy={-3} />
-          <circle cx="60" cy="69" r="2.4" fill={ink} />
-          <Hat />
-          <circle className="w-dot w-dot-1" cx="98" cy="10" r="3.4" fill={ink} />
-          <circle className="w-dot w-dot-2" cx="108" cy="18" r="3.4" fill={ink} />
-          <circle className="w-dot w-dot-3" cx="116" cy="28" r="3.4" fill={ink} />
-          <TicketCard />
-          <Paws />
-        </>
-      );
-    case "success":
-      return (
-        <>
-          <Body />
-          <FacePatch />
-          <Cheeks />
-          <path d="M46.5 59 Q51 54 55.5 59" fill="none" stroke={ink} strokeWidth="2.6" strokeLinecap="round" />
-          <path d="M64.5 59 Q69 54 73.5 59" fill="none" stroke={ink} strokeWidth="2.6" strokeLinecap="round" />
-          <path d="M53 65 Q60 74 67 65 Z" fill={ink} />
-          <Hat tilt={8} />
-          <TicketCard stamped />
-          <Paws />
-        </>
-      );
-    case "error":
-      return (
-        <>
-          <path d="M108 40 Q114 50 108 56 Q102 50 108 40 Z" fill={red} opacity=".8" />
-          <Body />
-          <FacePatch />
-          <Cheeks />
-          <Eyes dy={1.5} />
-          <path d="M45 53 L55 50" stroke={ink} strokeWidth="2" strokeLinecap="round" />
-          <path d="M75 53 L65 50" stroke={ink} strokeWidth="2" strokeLinecap="round" />
-          <path d="M54 70 Q57 67 60 70 T66 70" fill="none" stroke={ink} strokeWidth="2" strokeLinecap="round" />
-          <Hat tilt={-16} />
-          <TicketCard crumpled />
-          <Paws />
-        </>
-      );
-  }
+      )}
+      {pose === "success" && <path d="M18 30 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 Z" fill={CHAMP} />}
+      {pose === "error" && <path d="M22 26 Q28 36 22 42 Q16 36 22 26 Z" fill={AMBER} />}
+      <g transform={tilt}>
+        <Egg glow={glow} />
+        <Cheeks />
+        {face}
+        <Boat />
+        <Paws />
+      </g>
+    </>
+  );
 }
 
-export function Doggett({ pose, size = 72, className = "", decorative = false }: { pose: Pose; size?: number; className?: string; decorative?: boolean }) {
+export function Doggett({
+  pose,
+  size = 72,
+  className = "",
+  decorative = false,
+  glow,
+}: {
+  pose: Pose;
+  size?: number;
+  className?: string;
+  decorative?: boolean;
+  /** soft inner light and fur; defaults on at 120 px and up */
+  glow?: boolean;
+}) {
+  const lit = glow ?? size >= 120;
   return (
     <svg
-      viewBox="0 0 120 142"
-      width={(size * 120) / 142}
-      height={size}
+      viewBox="0 0 160 140"
+      width={size}
+      height={(size * 140) / 160}
       className={`shrink-0 overflow-visible ${className}`}
       role={decorative ? undefined : "img"}
       aria-hidden={decorative || undefined}
       aria-label={decorative ? undefined : TITLES[pose]}
     >
-      <Defs />
-      <PoseArt pose={pose} />
+      <Defs glow={lit} />
+      <PoseArt pose={pose} glow={lit} />
     </svg>
   );
 }
