@@ -6,7 +6,7 @@
 | M1 program on devnet + TS test | 05:00 | done | 03:45 | 16/16 LiteSVM TS tests pass; batch of 3 settled on devnet in one v1 tx (below) | none |
 | M2 core flow e2e from UI | 06:45 | done | 04:12 | From the UI on devnet: open tab `5U9crhh5…`, 3 vouchers settled in one v1 tx `3GWbVawE…` (0.93 s), risk circuit trip, offline shell; screenshots in the shared notes folder `build-m2-screens/` | none |
 | M3 AI officer + Gaming | 07:45 | done | 04:44 | AI officer (Qwen2.5-1.5B, WebLLM/WebGPU) in the Shop accept flow, 1.2–1.7 s per voucher, loads from cache with 0 network requests; game: commit `2r7CnF68…`, power-up settled in `BVMGtkkQ…`, reveal `2nrbnoD4…`, drop proven; screenshots in `build-m3-screens/` | none |
-| M4 polish | 08:15 | not started | | | |
+| M4 polish | 08:15 | done | 05:07 | 375 px pass (no overflow on 6 pages), a11y scan clean, guided path, README, branded 404/error; prod-build rehearsal: open `3beWsDgC…`, 3-voucher settle `5dwbbrL6…` (0.8 s), reveal `59iQvt8c…`; screenshots `build-m4-screens-375/`, `build-m4-rehearsal/` | none |
 | FREEZE | 08:30 | | | | |
 | Initial submission | <10:00 | | | | |
 | Final submission | <11:00 | | | | |
