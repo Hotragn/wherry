@@ -86,3 +86,20 @@ Game PDA: `DtnGwjM1qHsQ7E4GugU1w4CnE31W7X3MAxnixVviwZ3N` (studio = the shop key 
 | Power-up bought (round 0 in nonce), settled | `5Wd9Zbo5GykmSytGRRHJNfC3sfJJ6CjMZscTfUjRXiS9K4sND2AUbhA9qNeEMWuMEeZ2sWpdETCHQMVhEH58dtNG`, 0.9 s |
 | Seed revealed | `59iQvt8c5UdCo97pQjXbvqR2F2vvZu7ZokzpxwRW4knzyQW8eBVQdPsG5Sz2i3EecUdMkRqNZAdqiZ1GKoWcb1J7`, 0.8 s |
 | Player's proof | ✓ Oar polish; sha256(seed) matches; round in voucher 0 |
+
+## Add-ons (ADDONS.md), 05:08–05:21 ET. No program upgrade; deployer still 1.77 SOL
+| # | Status | Proof |
+|---|---|---|
+| 1 Batch | 5 vouchers per v1 tx (client); single-precompile `settle_batch` not built | devnet `xF5ViLRC44dCNDgD798kTTqWxB3gL7cq5QqkjwjUC5CNRBEmMicXhZtKmshepG8nkCNHtahrR7GirNR1CMvfwTC`: 5 vouchers, v1, 110,940 CU, 0.8 s |
+| 2 Hash chain | link in nonce bytes 4–11; shops decline forks | test "a fork after the same voucher is rejected" |
+| 3 v1 + limits | verified | `scripts/tx-info.ts`: configMask 12, CU limit 120,065, loaded data 543,222; v0 fallback tx is version 0 |
+| 4 Zero-copy | not done (layout break for existing tabs, small gain); CU recorded | README "Measured numbers" |
+| 5 Property tests | 25 seeded worlds × 10 attempts | 28/28 tests |
+| 6 Non-extractable key | verified | test: pkcs8 and jwk export reject |
+| 7 Offline hard reload | verified on localhost prod build; SW keeps lazy AI chunk | server stopped: Phone/Shop/Play reload and run, officer Ready |
+| 8 Codama | verified | only the Ed25519 precompile ix is hand-built |
+| 9 AI on screen | model name + latency | "(Qwen2.5 1.5B, 1.7 s, on this device)" |
+| 10 Live numbers | Shop "Measured here" panel + README | 1 voucher: 1.0 s confirmed, 1.0 s finalized, 23,688 CU, AI 1.5 s |
+| 11 Threat model | stolen phone, fork, malicious courier added | README |
+| 12 Budget planner | phone, offline, advise-only | "Split by Qwen2.5 1.5B on this phone in 1.3 s, offline"; "This is 40% of today's food budget" |
+| 13 Story | README "When the road is gone"; courier as unshipped design | README |
