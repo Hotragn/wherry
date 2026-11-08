@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BuiltWith } from "./components/built-with";
 import { Logo } from "./components/logo";
-import { HeroStage } from "./components/hero-stage";
+import { ProductCrux } from "./components/product-crux";
 import { RiverHero } from "./components/river-hero";
 import { Ticket } from "./components/ticket";
 import { Addr, WhatsThis } from "./components/ui";
@@ -46,80 +46,73 @@ const SAFETY = [
 export default function Landing() {
   return (
     <div className="min-h-dvh overflow-x-clip">
-      <header className="relative z-10 mx-auto flex max-w-page items-center justify-between gap-3 px-4 py-5 md:px-8">
-        <Logo size={44} className="text-3xl" />
-        <nav aria-label="Page" className="flex items-center gap-1 rounded-full border border-line bg-surface p-1 text-sm shadow-1">
-          <a href="#how" className="rounded-full px-3 py-1.5 font-medium hover:bg-sunk">
-            How it works
-          </a>
-          <a href="#safe" className="hidden rounded-full px-3 py-1.5 font-medium hover:bg-sunk sm:inline">
-            Is it safe
-          </a>
-          <Link href="/app" className="rounded-full bg-accent px-3 py-1.5 font-medium text-on-accent">
-            Open app
-          </Link>
-        </nav>
-      </header>
+      <div className="relative isolate overflow-hidden">
+        {/* Painted hero (generated in Canva): a river at dusk, town lights out, one lantern-lit ferry still crossing. */}
+        <img src="/hero-river.jpg" alt="" className="absolute inset-0 -z-20 h-full w-full object-cover" />
+        <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--w-navy)_45%,transparent)_0%,color-mix(in_srgb,var(--w-navy)_30%,transparent)_40%,color-mix(in_srgb,var(--w-navy)_55%,transparent)_75%,var(--w-navy)_100%)]" />
+        <header className="relative z-10 mx-auto flex max-w-page items-center justify-between gap-3 px-4 py-5 md:px-8">
+          <Logo size={44} className="text-3xl" />
+          <nav aria-label="Page" className="flex items-center gap-2 text-sm">
+            <a href="#how" className="hidden rounded-full px-3 py-1.5 font-medium hover:bg-surface sm:inline">
+              How it works
+            </a>
+            <a href="#safe" className="hidden rounded-full px-3 py-1.5 font-medium hover:bg-surface sm:inline">
+              Is it safe
+            </a>
+            <Link href="/app" className="btn-gold rounded-full px-4 py-2 font-semibold">
+              Open the app ↗
+            </Link>
+          </nav>
+        </header>
 
-      <main>
-        <div className="relative isolate -mt-24 pt-24">
-          <div aria-hidden className="w-beams -z-10" />
-          <section className="relative mx-auto grid max-w-page items-center gap-10 px-4 pb-14 pt-6 md:px-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:pt-12">
-            <div className="flex flex-col gap-7">
-              <p className="label">Offline · Signed · Settled on Solana</p>
-              <div className="relative">
-                <svg aria-hidden viewBox="0 0 600 300" className="pointer-events-none absolute -left-16 top-24 -z-10 hidden w-[760px] text-ink/20 lg:block">
-                  <path d="M10 290 C 160 330, 520 300, 590 120" fill="none" stroke="currentColor" strokeWidth="1" />
-                </svg>
-                <h1 className="headline-fade max-w-[720px] text-[clamp(56px,8.4vw,120px)]">
-                  Pay with <em className="font-normal italic">no signal.</em> Get paid when it&apos;s back.
-                </h1>
-                <span aria-hidden className="absolute bottom-6 right-0 hidden text-3xl text-ink lg:block">✦</span>
-              </div>
-              <p className="max-w-[540px] text-xl text-muted">
-                Your phone pays a shop with a signed ferry ticket, even in airplane mode. The money was locked on Solana first, so the ticket is always good.
+        <main>
+          <section className="mx-auto flex max-w-[960px] flex-col items-center gap-8 px-4 pb-24 pt-16 text-center md:pt-24">
+            <p className="label text-ink">Offline payments on Solana · devnet</p>
+            <h1 className="text-[clamp(52px,8vw,112px)] [text-shadow:0_2px_30px_color-mix(in_srgb,var(--w-navy)_80%,transparent)]">
+              Pay with <em className="italic text-accent">no signal.</em>
+            </h1>
+            <Link href="/app/owner" className="btn-gold rounded-full px-10 py-4 text-lg font-semibold">
+              Start the demo
+            </Link>
+            <div className="flex max-w-[680px] flex-col gap-5 text-left text-lg md:text-xl [text-shadow:0_1px_12px_color-mix(in_srgb,var(--w-navy)_90%,transparent)]">
+              <p>When the network goes down, card payments stop. Wherry keeps the market open.</p>
+              <p>
+                Your phone pays the shop with a <strong>signed ferry ticket</strong>, even in airplane mode. The money was <strong>locked on Solana first</strong>, so the
+                ticket is always good.
               </p>
-              <div className="flex flex-wrap items-center gap-4">
-                <Link href="/app/owner" className="btn btn-sail">
-                  Start the demo
-                </Link>
-                <a href="#how" className="btn btn-quiet">
-                  How it works
-                </a>
-              </div>
-              <nav aria-label="Demo in three steps" className="flex flex-col gap-2">
-                <span className="label">Judges: the whole demo is 3 pages</span>
-                <ol className="flex flex-wrap items-center gap-2 text-sm">
-                  {[
-                    ["/app/owner", "1", "Owner", "lock $40"],
-                    ["/app/phone", "2", "Phone", "pay offline"],
-                    ["/app/shop", "3", "Shop", "check + collect"],
-                  ].map(([href, n, role, what], i) => (
-                    <li key={href} className="flex items-center gap-2">
-                      {i > 0 && (
-                        <span aria-hidden className="text-muted">
-                          →
-                        </span>
-                      )}
-                      <Link href={href} className="flex items-center gap-2 rounded-full border border-line px-3 py-1.5 hover:border-ink">
-                        <span className="mono grid h-5 w-5 place-items-center rounded-full bg-accent text-xs text-on-accent">{n}</span>
-                        <span className="font-semibold">{role}</span>
-                        <span className="text-muted">{what}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ol>
-              </nav>
+              <p>
+                The shop checks it in milliseconds with no network, and <strong>collects every ticket in one transaction</strong> when the signal comes back.
+              </p>
             </div>
-            <HeroStage />
-            <div aria-hidden className="absolute right-0 top-10 hidden flex-col items-center gap-3 xl:flex">
-              <span className="mono text-xs text-ink">01</span>
-              <span className="h-24 w-px bg-line" />
-              <span className="mono text-xs text-muted">02</span>
-              <span className="mono text-xs text-muted">03</span>
-            </div>
+            <nav aria-label="Demo in three steps" className="flex flex-col items-center gap-2">
+              <span className="label text-ink">Judges: the whole demo is 3 pages</span>
+              <ol className="flex flex-wrap items-center justify-center gap-2 text-sm">
+                {[
+                  ["/app/owner", "1", "Owner", "lock $40"],
+                  ["/app/phone", "2", "Phone", "pay offline"],
+                  ["/app/shop", "3", "Shop", "check + collect"],
+                ].map(([href, n, role, what], i) => (
+                  <li key={href} className="flex items-center gap-2">
+                    {i > 0 && (
+                      <span aria-hidden className="text-muted max-sm:hidden">
+                        →
+                      </span>
+                    )}
+                    <Link href={href} className="flex items-center gap-2 rounded-full border border-line bg-base/60 px-3 py-1.5 backdrop-blur hover:border-ink">
+                      <span className="mono grid h-5 w-5 place-items-center rounded-full bg-accent text-xs text-on-accent">{n}</span>
+                      <span className="font-semibold">{role}</span>
+                      <span className="text-muted">{what}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            </nav>
           </section>
-        </div>
+        </main>
+      </div>
+
+      <div>
+        <ProductCrux />
 
         <BuiltWith />
 
@@ -205,7 +198,7 @@ export default function Landing() {
             </Link>
           </div>
         </section>
-      </main>
+      </div>
 
       <footer className="bg-night text-on-night">
         <div className="mx-auto flex max-w-page flex-col gap-3 px-4 py-10 text-sm md:px-8">
@@ -222,7 +215,7 @@ export default function Landing() {
             <a className="link" href="https://www.rareui.com" target="_blank" rel="noreferrer">
               Rare UI
             </a>
-            . Type: Cormorant Garamond, Geist and Paper Mono (OFL).
+            . Type: Newsreader, Geist and Paper Mono (OFL).
           </span>
         </div>
       </footer>
