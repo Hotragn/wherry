@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
-  <!-- Doggett favicon, flat version from the owner's mascot sheet. Tokens: mocha #5B4632, champagne #F4D9A0, amber #C8792C. -->
-  <rect width="160" height="160" rx="36" fill="#5B4632"/>
+  <!-- Doggett favicon, flat version from the owner's mascot sheet. Tokens: navy #13294B, mist #F3EEE3, gold #E8B04B. -->
+  <rect width="160" height="160" rx="36" fill="#13294B"/>
   <g transform="translate(0 10)">
-    <line x1="118" y1="90" x2="118" y2="16" stroke="#F4D9A0" stroke-width="6" stroke-linecap="round"/>
-    <path d="M120 17 C130 13 137 22 150 17 L146 27 L150 37 C137 42 130 33 120 36 Z" fill="#C8792C"/>
-    <path d="M70 18 C95 18 110 46 110 74 C110 98 96 106 70 106 C44 106 30 98 30 74 C30 46 45 18 70 18 Z" fill="#F4D9A0"/>
-    <circle cx="60" cy="64" r="6" fill="#5B4632"/>
-    <circle cx="80" cy="64" r="6" fill="#5B4632"/>
-    <path d="M16 92 L144 86 Q138 118 98 121 L56 122 Q26 119 16 92 Z" fill="#C8792C"/>
-    <path d="M12 134 Q38 124 64 132 T116 130 T152 124" fill="none" stroke="#F4D9A0" stroke-width="7" stroke-linecap="round"/>
+    <line x1="118" y1="90" x2="118" y2="16" stroke="#F3EEE3" stroke-width="6" stroke-linecap="round"/>
+    <path d="M120 17 C130 13 137 22 150 17 L146 27 L150 37 C137 42 130 33 120 36 Z" fill="#E8B04B"/>
+    <path d="M70 18 C95 18 110 46 110 74 C110 98 96 106 70 106 C44 106 30 98 30 74 C30 46 45 18 70 18 Z" fill="#F3EEE3"/>
+    <circle cx="60" cy="64" r="6" fill="#13294B"/>
+    <circle cx="80" cy="64" r="6" fill="#13294B"/>
+    <path d="M16 92 L144 86 Q138 118 98 121 L56 122 Q26 119 16 92 Z" fill="#E8B04B"/>
+    <path d="M12 134 Q38 124 64 132 T116 130 T152 124" fill="none" stroke="#F3EEE3" stroke-width="7" stroke-linecap="round"/>
   </g>
 </svg>
