@@ -19,7 +19,7 @@ export function HeroStage() {
           <Doggett pose="welcome" size={230} decorative className="max-sm:h-auto max-sm:w-[170px]" />
         </div>
       </div>
-      <div className="absolute -bottom-4 right-0 z-20 w-[230px] rotate-6 sm:w-[260px]">
+      <div className="absolute -bottom-4 right-0 z-20 hidden w-[260px] rotate-6 sm:block">
         <Ticket serial={7} shopName="Amara's kiosk" amount={3_500_000n} />
       </div>
     </div>
