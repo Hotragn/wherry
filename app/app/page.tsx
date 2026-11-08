@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { STEPS } from "../components/guide";
+import { STEPS } from "../lib/steps.ts";
 
 export const metadata = { title: "Try it in 60 seconds" };
 

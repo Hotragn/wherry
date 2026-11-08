@@ -134,7 +134,7 @@ export default function PlayPage() {
             <h1 className="text-4xl">Doggett&apos;s Crossing</h1>
             <p className="text-muted">Row the ferry across. Every crossing lands a crate. Works offline.</p>
           </div>
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col sm:items-end">
             <span className="label">Crossings</span>
             <span className="mono text-4xl">{crossings}</span>
           </div>
@@ -261,6 +261,8 @@ function ProofRow({ label, value }: { label: string; value: string }) {
 
 function DropRow({ p, proof, now }: { p: Purchase; proof?: Proof | "sealed"; now: number }) {
   const round = roundOf(p.nonce);
+  // Vouchers bought before rounds were added don't carry one; only check it when they do.
+  const roundOk = !p.roundInNonce || round === p.commitment?.epoch;
   return (
     <li className="flex flex-col gap-2 py-3">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -272,7 +274,7 @@ function DropRow({ p, proof, now }: { p: Purchase; proof?: Proof | "sealed"; now
           <span className="text-sm text-muted">
             Sealed. Round <span className="mono">{p.commitment.epoch}</span> not revealed for {duration(now - p.createdAt)}.
           </span>
-        ) : proof.matches && round === p.commitment.epoch ? (
+        ) : proof.matches && roundOk ? (
           <span className="font-semibold text-ok">
             ✓ {proof.drop.item} <span className="font-normal text-muted">({proof.drop.rarity})</span>
           </span>
@@ -290,7 +292,7 @@ function DropRow({ p, proof, now }: { p: Purchase; proof?: Proof | "sealed"; now
             <dd>{proof.matches ? "yes" : "no"}</dd>
             <ProofRow label="Your seed (voucher nonce)" value={hex(p.nonce)} />
             <dt className="text-muted">Round inside your voucher (nonce bytes 0–3)</dt>
-            <dd>{round === p.commitment.epoch ? round : `${round}: doesn't match round ${p.commitment.epoch}`}</dd>
+            <dd>{!p.roundInNonce ? "not in this voucher (bought before rounds were added)" : roundOk ? round : `${round}: doesn't match round ${p.commitment.epoch}`}</dd>
             <ProofRow label="sha256(seed ‖ nonce ‖ serial)" value={hex(proof.hash)} />
             <dt className="text-muted">Roll (first byte)</dt>
             <dd>

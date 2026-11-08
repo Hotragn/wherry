@@ -20,7 +20,17 @@ export const POWER_UP = { name: "Full sail", price: 500_000n, effect: "Rows twic
 export type Studio = { merchant: Address; name: string };
 /** The studio's commitment as this phone saw it, before buying. */
 export type Commitment = { epoch: number; hash: Uint8Array; seenAt: number };
-export type Purchase = { code: string; serial: number; nonce: Uint8Array; tab: Address; studio: Address; commitment?: Commitment; createdAt: number };
+export type Purchase = {
+  code: string;
+  serial: number;
+  nonce: Uint8Array;
+  tab: Address;
+  studio: Address;
+  commitment?: Commitment;
+  createdAt: number;
+  /** True when nonce bytes 0–3 carry the seed round (every purchase since rounds were added). */
+  roundInNonce?: boolean;
+};
 
 const isZero = (b: ArrayLike<number>) => Array.from(b).every((x) => x === 0);
 
@@ -63,6 +73,7 @@ export async function buyPowerUp(tab: TabSnapshot, studio: Studio): Promise<{ pu
     studio: studio.merchant,
     commitment,
     createdAt: Date.now(),
+    roundInNonce: true,
   };
   await update<Purchase[]>("play:purchases", (p) => [purchase, ...(p ?? [])]);
   return { purchase, voucher };
