@@ -17,7 +17,7 @@ Brand gate: waiting for "BRAND APPROVED". No UI styling written yet.
 - Program ID: `7QcwJ8Jwj4W74Ypq58U5jgBrxwHDvxquGwic2xzPr4MM` (upgrade authority = deployer `J3ogqwY8pDhqrKtnkxmi6iSzcsVDs9BXfdS1a9ZhFc8A`)
 - Test-USD mint (6 decimals): `DQRut6HQcdzu1bpKFzYRCPYfW1u7MCHso2EVGK6tuFs`; mint authority key in `keys/test-usd-authority.json` (for the faucet)
 - Demo shop key: `FQPHfnsmMhKfw4UzLiECcAkAJrKNMFAmqiANvwbJYNcw` (`keys/demo-shop.json`)
-- Deployer balance after M1: ~3.29 SOL
+- Deployer balance after M1: 3.30 SOL
 
 ## Real devnet transactions (`pnpm devnet-proof`)
 | Step | Signature | Confirmed | Fee |
