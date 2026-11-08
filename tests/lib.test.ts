@@ -4,7 +4,8 @@ import { test } from "node:test";
 import { type Address, generateKeyPair, generateKeyPairSigner, signBytes } from "@solana/kit";
 import { assess, DEFAULT_RISK, type Pending, type TabSnapshot } from "../app/lib/assess.ts";
 import { decodeVoucher, encodeVoucher, pairingCode, parsePairingCode, parseSticker, stickerCode, type SignedVoucher } from "../app/lib/codes.ts";
-import { formatUsd, parseUsd, PROGRAM_ID } from "../app/lib/config.ts";
+import { formatUsd, MINT, parseUsd, PROGRAM_ID } from "../app/lib/config.ts";
+import { chunkJoiner, soundChunks } from "../app/lib/sound.ts";
 import { verifyVoucherSignature, voucherBytes } from "../app/lib/voucher.ts";
 import { TabStatus } from "../app/generated/wherry/index.ts";
 
@@ -192,4 +193,19 @@ test("budget planner math: weights add to 100, per-day split, impact lines", asy
   assert.equal(plan.perDay.food, 5_400_000n); // $12/day x 45%
   assert.match(impactLine(plan, "food", 0n, 2_160_000n), /^This is 40% of today's food budget/);
   assert.match(impactLine(plan, "food", 4_000_000n, 2_000_000n), /^This goes \$0\.60 over today's food budget/);
+});
+
+test("pay by sound: two messages under ggwave's 140-byte limit rebuild the voucher in any order", async () => {
+  const { v } = await setup();
+  const code = encodeVoucher({ ...v, mint: MINT }); // the mint is left out on air and restored from config
+  const [a, b] = soundChunks(code);
+  assert.ok(a.length <= 140 && b.length <= 140);
+  const join = chunkJoiner();
+  assert.equal(join(b), null);
+  assert.equal(join(Uint8Array.of(1, 2, 3)), null); // stray noise is ignored
+  assert.equal(join(a), code);
+  const flipped = chunkJoiner();
+  assert.equal(flipped(a), null);
+  assert.equal(flipped(b), code);
+  assert.throws(() => soundChunks("WV1.abc"));
 });

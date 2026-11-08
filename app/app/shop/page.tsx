@@ -5,6 +5,7 @@ import { get, set } from "idb-keyval";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Crossing, type Boat } from "../../components/crossing";
 import { Doggett } from "../../components/doggett";
+import { ListenButton } from "../../components/sound";
 import { Scanner } from "../../components/scanner";
 import { Ticket } from "../../components/ticket";
 import { TxStatus, lamportsToSol, type TxState } from "../../components/tx-status";
@@ -73,6 +74,7 @@ export default function ShopPage() {
   const [queue, setQueue] = useState<Queued[]>([]);
   const [risk, setRisk] = useState<RiskSettings | null>(null);
   const [check, setCheck] = useState<Check | null>(null);
+  const [heard, setHeard] = useState<number | null>(null); // seconds, when the voucher came by sound
   const [lastTrip, setLastTrip] = useState<string | null>(null);
   const [settling, setSettling] = useState(false);
   const [batches, setBatches] = useState<BatchResult[]>([]);
@@ -259,8 +261,11 @@ export default function ShopPage() {
                 title="Scan the customer's voucher"
                 pasteHint="No camera? Paste the voucher code (it starts with WV1.)"
                 accept={(t) => (decodeVoucher(t) ? null : "That isn't a Wherry voucher.")}
-                onResult={onVoucher}
+                onResult={(c) => (setHeard(null), onVoucher(c))}
               />
+              <div className="mt-4 border-t border-line pt-4">
+                <ListenButton onCode={(c, s) => (setHeard(s), onVoucher(c))} />
+              </div>
             </div>
           ) : (
             <div className="paper grid gap-6 p-5 md:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
@@ -268,6 +273,12 @@ export default function ShopPage() {
                 <Ticket serial={check.v.serial} shopName={name} amount={check.v.amount} tab={check.v.tab} onPaper />
               </div>
               <div className="flex flex-col gap-3">
+                {heard !== null && (
+                  <span className="flex items-center gap-2 text-sm">
+                    <Doggett pose="success" size={36} />
+                    Heard by sound in <span className="mono">{heard.toFixed(1)} s</span>
+                  </span>
+                )}
                 {check.signatureOk ? (
                   <Signal tone="ok">
                     Signature valid · checked offline in <span className="mono">{check.verifyMs < 1 ? "<1" : Math.round(check.verifyMs)} ms</span>
