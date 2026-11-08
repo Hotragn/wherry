@@ -16,9 +16,9 @@ export function AppHeader() {
   const path = usePathname();
   const online = useOnline();
   return (
-    <header className="border-b-[1.5px] border-line">
+    <header className="border-b-2 border-ink">
       <div className="mx-auto flex max-w-page flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
-        <Link href="/" className="font-display text-2xl font-bold">
+        <Link href="/" className="display text-3xl">
           Wherry
         </Link>
         <nav aria-label="Roles" className="order-3 flex w-full gap-1 sm:order-none sm:w-auto">
@@ -29,7 +29,7 @@ export function AppHeader() {
                 key={r.href}
                 href={r.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-sm px-2.5 py-2 font-semibold sm:px-3 ${active ? "bg-surface shadow-1 ring-[1.5px] ring-ink" : "text-muted hover:text-ink"}`}
+                className={`rounded-sm border-2 px-2.5 py-1.5 font-bold sm:px-3 ${active ? "border-ink bg-accent text-ink shadow-1" : "border-transparent text-muted hover:border-ink hover:text-ink"}`}
               >
                 {r.n > 0 && (
                   <span className="mono mr-1 text-xs" aria-hidden>
@@ -42,7 +42,7 @@ export function AppHeader() {
           })}
         </nav>
         <span
-          className={`ml-auto flex items-center gap-2 rounded-full px-3 py-1 text-sm ${online ? "text-muted" : "bg-surface font-semibold text-warn ring-[1.5px] ring-warn"}`}
+          className={`ml-auto flex items-center gap-2 rounded-sm border-2 px-3 py-1 text-sm font-bold ${online ? "border-transparent text-muted" : "border-ink bg-surface text-ink"}`}
           role="status"
           aria-live="polite"
         >
@@ -54,7 +54,7 @@ export function AppHeader() {
               <path d="M2 2l12 12" />
             </svg>
           )}
-          {online ? "Online · devnet" : "Offline"}
+          {online ? "Online · devnet" : "No signal · tickets still work"}
         </span>
       </div>
       <StepLine />
