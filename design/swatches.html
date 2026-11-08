@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wherry palette swatches</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: light; }
+  body { margin: 0; font-family: "Instrument Sans", system-ui, sans-serif; background: #E9E1D2; color: #11313A; }
+  .page-title { font-family: "Fraunces", Georgia, serif; font-size: 28px; margin: 24px 24px 4px; }
+  .page-sub { margin: 0 24px 16px; font-size: 15px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; padding: 0 16px 24px; }
+  .pal { background: var(--w-base); color: var(--w-ink); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .pal-a { --w-base:#F3EBDD; --w-surface:#FBF6EC; --w-ink:#11313A; --w-muted:#4A5F63; --w-accent:#B0432A; --w-on-accent:#FBF6EC; --w-ok:#2B6E4B; --w-err:#A12A1F; --w-line:#D9CDB8; }
+  .pal-b { --w-base:#0E2427; --w-surface:#163235; --w-ink:#EFE6D5; --w-muted:#A7B7B1; --w-accent:#E8834F; --w-on-accent:#0E2427; --w-ok:#7DD3A2; --w-err:#F4978C; --w-line:#2A4A4C; }
+  .pal-c { --w-base:#1B1611; --w-surface:#26201A; --w-ink:#F2E9D9; --w-muted:#B9AC97; --w-accent:#D6AA3E; --w-on-accent:#1B1611; --w-ok:#86C99A; --w-err:#EC8B79; --w-line:#3A3128; }
+  .label { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--w-muted); }
+  h2 { font-family: "Fraunces", Georgia, serif; font-weight: 700; font-size: 26px; line-height: 1.1; margin: 0; }
+  p { margin: 0; font-size: 15px; line-height: 1.5; }
+  .muted { color: var(--w-muted); }
+  .ticket { background: var(--w-surface); border: 1.5px solid var(--w-line); border-radius: 10px; padding: 14px 16px; position: relative; }
+  .ticket::before, .ticket::after { content: ""; position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; background: var(--w-base); transform: translateY(-50%); }
+  .ticket::before { left: -8px; } .ticket::after { right: -8px; }
+  .ticket-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .amount { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 24px; font-variant-numeric: tabular-nums; }
+  .perf { border-top: 1.5px dashed var(--w-line); margin: 10px 0; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; }
+  .btn { appearance: none; border: 0; border-radius: 999px; padding: 12px 18px; font: 600 15px "Instrument Sans", sans-serif; background: var(--w-accent); color: var(--w-on-accent); cursor: pointer; align-self: flex-start; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; border-radius: 8px; padding: 8px 10px; font-size: 14px; background: var(--w-surface); border: 1.5px solid var(--w-line); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .ok .dot { background: var(--w-ok); } .ok b { color: var(--w-ok); }
+  .err .dot { background: var(--w-err); } .err b { color: var(--w-err); }
+  .why { font-size: 13px; border-left: 3px solid var(--w-accent); padding-left: 10px; }
+  img.mascot { width: 72px; height: 72px; }
+</style>
+</head>
+<body>
+  <h1 class="page-title">Wherry palettes</h1>
+  <p class="page-sub">Three options, the same real UI on each. Every text pair checked at ≥ 4.5:1.</p>
+  <div class="grid">
+    <section class="pal pal-a" aria-label="Palette A">
+      <span class="label">A · Admiralty chart</span>
+      <img class="mascot" src="mascot/welcome.svg" alt="Doggett, the wherry mascot">
+      <h2>The ferry for your money when the network's gone.</h2>
+      <p class="muted">Pay offline. The money is already locked onchain, so the shop knows it's covered.</p>
+      <div class="ticket">
+        <div class="ticket-row"><span class="label">Voucher #0007</span><span class="mono">Amara's kiosk</span></div>
+        <div class="perf"></div>
+        <div class="ticket-row"><span class="amount">$3.50</span><span class="mono">tab 7Hq…k2</span></div>
+      </div>
+      <button class="btn">Settle 3 vouchers</button>
+      <span class="chip ok"><span class="dot"></span><b>Confirmed in 0.7 s</b> · view on Explorer</span>
+      <span class="chip err"><span class="dot"></span><b>Voucher #0007 already settled</b></span>
+      <p class="why">Why: warm chart paper reads well in daylight at a market stall, and it doesn't look like a crypto app. River-ink text and a red-oxide barge-sail accent come straight from Thames charts and barges.</p>
+    </section>
+    <section class="pal pal-b" aria-label="Palette B">
+      <span class="label">B · Thames at dusk</span>
+      <img class="mascot" src="mascot/welcome.svg" alt="Doggett, the wherry mascot">
+      <h2>The ferry for your money when the network's gone.</h2>
+      <p class="muted">Pay offline. The money is already locked onchain, so the shop knows it's covered.</p>
+      <div class="ticket">
+        <div class="ticket-row"><span class="label">Voucher #0007</span><span class="mono">Amara's kiosk</span></div>
+        <div class="perf"></div>
+        <div class="ticket-row"><span class="amount">$3.50</span><span class="mono">tab 7Hq…k2</span></div>
+      </div>
+      <button class="btn">Settle 3 vouchers</button>
+      <span class="chip ok"><span class="dot"></span><b>Confirmed in 0.7 s</b> · view on Explorer</span>
+      <span class="chip err"><span class="dot"></span><b>Voucher #0007 already settled</b></span>
+      <p class="why">Why: deep river water at dusk with lantern-orange light. It sets the blackout mood, but a dark base with one warm button sits close to the "dark crypto app" look the brief bans.</p>
+    </section>
+    <section class="pal pal-c" aria-label="Palette C">
+      <span class="label">C · Tar &amp; brass</span>
+      <img class="mascot" src="mascot/welcome.svg" alt="Doggett, the wherry mascot">
+      <h2>The ferry for your money when the network's gone.</h2>
+      <p class="muted">Pay offline. The money is already locked onchain, so the shop knows it's covered.</p>
+      <div class="ticket">
+        <div class="ticket-row"><span class="label">Voucher #0007</span><span class="mono">Amara's kiosk</span></div>
+        <div class="perf"></div>
+        <div class="ticket-row"><span class="amount">$3.50</span><span class="mono">tab 7Hq…k2</span></div>
+      </div>
+      <button class="btn">Settle 3 vouchers</button>
+      <span class="chip ok"><span class="dot"></span><b>Confirmed in 0.7 s</b> · view on Explorer</span>
+      <span class="chip err"><span class="dot"></span><b>Voucher #0007 already settled</b></span>
+      <p class="why">Why: tarred hull timber and a waterman's brass badge. Rich and crafted, but brass on dark brown reads "luxury" more than "kiosk", and it's harder to read in sunlight.</p>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="t">
+  <title id="t">Doggett the wherry, sail full, payment landed</title>
+  <path d="M6 80 Q18 74 30 80 T54 80 T78 80 T102 80" fill="none" stroke="var(--w-muted,#4A5F63)" stroke-width="3" stroke-linecap="round"/>
+  <line x1="50" y1="57" x2="50" y2="16" stroke="var(--w-ink,#11313A)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M50 16 L60 19.5 L50 23 Z" fill="var(--w-ink,#11313A)"/>
+  <path d="M52.5 18 Q80 26 80 51 L52.5 54 Z" fill="var(--w-accent,#B0432A)"/>
+  <path d="M53.5 52.5 L75 30" stroke="var(--w-surface,#FBF6EC)" stroke-width="2" stroke-linecap="round" opacity=".75"/>
+  <circle cx="80" cy="16" r="10" fill="var(--w-ok,#2B6E4B)"/>
+  <path d="M75 16.5 L79 20.5 L86 12.5" fill="none" stroke="var(--w-surface,#FBF6EC)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M12 58 Q48 61 86 53 Q80 76 52 78 Q24 79 12 58 Z" fill="var(--w-ink,#11313A)"/>
+  <path d="M15 60.5 Q48 63.5 83 56" fill="none" stroke="var(--w-surface,#FBF6EC)" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M33.8 67.5 Q38 62.5 42.2 67.5" fill="none" stroke="var(--w-surface,#FBF6EC)" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M48.8 67 Q53 62 57.2 67" fill="none" stroke="var(--w-surface,#FBF6EC)" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M40.5 72 Q45.5 77.5 50.5 72" fill="none" stroke="var(--w-surface,#FBF6EC)" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

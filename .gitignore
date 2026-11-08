@@ -1,0 +1,29 @@
+# secrets and keys: never commit
+.env
+.env.*
+!.env.example
+keys/
+*-keypair.json
+id.json
+# local links and caches
+knowledge
+.claude/settings.local.json
+# build output
+node_modules/
+target/
+.next/
+out/
+dist/
+.anchor/
+test-ledger/
+.surfpool/
+.DS_Store
+# from the kit/nextjs-anchor template
+.pnp.*
+/coverage
+*.pem
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+npm-debug.log*
+.pnpm-debug.log*

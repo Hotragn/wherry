@@ -1,0 +1,63 @@
+/* Wherry design tokens. Palette A "Admiralty chart" (picked 2026-11-08 by the manager).
+   Every colour in the app comes from here. No ad-hoc hex values in components.
+   Contrast (WCAG): ink/base 11.64, muted/base 5.71, ok/base 5.16, err/base 6.19,
+   warn/base 5.85, accent/base 4.82, on-accent/accent 5.29, surface/night 12.79. */
+
+:root {
+  /* colour: palette A */
+  --w-base: #F3EBDD;          /* warm chart paper, page background */
+  --w-surface: #FBF6EC;       /* card / ticket paper */
+  --w-sunk: #ECE2D0;          /* inset wells, table stripes */
+  --w-ink: #11313A;           /* river ink: text, hull, icons */
+  --w-muted: #4A5F63;         /* secondary text, input borders (5.71:1) */
+  --w-line: #D9CDB8;          /* decorative rules, ticket perforation (non-essential) */
+  --w-accent: #B0432A;        /* red-oxide barge sail: ONE primary action per screen */
+  --w-on-accent: #FBF6EC;     /* text on accent */
+  --w-ok: #2B6E4B;            /* signal: success / covered / settled */
+  --w-err: #A12A1F;           /* signal: error / declined / shortfall */
+  --w-warn: #7A5200;          /* signal: stale sync, unverified tab (text only) */
+  --w-night: #11313A;         /* dark bands (hero strip, footer): ink as background */
+  --w-on-night: #FBF6EC;      /* text on night (12.79:1) */
+  --w-on-night-muted: #B7C6C4;/* secondary text on night (7.8:1) */
+  --w-focus: #B0432A;         /* focus ring (4.82:1 on base) */
+  /* Rule: accent is never text or icon on --w-night (2.42:1). On night bands the
+     primary button is --w-surface fill with --w-ink text. */
+
+  /* type */
+  --w-font-display: "Fraunces", Georgia, "Times New Roman", serif;   /* opsz 9..144, 500/700 */
+  --w-font-text: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif; /* 400/500/600 */
+  --w-font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;         /* 500; amounts, keys, sigs */
+  --w-text-xs: 12px;  --w-text-sm: 14px;  --w-text-md: 16px;  --w-text-lg: 18px;
+  --w-text-xl: 22px;  --w-text-2xl: 28px; --w-text-3xl: 36px; --w-text-4xl: 48px; --w-text-5xl: 64px;
+  --w-leading-tight: 1.1; --w-leading-body: 1.5;
+  --w-tracking-label: .08em; /* uppercase labels only */
+
+  /* spacing (4 px base) */
+  --w-space-1: 4px;  --w-space-2: 8px;  --w-space-3: 12px; --w-space-4: 16px; --w-space-5: 20px;
+  --w-space-6: 24px; --w-space-8: 32px; --w-space-10: 40px; --w-space-14: 56px; --w-space-18: 72px;
+  --w-max-text: 68ch; --w-max-page: 1120px;
+
+  /* radii */
+  --w-radius-sm: 4px;    /* inputs, small chips */
+  --w-radius-md: 10px;   /* tickets, cards */
+  --w-radius-lg: 14px;   /* panels */
+  --w-radius-pill: 999px;/* buttons */
+
+  /* shadows: paper on a chart table, never glows */
+  --w-shadow-1: 0 1px 0 rgba(17, 49, 58, .06);
+  --w-shadow-2: 0 1px 0 rgba(17, 49, 58, .06), 0 8px 20px -10px rgba(17, 49, 58, .28);
+  --w-shadow-lift: 0 2px 0 rgba(17, 49, 58, .08), 0 14px 28px -12px rgba(17, 49, 58, .32);
+
+  /* motion: a boat on calm water. Short, eased, never bouncy */
+  --w-ease: cubic-bezier(.2, .8, .2, 1);
+  --w-dur-fast: 120ms; --w-dur: 200ms; --w-dur-slow: 320ms;
+  --w-dur-row: 1200ms; /* waiting-dot rhythm on the mascot */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --w-dur-fast: 0ms; --w-dur: 0ms; --w-dur-slow: 0ms; --w-dur-row: 0ms; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* Google Fonts (add in the root layout <head>):
+   https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap */

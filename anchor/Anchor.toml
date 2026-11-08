@@ -1,0 +1,17 @@
+[toolchain]
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.devnet]
+wherry = "7QcwJ8Jwj4W74Ypq58U5jgBrxwHDvxquGwic2xzPr4MM"
+
+[provider]
+cluster = "devnet"
+wallet = "~/wherry/keys/devnet-deployer.json"
+
+[scripts]
+test = "cargo test"
+
+[hooks]
