@@ -262,7 +262,7 @@ export default function ShopPage() {
       <div className="flex min-w-0 flex-col gap-10">
         <FirstRun role="shop" />
         {!online && (
-          <p role="status" className="flex items-center gap-3 rounded-sm border-2 border-ink bg-accent px-4 py-3 text-lg font-bold">
+          <p role="status" className="flex items-center gap-3 rounded-2xl bg-night px-5 py-4 text-lg font-semibold text-on-night">
             <span aria-hidden className="mono">[....]</span>
             No signal. That&apos;s fine. Tickets still check offline.
           </p>
@@ -280,7 +280,7 @@ export default function ShopPage() {
                 accept={(t) => (decodeVoucher(t) ? null : "That isn't a Wherry voucher.")}
                 onResult={(c) => (setHeard(null), onVoucher(c))}
               />
-              <div className="mt-4 border-t-2 border-ink pt-4">
+              <div className="mt-4 border-t border-line pt-4">
                 <ListenButton onCode={(c, s) => (setHeard(s), onVoucher(c))} />
               </div>
             </div>
@@ -340,10 +340,9 @@ export default function ShopPage() {
           )}
         </section>
 
-        <section aria-label="Tickets to collect" className="flex flex-col gap-5 border-t-2 border-ink pt-8">
+        <section aria-label="Tickets to collect" className="flex flex-col gap-5 border-t border-line pt-8">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <span className="label text-ink">The crossing</span>
               <h2 className="text-4xl">Tickets to collect</h2>
               <p className="text-lg">
                 {pending.length === 0 ? "Nothing waiting to collect." : (
@@ -421,7 +420,7 @@ export default function ShopPage() {
         </section>
       </div>
 
-      <aside className="flex flex-col gap-8 [&>section+section]:border-t-2 [&>section+section]:border-ink [&>section+section]:pt-6">
+      <aside className="flex flex-col gap-8 [&>section+section]:border-t [&>section+section]:border-line [&>section+section]:pt-6">
         <Sticker shop={shop} name={name} online={online} />
         <RiskCircuit risk={risk} pending={pending} lastTrip={lastTrip} onChange={async (r) => (setRisk(r), await saveRisk(r))} />
         <OfficerPanel state={officer} onStart={startOfficer} onStop={async () => (await set("shop:officer-on", false), setOfficer({ status: "off" }))} />

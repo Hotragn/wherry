@@ -14,13 +14,13 @@ export default function AppHome() {
           between them.
         </p>
       </div>
-      <ol className="flex flex-col border-t-2 border-ink">
+      <ol className="flex flex-col border-t border-line">
         {STEPS.map((s) => (
-          <li key={s.href} className="border-b-2 border-ink">
+          <li key={s.href} className="border-b border-line">
             <Link href={s.href} className="group flex items-start gap-4 py-5">
               <span
                 aria-hidden
-                className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-surface display text-lg "
+                className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-surface display text-lg "
               >
                 {s.n}
               </span>

@@ -147,7 +147,7 @@ function Owner() {
   return (
     <div className="flex flex-col gap-10">
       <FirstRun role="owner" />
-      <section aria-label="Your wallet" className="flex flex-wrap items-end gap-x-8 gap-y-4 border-b-2 border-ink pb-5">
+      <section aria-label="Your wallet" className="flex flex-wrap items-end gap-x-8 gap-y-4 border-b border-line pb-5">
         <Stat label={burner ? "Test wallet (this browser)" : "Wallet"}>
           <Addr value={owner} />
         </Stat>
@@ -383,7 +383,7 @@ function TabCard({ tab, run }: { tab: TabSnapshot; run: Parameters<typeof OpenTa
         ) : settlements.length === 0 ? (
           <p className="text-sm text-muted">No vouchers settled from this tab yet.</p>
         ) : (
-          <ul className="flex flex-col divide-y-2 divide-ink text-sm">
+          <ul className="flex flex-col divide-y divide-line text-sm">
             {settlements.map((s) => (
               <li key={`${s.signature}-${s.serial}`} className="flex flex-wrap items-center gap-x-4 gap-y-1 py-2">
                 <span className="label w-[72px] text-ink">{serialLabel(s.serial)}</span>
