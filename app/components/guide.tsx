@@ -52,6 +52,7 @@ export function NextStep() {
 const FIRST_RUN = {
   owner: ["Get test dollars. They're devnet money, not real money.", "Pair the customer's phone by scanning its code.", "Lock the money in a tab. Now the phone can pay with no signal."],
   phone: ["Find your tab: the money someone locked for this phone.", "Scan the shop's sticker and type the amount.", "Show the ferry ticket. No signal needed."],
+  courier: ["Paste the bundle a shop handed you.", "Check it: every ticket is signed, and the shop's note allows your fee.", "Find a signal and collect. The shop gets its money; you keep the fee."],
   shop: ["Scan the customer's ferry ticket.", "Check it: signature, money left in their tab, your limits. All offline.", "Collect your money when the network is back."],
 } as const;
 
