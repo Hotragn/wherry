@@ -181,3 +181,15 @@ test("hash-chained vouchers: a fork after the same voucher is rejected, a proper
   // two chain starts (e.g. a reinstalled app) are not called a fork
   assert.equal(check(withLink(new Uint8Array(8), 4), [first]).decision, "accept");
 });
+
+test("budget planner math: weights add to 100, per-day split, impact lines", async () => {
+  const { DEFAULT_WEIGHTS, impactLine, normalizeWeights, planFor } = await import("../app/lib/planner.ts");
+  assert.deepEqual(normalizeWeights({ water: 20, food: 50, transport: 5, phone_credit: 25 }), { water: 20, food: 50, transport: 5, phone_credit: 25 });
+  const odd = normalizeWeights({ water: 1, food: 1, transport: 1, phone_credit: 0 })!;
+  assert.equal(Object.values(odd).reduce((a, b) => a + b, 0), 100);
+  assert.equal(normalizeWeights({ water: "x", food: -5 }), null); // junk -> caller uses the default plan
+  const plan = planFor(36n * USD, 3, DEFAULT_WEIGHTS, "stuck", "default");
+  assert.equal(plan.perDay.food, 5_400_000n); // $12/day x 45%
+  assert.match(impactLine(plan, "food", 0n, 2_160_000n), /^This is 40% of today's food budget/);
+  assert.match(impactLine(plan, "food", 4_000_000n, 2_000_000n), /^This goes \$0\.60 over today's food budget/);
+});

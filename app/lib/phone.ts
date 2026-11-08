@@ -14,6 +14,8 @@ export type IssuedVoucher = {
   merchant: Address;
   shopName: string;
   createdAt: number;
+  /** Budget category picked on this phone (never leaves it). */
+  need?: string;
 };
 
 /** The phone key. Created once; the private half can never leave the browser. */
@@ -47,7 +49,13 @@ async function reserveSerial(tab: TabSnapshot): Promise<number> {
 
 /** Sign a voucher for `amount` to a shop. Works offline.
  *  Game vouchers pass `round`: nonce bytes 0–3 carry the studio's seed round (u32 LE), the rest stays random. */
-export async function payShop(tab: TabSnapshot, shop: { merchant: Address; name: string }, amount: bigint, round?: number): Promise<IssuedVoucher> {
+export async function payShop(
+  tab: TabSnapshot,
+  shop: { merchant: Address; name: string },
+  amount: bigint,
+  round?: number,
+  need?: string,
+): Promise<IssuedVoucher> {
   const { pair, pk } = await deviceKey();
   const serial = await reserveSerial(tab);
   const nonce = crypto.getRandomValues(new Uint8Array(16));
@@ -73,6 +81,7 @@ export async function payShop(tab: TabSnapshot, shop: { merchant: Address; name:
     merchant: shop.merchant,
     shopName: shop.name,
     createdAt: Date.now(),
+    need,
   };
   await update<IssuedVoucher[]>("phone:history", (h) => [issued, ...(h ?? [])]);
   return issued;
