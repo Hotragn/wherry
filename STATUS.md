@@ -4,7 +4,7 @@
 |---|---|---|---|---|---|
 | Before M1 (fork, VERSIONS.md, deploy test) | 04:05 | done | 03:41 | Program deployed to devnet, tx `2KiK68LmAH9kSKmrivJsTqA4XjNH6GmLN7wwfkCN76vdLxjZ6hU34dWXZedYXcmbNXjHBrZuxws61HRURzjvXVxd` | none |
 | M1 program on devnet + TS test | 05:00 | done | 03:45 | 16/16 LiteSVM TS tests pass; batch of 3 settled on devnet in one v1 tx (below) | none |
-| M2 core flow e2e from UI | 06:45 | done | 04:20 | From the UI on devnet: open tab `5U9crhh5…`, 3 vouchers settled in one v1 tx `3GWbVawE…` (0.93 s), risk circuit trip, offline shell; screenshots in the shared notes folder `build-m2-screens/` | none |
+| M2 core flow e2e from UI | 06:45 | done | 04:12 | From the UI on devnet: open tab `5U9crhh5…`, 3 vouchers settled in one v1 tx `3GWbVawE…` (0.93 s), risk circuit trip, offline shell; screenshots in the shared notes folder `build-m2-screens/` | none |
 | M3 AI officer + Gaming | 07:45 | not started | | | |
 | M4 polish | 08:15 | not started | | | |
 | FREEZE | 08:30 | | | | |
