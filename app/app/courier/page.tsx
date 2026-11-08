@@ -46,7 +46,7 @@ export default function CourierPage() {
       <div className="flex flex-col gap-3">
         <h1 className="text-5xl md:text-7xl">Carry the tickets across.</h1>
         <p className="max-w-[60ch] text-lg">
-          The first phone to find a signal collects for everyone. Shops hand you their ferry tickets with a signed note that lets you collect them and keep a small fee. The
+          The first phone to find a signal collects for everyone. Shops hand you their offline payments with a signed note that lets you collect them and keep a small fee. The
           money still goes to the shop; you can&apos;t redirect it.
         </p>
         <WhatsThis term="Courier authorization">A note the shop signs with its own key. It names a fee cap (1%, at most $0.05 a ticket) and expires after 48 hours. Solana checks it onchain.</WhatsThis>

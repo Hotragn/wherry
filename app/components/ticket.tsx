@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { formatUsd, serialLabel, shortAddress } from "../lib/config.ts";
 
 /**
- * A ferry ticket (the voucher): emerald card stock like a banknote, serial, destination shop, mono fare,
+ * An offline payment (the voucher): emerald card stock like a banknote, serial, destination shop, mono fare,
  * a perforated stub with punched notches. When collected, a vermilion stamp lands and the stub tears off.
  */
 export function Ticket({
@@ -29,11 +29,11 @@ export function Ticket({
     <article
       className="ticket flex w-full max-w-sm"
       style={style}
-      aria-label={`Ferry ticket ${serialLabel(serial)}, ${formatUsd(amount)}, to ${shopName}${stamp ? ", collected" : ""}`}
+      aria-label={`Offline payment ${serialLabel(serial)}, ${formatUsd(amount)}, to ${shopName}${stamp ? ", collected" : ""}`}
     >
       <div className="flex min-w-0 flex-1 flex-col gap-4 p-5">
         <header className="flex flex-wrap items-baseline justify-between gap-x-3">
-          <span className="text-sm font-medium opacity-80">Wherry ferry ticket</span>
+          <span className="text-sm font-medium opacity-80">Wherry offline payment</span>
           <span className="mono whitespace-nowrap text-sm opacity-80">{serialLabel(serial)}</span>
         </header>
         <div className="flex flex-col gap-0.5">

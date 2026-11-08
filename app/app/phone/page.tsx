@@ -133,7 +133,7 @@ export default function PhonePage() {
           <FirstRun role="phone" />
           <h1 className="text-5xl">Pair this phone</h1>
           <p className="text-lg">
-            This phone now holds a key that signs ferry tickets. The private
+            This phone now holds a key that signs offline payments. The private
             half never leaves this browser, even offline.
           </p>
           <ol className="flex list-decimal flex-col gap-2 pl-6 text-lg marker:font-bold">
@@ -323,9 +323,9 @@ export default function PhonePage() {
             className="flex max-w-xl flex-col gap-5"
           >
             <div className="flex flex-col gap-1">
-              <h1 className="text-5xl">Pay with a ferry ticket</h1>
+              <h1 className="text-5xl">Pay a shop offline</h1>
               <WhatsThis term="Voucher">
-                A ferry ticket is an IOU your phone signs for one shop and one
+                An offline payment is an IOU your phone signs for one shop and one
                 amount. The shop can check it with no network.
               </WhatsThis>
             </div>

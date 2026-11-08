@@ -267,15 +267,15 @@ export default function ShopPage() {
             No signal. That&apos;s fine. Tickets still check offline.
           </p>
         )}
-        <section aria-label="Check a ferry ticket" className="flex flex-col gap-4">
+        <section aria-label="Check an offline payment" className="flex flex-col gap-4">
           <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-            <h1 className="text-5xl md:text-6xl">Check a ferry ticket</h1>
+            <h1 className="text-5xl md:text-6xl">Check an offline payment</h1>
             <span className="mono text-sm">{name}</span>
           </div>
           {!check ? (
             <div className="paper p-5">
               <Scanner
-                title="Scan the customer's ferry ticket"
+                title="Scan the customer's offline payment"
                 pasteHint="No camera? Paste the ticket code (it starts with WV1.)"
                 accept={(t) => (decodeVoucher(t) ? null : "That isn't a Wherry voucher.")}
                 onResult={(c) => (setHeard(null), onVoucher(c))}
@@ -463,7 +463,7 @@ function Setup({ onDone }: { onDone: (name: string) => void }) {
     >
       <FirstRun role="shop" />
       <h1 className="text-5xl">Set up your shop</h1>
-      <p className="text-lg">Your shop gets its own key in this browser. Customers scan your sticker to pay you, and you collect their ferry tickets with this key later.</p>
+      <p className="text-lg">Your shop gets its own key in this browser. Customers scan your sticker to pay you, and you collect their offline payments with this key later.</p>
       <label className="flex flex-col gap-1">
         <span className="label">Shop name</span>
         <input className="field" value={value} maxLength={40} onChange={(e) => setValue(e.target.value)} placeholder="Amara's kiosk" />

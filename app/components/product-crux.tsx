@@ -42,7 +42,7 @@ export function ProductCrux() {
           <figcaption className="text-center">
             <span className="mono text-sm text-accent">1 · Phone</span>
             <br />
-            Signs a ferry ticket. No signal needed.
+            Signs an offline payment. No signal needed.
           </figcaption>
         </figure>
 

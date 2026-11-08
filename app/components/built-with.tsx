@@ -1,5 +1,5 @@
 /** "Built with" strip, like a partner bar: hand-drawn glyphs in the brand colours, plain names. Not endorsements. */
-const ITEMS: { name: string; note: string; glyph: React.ReactNode }[] = [
+export const ITEMS: { name: string; note: string; glyph: React.ReactNode }[] = [
   {
     name: "Solana",
     note: "devnet program",
@@ -70,5 +70,33 @@ export function BuiltWith() {
         ))}
       </div>
     </section>
+  );
+}
+
+/** Hero row like the owner's reference: rounded logo tiles joined by "×". */
+export function BuiltWithTiles() {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <span className="label text-ink">Built with</span>
+      <ul className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+        {ITEMS.map((it, i) => (
+          <li key={it.name} className="flex items-center gap-3">
+            {i > 0 && (
+              <span aria-hidden className="text-lg text-muted max-sm:hidden">
+                ×
+              </span>
+            )}
+            <span title={`${it.name}: ${it.note}`} className="flex items-center gap-2 rounded-xl bg-paper py-1.5 pl-1.5 pr-3 text-on-paper shadow-2">
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-on-paper text-paper">
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
+                  {it.glyph}
+                </svg>
+              </span>
+              <span className="text-sm font-semibold">{it.name}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

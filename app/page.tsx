@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BuiltWith } from "./components/built-with";
+import { BuiltWith, BuiltWithTiles } from "./components/built-with";
 import { Logo } from "./components/logo";
 import { ProductCrux } from "./components/product-crux";
 import { RiverHero } from "./components/river-hero";
@@ -19,7 +19,7 @@ const STEPS = [
   {
     n: "02",
     when: "No signal",
-    title: "Pay with a ferry ticket",
+    title: "Pay a shop offline",
     text: "The phone signs a ticket for one shop and one amount. The shop checks it in milliseconds, with no network at all.",
     term: "Voucher",
     tech: "An IOU your phone signs with an Ed25519 key that never leaves it. It names the shop, the amount and a serial number.",
@@ -67,6 +67,7 @@ export default function Landing() {
 
         <main>
           <section className="mx-auto flex max-w-[960px] flex-col items-center gap-8 px-4 pb-24 pt-16 text-center md:pt-24">
+            <BuiltWithTiles />
             <p className="label text-ink">Offline payments on Solana · devnet</p>
             <h1 className="text-[clamp(52px,8vw,112px)] [text-shadow:0_2px_30px_color-mix(in_srgb,var(--w-navy)_80%,transparent)]">
               Pay with <em className="italic text-accent">no signal.</em>
@@ -77,11 +78,11 @@ export default function Landing() {
             <div className="flex max-w-[680px] flex-col gap-5 text-left text-lg md:text-xl [text-shadow:0_1px_12px_color-mix(in_srgb,var(--w-navy)_90%,transparent)]">
               <p>When the network goes down, card payments stop. Wherry keeps the market open.</p>
               <p>
-                Your phone pays the shop with a <strong>signed ferry ticket</strong>, even in airplane mode. The money was <strong>locked on Solana first</strong>, so the
-                ticket is always good.
+                Your phone pays the shop with a <strong>signed offline payment</strong>, even in airplane mode. The money was <strong>locked on Solana first</strong>, so the
+                payment is always good.
               </p>
               <p>
-                The shop checks it in milliseconds with no network, and <strong>collects every ticket in one transaction</strong> when the signal comes back.
+                The shop checks it in milliseconds with no network, and <strong>collects every payment in one transaction</strong> when the signal comes back.
               </p>
             </div>
             <nav aria-label="Demo in three steps" className="flex flex-col items-center gap-2">

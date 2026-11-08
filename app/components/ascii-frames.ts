@@ -62,7 +62,7 @@ export function riverFrame(ms: number, cols = 62) {
   return rows.join("\n");
 }
 
-/** A ferry ticket printed character by character, like a receipt printer. */
+/** An offline payment printed character by character, like a receipt printer. */
 export function ticketLines(serial: string, shop: string, amount: string) {
   const w = 30;
   const row = (s: string) => `| ${pad(s, w - 4)} |`;
