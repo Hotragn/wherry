@@ -24,4 +24,10 @@ Screens: `design/before/*-{390,1440}.png`.
 5. A declined ticket had no Doggett error pose. Fixed: error pose next to the decline line.
 
 ## Critique round 2
-See the bottom of this file once it's done.
+1. The hero ASCII was 8 px on a 390 px phone: unreadable. Fixed: minimum 10 px and shorter status text ("tickets still work.") so the line fits about 55 columns.
+2. Three Doggetts could be on screen at once (first-run guide, empty list, success). Fixed: dropped the empty-list Doggetts. Doggett now appears only in the guide and in waiting, success and error states.
+3. A next/font warning about the Atkinson fallback cluttered the build output. Fixed: `adjustFontFallback: false`.
+4. Signing a ticket gave no feedback. Checked: the ASCII print runs about 1.3 s at 220 characters per second, then the real ticket rises in (see `design/after/phone-print-390.png`).
+5. Checked side by side for the laptop-only video at 1440 px: the phone window (390 px) is a single column, the shop window is two columns, and the saffron action is the same colour in both.
+
+Still open: the first-run guide's Doggett can share the screen with a success or error Doggett until the guide is dismissed.
