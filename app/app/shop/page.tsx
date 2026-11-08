@@ -32,6 +32,7 @@ import { useOnline } from "../../lib/use-online.ts";
 import { verifyVoucherSignature } from "../../lib/voucher.ts";
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+const sumOf = (queue: Queued[], codes: string[]) => queue.filter((q) => codes.includes(q.code)).reduce((a, q) => a + q.v.amount, 0n);
 
 type Check = { code: string; v: SignedVoucher; verifyMs: number; signatureOk: boolean; result: Assessment };
 
@@ -143,6 +144,8 @@ export default function ShopPage() {
   const pendingTotal = pending.reduce((a, p) => a + p.amount, 0n);
   const payer = check ? snap?.payers[snap.tabs[check.v.tab]?.owner ?? ""] : undefined;
   const settlePrimary = !check && pending.length > 0;
+  const lastSig = [...batches].reverse().find((b) => b.sent)?.sent?.signature;
+  const lastSettled = lastSig ? queue.filter((q) => q.sent?.signature === lastSig) : [];
 
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
@@ -230,8 +233,8 @@ export default function ShopPage() {
               {batches.map((b, i) =>
                 b.sent ? (
                   <li key={i} className="text-ok">
-                    ✓ Settled {b.codes.length} voucher{b.codes.length === 1 ? "" : "s"} in one transaction. Confirmed in{" "}
-                    <span className="mono">{b.sent.seconds.toFixed(1)} s</span>
+                    ✓ Settled {plural(b.codes.length, "voucher")} in one transaction. {formatUsd(sumOf(queue, b.codes))} is in your account. Confirmed in{" "}
+                    <span className="mono whitespace-nowrap">{b.sent.seconds.toFixed(1)} s</span>
                     {b.sent.feeLamports !== null && (
                       <span className="text-muted">
                         {" "}
@@ -248,6 +251,15 @@ export default function ShopPage() {
                 ),
               )}
             </ul>
+          )}
+          {lastSettled.length > 0 && (
+            <div className="flex flex-wrap gap-4" aria-label="Just settled">
+              {lastSettled.map((q) => (
+                <div key={q.code} className="w-72 w-rise">
+                  <Ticket serial={q.v.serial} shopName={name} amount={q.v.amount} stamp={`${q.sent!.seconds.toFixed(1)} s`} />
+                </div>
+              ))}
+            </div>
           )}
         </section>
       </div>

@@ -166,6 +166,7 @@ export default function PhonePage() {
             amount={showing.amount}
             tab={showing.tab}
             qr={<QrCode text={showing.code} size={260} label={`Voucher ${serialLabel(showing.serial)} QR code`} />}
+            stamp={isSettled(tab, showing.serial) ? "onchain" : undefined}
           />
           <CopyButton text={showing.code} label="Copy voucher code" />
           <button type="button" className="btn btn-sail" onClick={() => setShowing(null)}>
