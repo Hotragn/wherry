@@ -11,13 +11,13 @@ export type TxState =
 
 export const lamportsToSol = (l: bigint) => `${(Number(l) / 1e9).toFixed(6).replace(/0+$/, "").replace(/\.$/, "")} SOL`;
 
-/** Transaction state in plain words, with Doggett and an Explorer link. */
-export function TxStatus({ state }: { state: TxState }) {
+/** Transaction state in plain words, with Doggett (unless `compact`, for screens that already show him) and an Explorer link. */
+export function TxStatus({ state, compact = false }: { state: TxState; compact?: boolean }) {
   if (state.s === "idle") return null;
   const pose = state.s === "done" ? "success" : state.s === "error" ? "error" : "waiting";
   return (
-    <div role="status" aria-live="polite" className="w-rise flex items-center gap-3 rounded-md bg-sunk px-3 py-2">
-      <Doggett pose={pose} size={48} />
+    <div role="status" aria-live="polite" className={`w-rise flex items-center gap-3 rounded-md bg-sunk px-3 py-2 ${compact ? "text-sm" : ""}`}>
+      {!compact && <Doggett pose={pose} size={48} />}
       <div className="flex min-w-0 flex-col">
         {state.s === "wallet" && <span>Waiting for your wallet</span>}
         {state.s === "sending" && <span>{state.what}: sending to devnet</span>}

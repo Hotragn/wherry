@@ -5,7 +5,7 @@
 | Before M1 (fork, VERSIONS.md, deploy test) | 04:05 | done | 03:41 | Program deployed to devnet, tx `2KiK68LmAH9kSKmrivJsTqA4XjNH6GmLN7wwfkCN76vdLxjZ6hU34dWXZedYXcmbNXjHBrZuxws61HRURzjvXVxd` | none |
 | M1 program on devnet + TS test | 05:00 | done | 03:45 | 16/16 LiteSVM TS tests pass; batch of 3 settled on devnet in one v1 tx (below) | none |
 | M2 core flow e2e from UI | 06:45 | done | 04:12 | From the UI on devnet: open tab `5U9crhh5…`, 3 vouchers settled in one v1 tx `3GWbVawE…` (0.93 s), risk circuit trip, offline shell; screenshots in the shared notes folder `build-m2-screens/` | none |
-| M3 AI officer + Gaming | 07:45 | not started | | | |
+| M3 AI officer + Gaming | 07:45 | done | 04:44 | AI officer (Qwen2.5-1.5B, WebLLM/WebGPU) in the Shop accept flow, 1.2–1.7 s per voucher, loads from cache with 0 network requests; game: commit `2r7CnF68…`, power-up settled in `BVMGtkkQ…`, reveal `2nrbnoD4…`, drop proven; screenshots in `build-m3-screens/` | none |
 | M4 polish | 08:15 | not started | | | |
 | FREEZE | 08:30 | | | | |
 | Initial submission | <10:00 | | | | |
@@ -48,3 +48,22 @@ Offline checks seen in the UI: "Signature valid · checked offline in 1 ms"; "Co
 Offline shell: service worker precaches all pages and their assets; with the server stopped, /app/phone and /app/shop still load and run.
 Faucet key `5zGShzjgsovLoasxSiusW1VP7AjEdmA6wqA2QnogoJBr` (= test-USD mint authority) holds ~0.46 SOL for drips.
 Not verified: a real wallet extension (Phantom etc.) in the Owner view; I used the browser test wallet. Real airplane mode on two devices is for the demo recording.
+
+## M2 review fixes (04:25)
+- v0 fallback, forced with `/app/shop?tx=v0`: 2 vouchers settled as 2 parallel v0 txs, `5ePGD7q692rXgfcDNKsfQEaGUJj1dzzyXu2z1qkydTEx5RDkmAP1GPTWhkCTwSGmfoBwRGo5bgocswWyMJ4VPvB5` and `4cFQHx9MoiE9jYr7GE7fvA23a6hPJqx6Vmb1HuMgNo1mZVyYAoMxZ8cMVjFGoAPd4qj7uAsmw3DwvRPKw1qJ3wvL` (version 0, 0.68 s / 0.69 s). UI: "Settled 2 vouchers · 2 transactions · 0.7 s".
+- Faucet key topped up to 1.497 SOL; deployer 1.77 SOL (enough for one program upgrade buffer).
+
+## M3: AI risk officer (on-device, offline, tighten-only)
+- Model: `Qwen2.5-1.5B-Instruct-q4f16_1-MLC` via WebLLM 0.2.87 on WebGPU (this Mac: Apple, metal-3). First load 12.8 s (≈1 GB download); later loads 0.46–0.9 s from the browser cache with no requests to huggingface.co or raw.githubusercontent.com.
+- Spike findings: 0.5B answered in ~0.3 s but couldn't apply rules (accepted everything); 1.5B also ignored explicit rules ("decline on shortfalls" → accept) even though it read the facts back correctly. Working design: code lists soft warning signs; the model picks the main reason from a JSON-schema enum (8 worked examples); the decision follows from the reason; it may decline only when a warning sign exists. 7/8 spike cases decided as labelled, 0 false declines.
+- In the Shop: "AI officer: Accept: 8% of this tab, 0 clean tabs before. (1.7 s, on this device)". It only reviews what the rules accepted.
+
+## M3: Doggett's Crossing (offline power-up + commit/reveal)
+| Step | Signature / result |
+|---|---|
+| Studio commits sha256(seed), round 0 | `2r7CnF68pXz2RU3pqXiWnzcK8afsQwmBcdnB3XUDjYA3fg3m3AF98gMRMsenBggQSvs1M5y47M17FDpNJGnf7QTt` (1.0 s) |
+| Phone buys Full sail offline | unlocked in 10 ms, voucher No. 0008, no network |
+| Studio settles it (with No. 0007) in one v1 tx | `BVMGtkkQqApsF9GKKj242tdWe5KYfha1RLHUmZMo22eqF4rFiQKvLmZAV4utLeRfVSXfajAB9a2xCZjqg8QSeiL` (1.0 s) |
+| Studio reveals seed, commits round 1 | `2nrbnoD4RgKxZDFgVZfiuC8YFYZHR59YPxXaLkgvPMeTiUvhd9Lk6PjqfXB7ZypqXkxDhDi4c22E9zCk4uikLULe` (1.0 s) |
+| Player checks | sha256(seed) matches the commitment seen before buying; roll 81 → Oar polish (common) |
+Game PDA: `DtnGwjM1qHsQ7E4GugU1w4CnE31W7X3MAxnixVviwZ3N` (studio = the shop key `6LNV…PsXm`).

@@ -7,7 +7,9 @@ import { Crossing, type Boat } from "../../components/crossing";
 import { Doggett } from "../../components/doggett";
 import { Scanner } from "../../components/scanner";
 import { Ticket } from "../../components/ticket";
-import { lamportsToSol } from "../../components/tx-status";
+import { TxStatus, lamportsToSol, type TxState } from "../../components/tx-status";
+import { hex } from "../../lib/fair.ts";
+import { commitSeed, revealSeed, studioState } from "../../lib/game.ts";
 import { Addr, Money, QrCode, Signal, TxLink } from "../../components/ui";
 import { assess, type Assessment, type Pending, type RiskSettings } from "../../lib/assess.ts";
 import { fetchSolBalance } from "../../lib/chain.ts";
@@ -347,6 +349,7 @@ export default function ShopPage() {
         <Sticker shop={shop} name={name} online={online} />
         <RiskCircuit risk={risk} pending={pending} lastTrip={lastTrip} onChange={async (r) => (setRisk(r), await saveRisk(r))} />
         <OfficerPanel state={officer} onStart={startOfficer} onStop={async () => (await set("shop:officer-on", false), setOfficer({ status: "off" }))} />
+        <StudioPanel shop={shop} online={online} />
         <section aria-label="Tab list" className="flex flex-col gap-2">
           <h2 className="text-xl">Tab list</h2>
           <p className="text-sm">
@@ -437,6 +440,52 @@ function Sticker({ shop, name, online }: { shop: KeyPairSigner; name: string; on
         )}
         {faucet && <span className="text-muted">{faucet.length > 60 ? <TxLink signature={faucet}>Sent ✓ Explorer</TxLink> : faucet}</span>}
       </div>
+    </section>
+  );
+}
+
+/** This shop can also sell game power-ups: it commits a secret seed before selling and reveals it after settling. */
+function StudioPanel({ shop, online }: { shop: KeyPairSigner; online: boolean }) {
+  const [state, setState] = useState<Awaited<ReturnType<typeof studioState>> | undefined>(undefined);
+  const [tx, setTx] = useState<TxState>({ s: "idle" });
+  useEffect(() => {
+    if (online) studioState(shop.address).then(setState, () => {});
+  }, [online, shop.address]);
+
+  async function run(what: string, fn: typeof commitSeed) {
+    setTx({ s: "sending", what });
+    try {
+      const sent = await fn(shop);
+      setTx({ s: "done", what, sent });
+      setState(await studioState(shop.address));
+    } catch (e) {
+      setTx({ s: "error", message: explainError(e).message });
+    }
+  }
+
+  return (
+    <section aria-label="Game studio" className="flex flex-col gap-2">
+      <h2 className="text-xl">Game studio</h2>
+      <p className="text-sm text-muted">
+        Sell power-ups for Doggett&apos;s Crossing. Commit a secret seed before you sell and reveal it after you settle, so players can check their bonus drops.
+      </p>
+      {state === undefined ? (
+        <p className="text-sm text-muted">{online ? "Reading your seed from devnet…" : "Connect to see your seed."}</p>
+      ) : state?.committed ? (
+        <div className="flex flex-col gap-1 text-sm">
+          <span>
+            Seed for round <span className="mono">{state.epoch}</span> committed: <span className="mono">{hex(state.hash).slice(0, 12)}…</span>
+          </span>
+          <button type="button" className="link self-start" disabled={!online || tx.s === "sending"} onClick={() => run("Seed revealed", revealSeed)}>
+            Reveal the seed (after settling)
+          </button>
+        </div>
+      ) : (
+        <button type="button" className="link self-start text-sm" disabled={!online || tx.s === "sending"} onClick={() => run("Seed committed", commitSeed)}>
+          Commit a secret seed
+        </button>
+      )}
+      <TxStatus state={tx} compact />
     </section>
   );
 }

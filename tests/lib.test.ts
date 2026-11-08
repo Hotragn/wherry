@@ -104,3 +104,29 @@ test("coverage, replays and the risk circuit", async () => {
   assert.equal(unknown.decision, "accept");
   assert.match(unknown.warnings[0], /Unverified tab/);
 });
+
+test("bonus drops are deterministic and bound to the committed seed", async () => {
+  const { DROPS, rollDrop, seedMatches, sha256 } = await import("../app/lib/fair.ts");
+  const seed = new Uint8Array(32).fill(7);
+  const nonce = new Uint8Array(16).fill(9);
+  const a = await rollDrop(seed, nonce, 8);
+  const b = await rollDrop(seed, nonce, 8);
+  assert.equal(a.roll, b.roll);
+  assert.equal(a.drop.item, DROPS.find((d) => a.roll <= d.upTo)!.item);
+  assert.notDeepEqual((await rollDrop(seed, nonce, 9)).hash, a.hash);
+  assert.equal(await seedMatches(seed, await sha256(seed)), true);
+  assert.equal(await seedMatches(nonce, await sha256(seed)), false);
+});
+
+test("the AI officer can only decline when the code found a warning sign", async () => {
+  const { officerLine, verdict, warningSigns } = await import("../app/lib/officer.ts");
+  const clean = { amount: 3_500_000n, coverageLeft: 40_000_000n, tabsOpened: 1, tabsClosedClean: 0, shortfalls: 0, vouchersSettled: 0, waitingFromTab: 0, syncAgeMin: 2 };
+  assert.deepEqual(warningSigns(clean), []);
+  assert.equal(verdict(clean, "new_payer"), "accept"); // a wrong model answer can't decline a clean voucher
+  assert.equal(officerLine(clean, "accept"), "Accept: 8% of this tab, 0 clean tabs before.");
+  const risky = { ...clean, amount: 30_000_000n };
+  assert.match(warningSigns(risky).join("; "), /75% of the tab in one sale/);
+  assert.equal(verdict(risky, "large_share"), "decline");
+  assert.equal(verdict(risky, "clean_history"), "accept");
+  assert.match(officerLine(risky, "decline"), /^Decline: 75% of the tab in one sale/);
+});
