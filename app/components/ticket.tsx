@@ -54,7 +54,7 @@ export function Ticket({
         <span className="display text-base [writing-mode:vertical-rl]">Wherry</span>
       </div>
       {stamp && (
-        <span className="stamp w-stamp absolute bottom-5 right-20 z-[2]">
+        <span className="stamp w-stamp absolute right-20 top-12 z-[2]">
           Collected
           <span className="text-xs normal-case tracking-normal">{stamp}</span>
         </span>
