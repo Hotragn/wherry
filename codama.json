@@ -1,0 +1,14 @@
+{
+  "idl": "./anchor/target/idl/wherry.json",
+  "scripts": {
+    "js": [
+      {
+        "from": "@codama/renderers-js",
+        "args": [
+          "./app/generated/wherry",
+          { "generatedFolder": ".", "syncPackageJson": false, "importExtension": "ts", "erasableSyntax": true }
+        ]
+      }
+    ]
+  }
+}
