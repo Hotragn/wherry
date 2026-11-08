@@ -94,3 +94,28 @@ export const isChainStart = (link: Uint8Array) => link.every((b) => b === 0);
 export async function chainLink(previousVoucherBytes: Uint8Array): Promise<Uint8Array> {
   return new Uint8Array(await crypto.subtle.digest("SHA-256", previousVoucherBytes as BufferSource)).slice(0, 8);
 }
+
+/** A shop's signed consent to a courier settling its vouchers on one tab (138 bytes; must match `courier_auth_bytes`). */
+export type CourierAuth = {
+  programId: Address;
+  merchant: Address;
+  tab: Address;
+  maxFeeBps: number;
+  maxFeeAbs: bigint;
+  authExpiresAt: bigint;
+  authNonce: Uint8Array;
+};
+
+export function courierAuthBytes(a: CourierAuth): Uint8Array {
+  if (a.authNonce.length !== 16) throw new Error("auth nonce must be 16 bytes");
+  const m = new Uint8Array(138);
+  m.set(new TextEncoder().encode("WHERRYC1"), 0);
+  m.set(addr.encode(a.programId), 8);
+  m.set(addr.encode(a.merchant), 40);
+  m.set(addr.encode(a.tab), 72);
+  new DataView(m.buffer).setUint16(104, a.maxFeeBps, true);
+  m.set(getU64Encoder().encode(a.maxFeeAbs), 106);
+  m.set(getI64Encoder().encode(a.authExpiresAt), 114);
+  m.set(a.authNonce, 122);
+  return m;
+}

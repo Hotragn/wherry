@@ -78,7 +78,7 @@ async function settleIxs(shop: TransactionSigner, items: Queued[], snap: Snapsho
 export function explainError(e: unknown): { message: string; final: boolean } {
   for (let cur: unknown = e; cur; cur = (cur as { cause?: unknown }).cause) {
     const code = (cur as { context?: { code?: unknown } }).context?.code;
-    if (typeof code === "number" && code >= 6000 && code <= 6018) {
+    if (typeof code === "number" && code >= 6000 && code <= 6022) {
       return { message: getWherryErrorMessage(code as Parameters<typeof getWherryErrorMessage>[0]), final: true };
     }
   }
