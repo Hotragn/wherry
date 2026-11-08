@@ -72,25 +72,40 @@ const FIRST_RUN = {
   shop: ["Scan the customer's offline payment.", "Check it: signature, money left in their tab, your limits. All offline.", "Collect your money when the network is back."],
 } as const;
 
-/** Doggett's 3-step first-run guide for a role. Dismissed once per browser. */
+const PAGE = { owner: "/app/owner", phone: "/app/phone", shop: "/app/shop" } as const;
+
+/** "What to do here": the step's 1-2-3 in plain words, at the top of each step page. Hideable once per browser. */
 export function FirstRun({ role }: { role: keyof typeof FIRST_RUN }) {
-  const key = `wherry:first-run:${role}`;
-  const [open, setOpen] = useState(false);
+  const key = `wherry:what-to-do:${role}`;
+  const [open, setOpen] = useState(true);
   useEffect(() => {
     try {
-      if (!localStorage.getItem(key)) Promise.resolve().then(() => setOpen(true));
+      if (localStorage.getItem(key)) Promise.resolve().then(() => setOpen(false));
     } catch {}
   }, [key]);
-  if (!open) return null;
+  const href = role === "courier" ? undefined : PAGE[role];
+  const c = href ? STEP_COPY[href] : undefined;
+  const step = href ? STEPS.find((s) => s.href === href) : undefined;
+  if (!open)
+    return (
+      <button type="button" className="link self-start text-sm" onClick={() => (setOpen(true), localStorage.removeItem(key))}>
+        Show what to do here
+      </button>
+    );
   return (
-    <aside aria-label="First time here?" className="paper flex gap-4 p-4">
-      <Doggett pose="welcome" size={56} decorative />
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <p className="font-bold">First time here? Three steps:</p>
-        <ol className="flex flex-col gap-1">
-          {FIRST_RUN[role].map((line, i) => (
+    <aside aria-label="What to do here" className="paper flex gap-4 p-5">
+      <Doggett pose="welcome" size={64} decorative className="hidden sm:block" />
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <p className="label">{step ? `Step ${step.n} of 3 · what to do here` : "What to do here"}</p>
+          {c && <span className="rounded-full border border-line px-2.5 py-0.5 text-xs">{c.signal}</span>}
+        </div>
+        {c && <p className="display text-2xl">{c.action}</p>}
+        {c && <p className="text-sm text-muted">{c.who}</p>}
+        <ol className="flex flex-col gap-1.5">
+          {(c?.doIt ?? FIRST_RUN[role]).map((line, i) => (
             <li key={i} className="flex gap-2">
-              <span className="mono text-muted">{i + 1}.</span>
+              <span className="mono text-accent">{i + 1}.</span>
               <span>{line}</span>
             </li>
           ))}
@@ -105,7 +120,7 @@ export function FirstRun({ role }: { role: keyof typeof FIRST_RUN }) {
             } catch {}
           }}
         >
-          Got it, hide this
+          Hide this
         </button>
       </div>
     </aside>

@@ -13,7 +13,7 @@ export const STEP_COPY: Record<string, StepCopy> = {
     who: "You are the customer, at home with Wi-Fi.",
     action: "Lock $40 for your phone",
     short: "lock $40",
-    doIt: ["Tap “Use a test wallet” and “Get $50” (free test money).", "Paste your phone’s code (from step 2’s page).", "Tap “Lock $40 in a tab”."],
+    doIt: ["Tap “Use a test wallet” and “Get $50” (free test money).", "Open Phone (step 2) in a second window, copy its code, paste it here.", "Tap “Lock $40 in a tab”."],
     signal: "Needs signal, once",
     result: "$40 is locked on Solana for your phone. Nobody can spend it twice.",
   },

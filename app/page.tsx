@@ -72,7 +72,7 @@ export default function Landing() {
             <h1 className="text-[clamp(52px,8vw,112px)] [text-shadow:0_2px_30px_color-mix(in_srgb,var(--w-navy)_80%,transparent)]">
               Pay with <em className="italic text-accent">no signal.</em>
             </h1>
-            <Link href="/app/owner" className="btn-gold rounded-full px-10 py-4 text-lg font-semibold">
+            <Link href="/app" className="btn-gold rounded-full px-10 py-4 text-lg font-semibold">
               Start the demo
             </Link>
             <div className="flex max-w-[680px] flex-col gap-5 text-left text-lg md:text-xl [text-shadow:0_1px_12px_color-mix(in_srgb,var(--w-navy)_90%,transparent)]">

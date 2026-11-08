@@ -3,6 +3,7 @@ import { Doggett } from "../components/doggett";
 import { HullGauge } from "../components/hull";
 import { STEP_COPY } from "../components/step-copy";
 import { Ticket } from "../components/ticket";
+import { TwoWindows } from "../components/two-windows";
 import { STEPS } from "../lib/steps.ts";
 
 export const metadata = { title: "Try it in 60 seconds" };
@@ -32,6 +33,12 @@ export default function AppHome() {
             A customer locks money, pays a shop with no signal, and the shop collects. Do the steps in order. On one laptop, keep the Phone and the Shop open in two
             windows side by side and copy-paste the codes between them.
           </p>
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <Link href="/app/owner" className="btn btn-sail">
+              Start with step 1
+            </Link>
+            <TwoWindows />
+          </div>
         </div>
         <Doggett pose="welcome" size={150} className="hidden md:block" />
       </div>
@@ -65,7 +72,7 @@ export default function AppHome() {
                   <span className="font-semibold">Result: </span>
                   <span className="text-muted">{c.result}</span>
                 </p>
-                <span className={`btn mt-auto self-start ${i === 0 ? "btn-sail" : "btn-quiet"}`}>Open step {s.n}</span>
+                <span className="btn btn-quiet mt-auto self-start">Open step {s.n} →</span>
               </Link>
             </li>
           );
