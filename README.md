@@ -105,16 +105,24 @@ Laptop only, one browser, two windows. Everything runs on devnet.
 2. **Window B:** open https://wherry-pay.vercel.app/app/phone. It says "Pair this phone". Click **Copy code**.
 3. **Window A (Owner):** paste the code under "Pair your phone", enter 40, and click **Lock $40.00 in a tab**. Wait for "Confirmed in … s" and the Explorer link.
 4. **Window A:** go to **Shop**. Under the shop's sticker, click **Copy code**.
-5. **Window B (Phone):** click **Refresh** until it shows your $40 tab. From here you can turn off Wi-Fi; paying needs no network. Under "Pay with a ferry ticket", paste the shop code, enter 3, and click **Sign a $3.00 ticket for Amara's kiosk**. The phone prints a ticket. Click **Copy ticket code**.
-6. **Window A (Shop):** under "Check a ferry ticket", paste the ticket code. You will see "Signature valid · checked offline in <1 ms". Click **Accept $3.00**. Turn Wi-Fi back on and click **Collect $3.00**. The ticket crosses to the far bank ("Collected: paid onchain") with its confirm time and an Explorer link.
+5. **Window B (Phone):** click **Refresh** until it shows your $40 tab. From here you can turn off Wi-Fi; paying needs no network. Under "Pay a shop offline", paste the shop code, enter 3, and click **Sign a $3.00 payment to Amara's kiosk**. The phone prints the payment. Click **Copy payment code**.
+6. **Window A (Shop):** under "Check an offline payment", paste the payment code. You will see "Signature valid · checked offline in <1 ms". Click **Accept $3.00**. Turn Wi-Fi back on and click **Collect $3.00**. The payment moves to "Collected: paid on Solana" with its confirm time and an Explorer link.
 
-Optional: paste the same ticket code again. The shop declines it, and the program would reject it too.
+Optional: paste the same payment code again. The shop declines it, and the program would reject it too.
 
 ## Screenshots
 
-![Wherry landing page: "The ferry for your money when the network's gone."](docs/landing-hero.png)
+Captured on the live site (https://wherry-pay.vercel.app) on November 8, 2026, with real devnet transactions.
 
-![The shop after collecting a ticket: the ticket is stamped "Collected" and the transaction confirmed in 0.7 s](docs/shop-collected.png)
+![Landing page: "Pay with no signal." over a painted river at dusk, with the 3-step demo path for judges](docs/landing-hero.jpg)
+
+![Phone, in airplane mode: a signed $2.00 offline payment for Amara's kiosk as a QR code, with "Pay by sound instead"](docs/phone-offline-payment.jpg)
+
+![Shop, offline: "Signature valid · checked offline in 1 ms", "Covered: $34.50 left", and the on-device AI officer's verdict (Qwen2.5 1.5B, 3.3 s)](docs/shop-check-ai-officer.jpg)
+
+![Shop, back online: the payment stamped "Collected" in 0.9 s, with the Explorer link and real compute and fee numbers](docs/shop-collected.jpg)
+
+![Play: a power-up bought offline, and the fairness proof for its bonus drop (committed seed, revealed seed, sha256 checks)](docs/play-fairness-proof.jpg)
 
 ## How it works
 
