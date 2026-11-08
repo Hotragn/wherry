@@ -14,13 +14,13 @@ const STEPS = [
     title: "Lock money in a tab",
     text: "Before the signal goes, the customer locks test dollars on Solana and pairs their phone with it. Nobody can spend that money twice.",
     term: "Escrow",
-    tech: "Money held by a Solana program, not by either side. Only signed tickets for that tab can draw on it.",
+    tech: "Money held by a Solana program, not by either side. Only signed payments for that tab can draw on it.",
   },
   {
     n: "02",
     when: "No signal",
     title: "Pay a shop offline",
-    text: "The phone signs a ticket for one shop and one amount. The shop checks it in milliseconds, with no network at all.",
+    text: "The phone signs a payment for one shop and one amount. The shop checks it in milliseconds, with no network at all.",
     term: "Voucher",
     tech: "An IOU your phone signs with an Ed25519 key that never leaves it. It names the shop, the amount and a serial number.",
   },
@@ -28,18 +28,18 @@ const STEPS = [
     n: "03",
     when: "Back online",
     title: "The shop collects",
-    text: "When the network returns, the shop hands in its tickets in one transaction. Solana checks every signature again and pays out of the tab.",
+    text: "When the network returns, the shop hands in its payments in one transaction. Solana checks every signature again and pays out of the tab.",
     term: "Settle",
-    tech: "One onchain transaction that verifies each ticket and moves the money from the tab to the shop, in about a second.",
+    tech: "One onchain transaction that verifies each payment and moves the money from the tab to the shop, in about a second.",
   },
 ];
 
 const SAFETY = [
-  ["The money exists first", "Every ticket draws on dollars already locked onchain. A phone can't promise more than its tab holds."],
+  ["The money exists first", "Every payment draws on dollars already locked onchain. A phone can't promise more than its tab holds."],
   ["Checked twice", "The shop checks the signature offline. Solana checks it again onchain, through its Ed25519 precompile."],
-  ["Each ticket pays once", "Every ticket has a serial. The tab keeps an onchain record of the 1,024 serials it can pay, and each one pays once."],
-  ["The shop sees its worst case", "Before saying yes, the shop sees what's left in the tab after its other uncollected tickets, and how fresh that number is."],
-  ["Shortfalls go on the record", "If tickets ever outrun the tab, the late shop gets what's left and the gap goes on the payer's public record."],
+  ["Each payment counts once", "Every payment has a serial. The tab keeps an onchain record of the 1,024 serials it can pay, and each one pays once."],
+  ["The shop sees its worst case", "Before saying yes, the shop sees what's left in the tab after its other uncollected payments, and how fresh that number is."],
+  ["Shortfalls go on the record", "If payments ever outrun the tab, the late shop gets what's left and the gap goes on the payer's public record."],
   ["Limits the shop sets", "Each shop caps what it holds uncollected, per customer and in total. A small AI on the shop's own device can also say no."],
 ];
 
@@ -191,7 +191,7 @@ export default function Landing() {
             <div className="flex flex-col gap-2">
               <h2 className="text-4xl">Try it with two windows.</h2>
               <p className="max-w-[56ch] text-muted">
-                One window is the customer&apos;s phone, one is the shop. Lock test dollars, switch off the network, pay with a ticket, then collect when you&apos;re back.
+                One window is the customer&apos;s phone, one is the shop. Lock test dollars, switch off the network, pay with a payment, then collect when you&apos;re back.
               </p>
             </div>
             <Link href="/app" className="btn btn-quiet shrink-0">

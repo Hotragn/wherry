@@ -52,7 +52,7 @@ export function ListenButton({ onCode }: { onCode: (code: string, seconds: numbe
     } catch (e) {
       const denied = e instanceof DOMException && e.name === "NotAllowedError";
       const stopped = e instanceof DOMException && e.name === "AbortError";
-      setState({ s: "failed", note: denied ? "No microphone access. Scan the QR or paste the code." : stopped ? "Didn't catch a ticket. Try again, or scan the QR." : "Listening failed here. Scan the QR or paste the code." });
+      setState({ s: "failed", note: denied ? "No microphone access. Scan the QR or paste the code." : stopped ? "Didn't catch a payment. Try again, or scan the QR." : "Listening failed here. Scan the QR or paste the code." });
     } finally {
       clearTimeout(timer);
       setLevel(0);
@@ -73,7 +73,7 @@ export function ListenButton({ onCode }: { onCode: (code: string, seconds: numbe
         </>
       ) : (
         <button type="button" className="btn btn-quiet" onClick={listen}>
-          Listen for a ticket (works best in a quiet room)
+          Listen for a payment (works best in a quiet room)
         </button>
       )}
       {(state.s === "heard" || state.s === "failed") && (

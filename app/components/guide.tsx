@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Doggett } from "./doggett";
 import { STEPS } from "../lib/steps.ts";
+import { STEP_COPY } from "./step-copy";
 
 const stepFor = (path: string) => STEPS.findIndex((s) => s.href === path);
 
@@ -26,7 +27,7 @@ export function StepLine() {
             >
               <span className={`mono grid h-5 w-5 place-items-center rounded-full text-xs ${j <= i ? "bg-accent text-on-accent" : "border border-line"}`}>{j < i ? "✓" : s.n}</span>
               {s.role}
-              <span className="hidden text-muted md:inline">· {s.line}</span>
+              <span className="hidden text-muted md:inline">· {STEP_COPY[s.href]?.short ?? s.line}</span>
             </Link>
           </li>
         ))}
@@ -48,16 +49,16 @@ export function NextStep() {
       {next ? (
         <Link href={next.href} className="group inline-flex flex-col">
           <span className="label">Next: step {next.n} of 3</span>
-          <span className="display text-2xl  group-hover:underline">
-            {next.role}: {next.line} →
+          <span className="display text-2xl group-hover:underline">
+            {next.role}: {STEP_COPY[next.href]?.action ?? next.line} →
           </span>
-          <span className="text-sm text-muted">{next.todo}</span>
+          <span className="text-sm text-muted">{STEP_COPY[next.href]?.who ?? next.todo}</span>
         </Link>
       ) : (
         <Link href="/play" className="group inline-flex flex-col">
-          <span className="label">You&apos;ve made the crossing</span>
-          <span className="display text-2xl  group-hover:underline">Next: Play, buy a power-up offline →</span>
-          <span className="text-sm text-muted">The same vouchers pay for an in-game item, with a bonus drop you can prove was fair.</span>
+          <span className="label">Done: you paid with no signal and the shop got its money</span>
+          <span className="display text-2xl group-hover:underline">Bonus: Play, buy a game power-up offline →</span>
+          <span className="text-sm text-muted">The same offline payments buy an in-game item, with a bonus drop you can prove was fair.</span>
         </Link>
       )}
     </nav>
@@ -67,7 +68,7 @@ export function NextStep() {
 const FIRST_RUN = {
   owner: ["Get test dollars. They're devnet money, not real money.", "Pair the customer's phone by scanning its code.", "Lock the money in a tab. Now the phone can pay with no signal."],
   phone: ["Find your tab: the money someone locked for this phone.", "Scan the shop's sticker and type the amount.", "Show the offline payment. No signal needed."],
-  courier: ["Paste the bundle a shop handed you.", "Check it: every ticket is signed, and the shop's note allows your fee.", "Find a signal and collect. The shop gets its money; you keep the fee."],
+  courier: ["Paste the bundle a shop handed you.", "Check it: every payment is signed, and the shop's note allows your fee.", "Find a signal and collect. The shop gets its money; you keep the fee."],
   shop: ["Scan the customer's offline payment.", "Check it: signature, money left in their tab, your limits. All offline.", "Collect your money when the network is back."],
 } as const;
 

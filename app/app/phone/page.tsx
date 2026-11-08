@@ -225,7 +225,7 @@ export default function PhonePage() {
           <span aria-hidden className="mono">
             [....]
           </span>
-          No signal. That&apos;s fine. Tickets still work.
+          No signal. That&apos;s fine. Payments still work.
         </p>
       )}
       <section
@@ -307,7 +307,7 @@ export default function PhonePage() {
             />
           </PrintedTicket>
           <PlaySound code={showing.code} />
-          <CopyButton text={showing.code} label="Copy ticket code" />
+          <CopyButton text={showing.code} label="Copy payment code" />
           <button
             type="button"
             className="btn btn-sail"
@@ -423,8 +423,8 @@ export default function PhonePage() {
                   disabled={busy || !amount || !!amountProblem}
                 >
                   {amount && !amountProblem
-                    ? `Sign a ${formatUsd(amount)} ticket for ${shop.name}`
-                    : "Sign the ticket"}
+                    ? `Sign a ${formatUsd(amount)} payment to ${shop.name}`
+                    : "Sign the payment"}
                 </button>
               </form>
             )}
@@ -441,11 +441,11 @@ export default function PhonePage() {
 
       {!showing && (
         <section aria-label="Your vouchers" className="flex flex-col gap-3">
-          <h2 className="text-3xl">Your tickets</h2>
+          <h2 className="text-3xl">Your payments</h2>
           {mine.length === 0 ? (
             <div className="flex items-center gap-4">
               <p className="text-muted">
-                No tickets yet. Your first payment shows up here, even offline.
+                No payments yet. Your first payment shows up here, even offline.
               </p>
             </div>
           ) : (

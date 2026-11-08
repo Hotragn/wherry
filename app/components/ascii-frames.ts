@@ -32,8 +32,8 @@ export function riverFrame(ms: number, cols = 62) {
     travel < 0.46
       ? ""
       : travel < 1
-        ? " tickets still work."
-        : " ticket landed.";
+        ? " payments still work."
+        : " payment landed.";
   const rows = Array.from({ length: 10 }, () => " ".repeat(cols));
   rows[0] = pad(` signal ${bars}${status}`, cols);
   rows[4] = put(put(rows[4], 1, "PHONE"), cols - 6, "SHOP");
@@ -69,8 +69,8 @@ export function ticketLines(serial: string, shop: string, amount: string) {
   const line = "+" + "=".repeat(w - 2) + "+";
   return [
     line,
-    row(`WHERRY FERRY      ${serial}`.slice(0, w - 4)),
-    row("ADMIT ONE CROSSING"),
+    row(`WHERRY PAYMENT    ${serial}`.slice(0, w - 4)),
+    row("SIGNED OFFLINE, ED25519"),
     row(`TO   ${shop}`),
     row(`FARE ${amount}`),
     "+" + "- ".repeat((w - 2) / 2) + "+",

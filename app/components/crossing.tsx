@@ -89,14 +89,14 @@ export function Crossing({ boats }: { boats: Boat[] }) {
       aria-label="The Crossing: vouchers checked offline on the near bank, settled onchain on the far bank"
       className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_88px_minmax(0,1fr)]"
     >
-      <Bank title="Near bank" sub="Checked offline, waiting to collect" boats={boats.filter((b) => b.where !== "far")} empty="No tickets waiting." />
+      <Bank title="Waiting to collect" sub="Checked offline" boats={boats.filter((b) => b.where !== "far")} empty="No payments waiting." />
       <div className="hidden sm:block">
         <River vertical />
       </div>
       <div className="sm:hidden">
         <River vertical={false} />
       </div>
-      <Bank title="Far bank" sub="Collected: paid onchain" boats={boats.filter((b) => b.where === "far")} empty="Nothing collected yet." />
+      <Bank title="Collected" sub="Paid on Solana" boats={boats.filter((b) => b.where === "far")} empty="Nothing collected yet." />
     </section>
   );
 }

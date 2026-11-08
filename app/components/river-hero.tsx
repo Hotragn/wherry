@@ -37,12 +37,12 @@ export function RiverHero() {
             render={(ms) => riverFrame(ms, cols)}
             staticAt={4200}
             fps={10}
-            label="Animation: a small boat named Doggett carries ticket number 7 for $3.50 from the phone's bank to the shop's bank. Halfway across the signal drops to nothing and the boat keeps going."
+            label="Animation: a small boat named Doggett carries payment number 7 for $3.50 from the phone's bank to the shop's bank. Halfway across the signal drops to nothing and the boat keeps going."
           />
         </div>
       </div>
       <figcaption className="text-sm text-muted">
-        The signal drops halfway across. The ticket still lands.
+        The signal drops halfway across. The payment still lands.
       </figcaption>
     </figure>
   );

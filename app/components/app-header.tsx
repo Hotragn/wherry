@@ -54,7 +54,7 @@ export function AppHeader() {
               <path d="M2 2l12 12" />
             </svg>
           )}
-          {online ? "Online · devnet" : "No signal · tickets still work"}
+          {online ? "Online · devnet" : "No signal · payments still work"}
         </span>
       </div>
       <StepLine />

@@ -27,13 +27,13 @@ export function ProductCrux() {
           <div className="w-full rounded-[44px] border border-line bg-night p-3 shadow-lift">
             <div className="flex flex-col gap-3 rounded-[34px] bg-base p-4">
               <div className="mx-auto h-5 w-24 rounded-full bg-night" />
-              <p className="rounded-full bg-surface px-3 py-1.5 text-center text-xs font-semibold">No signal · tickets still work</p>
+              <p className="rounded-full bg-surface px-3 py-1.5 text-center text-xs font-semibold">No signal · payments still work</p>
               <div aria-hidden>
                 <Ticket
                   serial={7}
                   shopName="Amara's kiosk"
                   amount={3_500_000n}
-                  qr={<QrCode text="WV1.wherry-demo-ticket-no-7-amaras-kiosk-3.50" size={150} label="Example ticket QR" />}
+                  qr={<QrCode text="WV1.wherry-demo-ticket-no-7-amaras-kiosk-3.50" size={150} label="Example payment QR" />}
                   onPaper
                 />
               </div>
