@@ -15,6 +15,9 @@ import { MINT, formatUsd, parseUsd, serialLabel, shortAddress, unixNow } from ".
 import { explainError } from "../../lib/shop.ts";
 import { useNow } from "../../lib/use-now.ts";
 import { useOnline } from "../../lib/use-online.ts";
+import { FirstRun } from "../../components/guide";
+import { HullGauge } from "../../components/hull";
+import { WhatsThis } from "../../components/ui";
 import { WalletProvider, useWallet } from "../../lib/wallet/context";
 
 const EXPIRY = [
@@ -110,11 +113,13 @@ function Owner() {
   if (!owner) {
     return (
       <div className="flex max-w-text flex-col gap-5">
-        <h1 className="text-4xl">Lock dollars in a tab</h1>
-        <p>
-          A tab is an escrow onchain. Once it&apos;s open, your paired phone can pay offline, up to what&apos;s locked. Shops get paid from it when they&apos;re back online, and
+        <FirstRun role="owner" />
+        <h1 className="text-5xl md:text-6xl">Lock money in a tab</h1>
+        <p className="text-lg">
+          A tab is money locked on Solana for one phone. Once it&apos;s open, your paired phone can pay offline, up to what&apos;s locked. Shops get paid from it when they&apos;re back online, and
           you get the rest back after the settlement window.
         </p>
+        <WhatsThis term="Escrow">Money held by a Solana program, not by you or the shop. Only tickets signed by your paired phone can draw on it.</WhatsThis>
         <p className="text-sm text-muted">This is the only part of Wherry that needs a wallet. Use devnet: these are test dollars, not money.</p>
         {connectors.length === 0 ? (
           <p className="text-warn">No Solana wallet found in this browser. Install Phantom, Solflare or Backpack, switch it to devnet, then reload.</p>
@@ -141,7 +146,8 @@ function Owner() {
 
   return (
     <div className="flex flex-col gap-10">
-      <section aria-label="Your wallet" className="flex flex-wrap items-end gap-x-8 gap-y-4 border-b-[1.5px] border-line pb-5">
+      <FirstRun role="owner" />
+      <section aria-label="Your wallet" className="flex flex-wrap items-end gap-x-8 gap-y-4 border-b-2 border-ink pb-5">
         <Stat label={burner ? "Test wallet (this browser)" : "Wallet"}>
           <Addr value={owner} />
         </Stat>
@@ -220,7 +226,7 @@ function OpenTab({
 
   return (
     <section aria-label="Open a tab" className="paper flex flex-col gap-5 self-start p-5">
-      <h1 className="text-3xl">Open a tab</h1>
+      <h1 className="text-4xl">Open a tab</h1>
       <label className="flex flex-col gap-1">
         <span className="label">Lock</span>
         <span className="flex items-center gap-2">
@@ -288,7 +294,7 @@ function Tabs({ tabs, run }: { tabs: TabSnapshot[] | null; run: Parameters<typeo
   if (tabs === null) return <p className="text-muted">Reading your tabs from devnet…</p>;
   return (
     <section aria-label="Your tabs" className="flex flex-col gap-4">
-      <h2 className="text-2xl">Your tabs</h2>
+      <h2 className="text-3xl">Your tabs</h2>
       {tabs.length === 0 ? <p className="text-muted">No open tabs. Open one to pay offline.</p> : tabs.map((t) => <TabCard key={t.address} tab={t} run={run} />)}
     </section>
   );
@@ -306,9 +312,10 @@ function TabCard({ tab, run }: { tab: TabSnapshot; run: Parameters<typeof OpenTa
   return (
     <article className="paper flex flex-col gap-4 p-5">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="text-xl">Tab {String(tab.tabId)}</h3>
+        <h3 className="text-3xl">Tab {String(tab.tabId)}</h3>
         <Addr value={tab.address} />
       </header>
+      <HullGauge left={left > 0n ? left : 0n} total={tab.deposited} />
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Stat label="Locked">
           <Money units={tab.deposited} />
@@ -376,7 +383,7 @@ function TabCard({ tab, run }: { tab: TabSnapshot; run: Parameters<typeof OpenTa
         ) : settlements.length === 0 ? (
           <p className="text-sm text-muted">No vouchers settled from this tab yet.</p>
         ) : (
-          <ul className="flex flex-col divide-y-[1.5px] divide-line text-sm">
+          <ul className="flex flex-col divide-y-2 divide-ink text-sm">
             {settlements.map((s) => (
               <li key={`${s.signature}-${s.serial}`} className="flex flex-wrap items-center gap-x-4 gap-y-1 py-2">
                 <span className="label w-[72px] text-ink">{serialLabel(s.serial)}</span>
@@ -396,7 +403,7 @@ function TabCard({ tab, run }: { tab: TabSnapshot; run: Parameters<typeof OpenTa
 function PayerCard({ payer }: { payer: PayerRecord | null }) {
   return (
     <section aria-label="Your payer record" className="flex flex-col gap-3">
-      <h2 className="text-2xl">Your payer record</h2>
+      <h2 className="text-3xl">Your payer record</h2>
       <p className="text-sm text-muted">Public and onchain. Shops see it before they accept a voucher.</p>
       {payer === null ? (
         <p className="text-muted">No record yet. It starts with your first tab.</p>
