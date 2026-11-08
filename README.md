@@ -91,7 +91,7 @@ We didn't move `Tab` to a zero-copy account: at 282 bytes, deserializing it is a
 - **Landing** (`/`): what it is and how it works, plus the blackout numbers.
 - **Try it in 60 seconds** (`/app`): Owner, then Phone, then Shop, with a "Next" link at the end of each view.
   - **Owner** connects a wallet (the only place that needs one) or uses a devnet test wallet kept in the browser, gets test dollars from the faucet, pairs the phone by QR or code, and opens, tops up or closes a tab. It also shows the settlements and the public payer record.
-  - **Phone** holds a non-extractable WebCrypto Ed25519 key. It finds its tab, scans the shop's sticker, shows the shop's name and key before signing, and shows each voucher as a ferry ticket with a QR. It works offline after the first load.
+  - **Phone** holds a non-extractable WebCrypto Ed25519 key. It finds its tab, scans the shop's sticker, shows the shop's name and key before signing, and shows each voucher as a ferry ticket with a QR, and has an offline budget planner. It works offline after the first load, including a hard reload.
   - **Shop** has a printable sticker, scans or pastes vouchers, checks them offline (signature, coverage from its last sync, the payer record), and runs the **risk circuit**: a per-customer and a total limit on what it holds unsettled, which trips visibly. It also runs the **AI risk officer**, queues vouchers in IndexedDB, shows **The Crossing** (vouchers wait on the near bank and cross when settled), and settles up to five per transaction with Explorer links and measured confirm times.
 - **Play** (`/play`): Doggett's Crossing. Buy a power-up offline with a voucher; it unlocks at once. After the studio settles and reveals its seed, the bonus drop opens, with the proof.
 - A service worker keeps `/app` and `/play` working offline after the first visit. The only server code is the test-dollar faucet (`/api/faucet`: fixed $50, at most 3 per address and 10 per IP per hour).
@@ -120,16 +120,32 @@ The officer is a small language model, **Qwen2.5-1.5B-Instruct (q4f16), run by W
 | Front-run the owner's close | Shops settle until the settle deadline (expiry + 24 h); the owner can close only after it. The windows never overlap. |
 | Grind the game seed | The studio commits before purchases and can't overwrite a pending commitment. The player's seed is the voucher nonce, random per voucher. Neither side can choose the result after seeing the other's input. |
 | Fake QR sticker pasted over the shop's | The phone shows the shop's name and short key before signing, and the shop shows its key on screen. A voucher made out to a fake key fails the real shop's check at the counter ("This voucher is for another shop"), so the swap shows up before the goods leave. |
+| Stolen phone | The thief can spend at most what's left in the tab, and only at shops that accept it. The key can't be copied off the phone (non-extractable; a test proves export fails). The owner tops up nothing more and closes the tab after the settle window. |
+| Cloned or tampered phone app signing two different next vouchers | Vouchers are hash-chained (nonce bytes 4–11 link to the previous voucher). A shop holding both declines the second as a fork and keeps both signed vouchers as proof; the links are public in settlement events. |
+| Malicious courier (someone else submits the settlement) | Today only the named shop can settle (the program requires merchant = signer), so a courier can't redirect money. See "Anyone-settles courier" below for the design we didn't ship. |
 | Faucet abuse | Devnet only, a fixed $50 per request, at most 3 per address and 10 per IP per hour (in-memory limits). |
 
 **Known limit: an unrevealed round.** The studio sees the nonces in game vouchers when it collects them. It could then decide never to reveal that round's seed, so the player paid and gets no drop. Today game vouchers carry their round in nonce bytes 0–3, and the Play page shows how long a round has gone unrevealed ("Round 0 not revealed for 2 h"). **Next step** (needs a program upgrade): settling a game voucher requires that round's seed to be revealed first, so a studio that withholds a reveal can't collect.
 
 **Also not done:** the faucet's limits are in memory, per server instance. The shop's key lives in its browser, so it can't yet sweep its test dollars to a wallet.
 
+## When the road is gone
+A landslide closes the only road. The towers are down and nobody knows for how long. Before it happened, the traveller had $40 locked in a Wherry tab. Now:
+- the local shops still take her vouchers, offline, and see that the money is really there;
+- the **budget planner** on her phone splits what's left across water, food, transport and phone credit for the days she may be stuck, and warns before a payment eats a day's food money ("This is 40% of today's food budget");
+- the shop's **AI risk officer** keeps each shop's exposure sane;
+- when the first phone or truck finds a signal, the shops settle in one transaction each.
+
+The same mechanics fit **aid groups** that pre-fund tabs for families before storm or flood season: the money is already escrowed and spendable offline when the network fails, and every payout is on a public record.
+
+**Budget planner (phone, offline, advice only).** It uses the same on-device model as the shop's officer (Qwen2.5 1.5B via WebLLM). The model proposes the split; code does the arithmetic; a junk answer or a phone without WebGPU falls back to a labelled simple plan. The person confirms every payment, and the escrow rules stay onchain. Measured: 1.2–1.3 s per plan, offline after a hard reload.
+
+**Anyone-settles courier (design, not shipped).** The idea: the first device with a signal settles everyone's vouchers and earns a small, capped fee. It needs a program change: the settlement signer would no longer have to be the shop (the voucher already binds the shop, so the money can't be redirected), and the fee needs a cap the shop agreed to, ideally signed into the voucher format. We left it out rather than take a fee from shops that never agreed to one. Today a shop can still hand its vouchers to a friend who settles them with the shop's own key later.
+
 ## Run it
 ```bash
 pnpm install
-pnpm test          # 23 TypeScript tests: 16 program tests on LiteSVM, 7 for the offline logic
+pnpm test          # 28 TypeScript tests: program tests and seeded property tests on LiteSVM, plus the offline logic
 pnpm dev           # http://localhost:3000
 ```
 - `.env.local` needs `FAUCET_SECRET_KEY`, the test-USD mint authority as a 64-byte JSON array, for the faucet. See `.env.example`. Everything else talks to the deployed program.
