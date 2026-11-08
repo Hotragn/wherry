@@ -6,7 +6,8 @@ import {
   type Signature,
   type TransactionSigner,
   createClient,
-  createSolanaRpc,
+  createDefaultRpcTransport,
+  createSolanaRpcFromTransport,
   getBase58Decoder,
   getBase64Encoder,
 } from "@solana/kit";
@@ -29,8 +30,20 @@ import {
 } from "../generated/wherry/index.ts";
 import type { TabSnapshot } from "./assess.ts";
 import { MINT, PROGRAM_ID, RPC_URL } from "./config.ts";
+import { isNetworkFailure, reportNetwork } from "./use-online.ts";
 
-export const rpc = createSolanaRpc(RPC_URL);
+const transport = createDefaultRpcTransport({ url: RPC_URL });
+/** Devnet RPC that also tells the header pill when the network is really gone. */
+export const rpc = createSolanaRpcFromTransport((async (request: Parameters<typeof transport>[0]) => {
+  try {
+    const response = await transport(request);
+    reportNetwork(true);
+    return response;
+  } catch (e) {
+    if (isNetworkFailure(e)) reportNetwork(false);
+    throw e;
+  }
+}) as typeof transport);
 const b58 = getBase58Decoder();
 const b64 = getBase64Encoder();
 

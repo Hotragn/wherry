@@ -89,40 +89,61 @@ export function explainError(e: unknown): { message: string; final: boolean } {
   return { message: text.length > 160 ? `${text.slice(0, 160)}…` : text, final: false };
 }
 
-export type BatchResult = { codes: string[]; sent?: Sent; error?: string; final?: boolean };
+/** One settlement step: either one v1 transaction for up to 3 vouchers, or one v0 transaction per voucher sent in parallel. */
+export type BatchResult = {
+  codes: string[];
+  /** Every transaction that landed for these vouchers. */
+  sents: Sent[];
+  /** Vouchers that didn't settle, with the reason. */
+  failed: { code: string; error: string; final: boolean }[];
+};
+
+async function settleOne(shop: KeyPairSigner, items: Queued[], snap: Snapshot, version: 0 | 1) {
+  const codes = items.map((i) => i.code);
+  try {
+    const sent = await send(shop, (s) => settleIxs(s, items, snap), version);
+    await patch(codes, { status: "settled", sent, error: undefined });
+    return { sent };
+  } catch (e) {
+    const { message, final } = explainError(e);
+    // Program refusals are final; network or fee problems stay pending so the shop can retry.
+    await patch(codes, final ? { status: "failed", error: message } : { error: message });
+    return { error: message, final };
+  }
+}
+
+/** Fallback for anything that can't take a v1 transaction: one (ed25519, settle) pair per v0 transaction, in parallel. */
+async function settleSingles(shop: KeyPairSigner, items: Queued[], snap: Snapshot): Promise<BatchResult> {
+  const outcomes = await Promise.all(items.map((item) => settleOne(shop, [item], snap, 0)));
+  return {
+    codes: items.map((i) => i.code),
+    sents: outcomes.flatMap((o) => (o.sent ? [o.sent] : [])),
+    failed: outcomes.flatMap((o, i) => (o.error ? [{ code: items[i].code, error: o.error, final: !!o.final }] : [])),
+  };
+}
 
 /**
- * Settle every pending voucher, up to 3 per transaction. If a batch fails,
- * retry its vouchers one by one so a single bad voucher doesn't block the rest.
+ * Settle every pending voucher, up to 3 per v1 transaction (3 inline Ed25519 checks need 1,536 bytes,
+ * over the 1,232-byte legacy limit). If a v1 batch fails, or `forceV0` is set, fall back to one v0
+ * transaction per voucher, sent in parallel, so one bad voucher or a v1-shy RPC doesn't block the rest.
  */
-export async function settleAll(onBatch: (r: BatchResult) => void): Promise<BatchResult[]> {
+export async function settleAll(onBatch: (r: BatchResult) => void, opts: { forceV0?: boolean } = {}): Promise<BatchResult[]> {
   const shop = await shopSigner();
   const snap = await syncSnapshot();
   const pending = (await loadQueue()).filter((q) => q.status === "pending").reverse();
   const results: BatchResult[] = [];
-  const run = async (items: Queued[]) => {
-    const codes = items.map((i) => i.code);
-    try {
-      const sent = await send(shop, (s) => settleIxs(s, items, snap), 1);
-      await patch(codes, { status: "settled", sent, error: undefined });
-      return { codes, sent };
-    } catch (e) {
-      const { message, final } = explainError(e);
-      // Program refusals are final; network or fee problems stay pending so the shop can retry.
-      await patch(codes, final ? { status: "failed", error: message } : { error: message });
-      return { codes, error: message, final };
-    }
-  };
   for (let i = 0; i < pending.length; i += 3) {
     const batch = pending.slice(i, i + 3);
-    const r = await run(batch);
-    if (r.error && r.final && batch.length > 1) {
-      for (const item of batch) {
-        const single = await run([item]);
-        results.push(single);
-        onBatch(single);
-      }
-      continue;
+    let r: BatchResult;
+    if (opts.forceV0) {
+      r = await settleSingles(shop, batch, snap);
+    } else {
+      const v1 = await settleOne(shop, batch, snap, 1);
+      r = v1.sent
+        ? { codes: batch.map((b) => b.code), sents: [v1.sent], failed: [] }
+        : batch.length > 1
+          ? await settleSingles(shop, batch, snap)
+          : { codes: batch.map((b) => b.code), sents: [], failed: [{ code: batch[0].code, error: v1.error!, final: !!v1.final }] };
     }
     results.push(r);
     onBatch(r);

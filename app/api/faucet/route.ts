@@ -16,12 +16,14 @@ import { MINT, RPC_URL } from "../../lib/config.ts";
 const DRIP_USD = 50_000_000n; // $50.00, fixed server-side
 const DRIP_SOL = 20_000_000n; // 0.02 SOL: enough rent and fees for a few tabs
 const LOW_SOL = 10_000_000n;
-const PER_ADDRESS_MS = 5 * 60_000;
+const HOUR = 3_600_000;
+const PER_ADDRESS_HOUR = 3; // at most $150 of test dollars per address per hour
 const PER_IP_HOUR = 10;
 
 // shortcut: in-memory limits reset on redeploy and are per server instance; use a shared store (KV) for real traffic.
-const lastByAddress = new Map<string, number>();
+const hitsByAddress = new Map<string, number[]>();
 const hitsByIp = new Map<string, number[]>();
+const recent = (m: Map<string, number[]>, key: string, now: number) => (m.get(key) ?? []).filter((t) => now - t < HOUR);
 
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => null)) as { address?: unknown } | null;
@@ -32,18 +34,19 @@ export async function POST(req: Request) {
 
   const now = Date.now();
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-  const recent = (hitsByIp.get(ip) ?? []).filter((t) => now - t < 3_600_000);
-  if (now - (lastByAddress.get(to) ?? 0) < PER_ADDRESS_MS) {
-    return NextResponse.json({ error: "This address got test dollars in the last 5 minutes. Try again soon." }, { status: 429 });
+  const byAddress = recent(hitsByAddress, to, now);
+  const byIp = recent(hitsByIp, ip, now);
+  if (byAddress.length >= PER_ADDRESS_HOUR) {
+    return NextResponse.json({ error: "This address has had its test dollars for this hour. Try again later." }, { status: 429 });
   }
-  if (recent.length >= PER_IP_HOUR) {
+  if (byIp.length >= PER_IP_HOUR) {
     return NextResponse.json({ error: "Too many requests from your network this hour." }, { status: 429 });
   }
   const secret = process.env.FAUCET_SECRET_KEY;
   if (!secret) return NextResponse.json({ error: "The faucet isn't set up on this server." }, { status: 503 });
 
-  lastByAddress.set(to, now);
-  hitsByIp.set(ip, [...recent, now]);
+  hitsByAddress.set(to, [...byAddress, now]);
+  hitsByIp.set(ip, [...byIp, now]);
   try {
     const authority = await createKeyPairSignerFromBytes(new Uint8Array(JSON.parse(secret)));
     const client = createClient().use(signer(authority)).use(solanaRpc({ rpcUrl: RPC_URL }));
@@ -57,7 +60,7 @@ export async function POST(req: Request) {
     const result = await client.sendTransaction(ixs);
     return NextResponse.json({ signature: result.context.signature, usd: "50.00", sol: sol < LOW_SOL ? "0.02" : "0" });
   } catch (e) {
-    lastByAddress.delete(to);
+    hitsByAddress.set(to, byAddress); // a failed send doesn't count against the address
     console.error("faucet failed", e);
     return NextResponse.json({ error: "The faucet couldn't send right now. Devnet may be busy; try again in a minute." }, { status: 502 });
   }

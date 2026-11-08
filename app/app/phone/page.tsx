@@ -9,7 +9,7 @@ import { CopyButton, Money, QrCode } from "../../components/ui";
 import type { TabSnapshot } from "../../lib/assess.ts";
 import { findTabForDevice } from "../../lib/chain.ts";
 import { pairingCode, parseSticker } from "../../lib/codes.ts";
-import { ago, formatUsd, parseUsd, serialLabel } from "../../lib/config.ts";
+import { ago, formatUsd, parseUsd, serialLabel, shortAddress } from "../../lib/config.ts";
 import { deviceKey, loadHistory, loadTab, payShop, saveTab, type IssuedVoucher } from "../../lib/phone.ts";
 import { useNow } from "../../lib/use-now.ts";
 import { useOnline } from "../../lib/use-online.ts";
@@ -195,12 +195,13 @@ export default function PhonePage() {
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <span>
-                  Paying <strong>{shop.name}</strong>
+                  Paying <strong>{shop.name}</strong> · <span className="mono text-sm">{shortAddress(shop.merchant)}</span>
                 </span>
                 <button type="button" className="link text-sm" onClick={() => setShop(null)}>
                   Change shop
                 </button>
               </div>
+              <p className="-mt-2 text-sm text-muted">Check this key matches the one on the shop&apos;s screen. A voucher only pays the shop it names.</p>
               <label className="flex flex-col gap-1">
                 <span className="label">Amount</span>
                 <span className="flex items-center gap-2">
@@ -223,7 +224,7 @@ export default function PhonePage() {
                 </span>
               </label>
               <button type="submit" className="btn btn-sail self-start" disabled={busy || !amount || !!amountProblem}>
-                {amount && !amountProblem ? `Pay ${formatUsd(amount)}` : "Pay"}
+                {amount && !amountProblem ? `Pay ${formatUsd(amount)} to ${shop.name}` : "Pay"}
               </button>
             </form>
           )}

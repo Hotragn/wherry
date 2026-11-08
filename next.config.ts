@@ -2,8 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["ws"],
-  // @solana/kit-plugin-payer's browser bundle has a spurious `import 'fs'`
-  // from the payerFromFile export. Stub it out for the client bundle.
+  // No dev "N" badge in screen recordings.
+  devIndicators: false,
+  // @solana/kit-plugin-signer's browser bundle has a spurious `import 'fs'`
+  // from its *FromFile exports. Stub it out for the client bundle.
   turbopack: {
     resolveAlias: {
       fs: { browser: "./empty-module.js" },

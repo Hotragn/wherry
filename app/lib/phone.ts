@@ -36,12 +36,12 @@ async function reserveSerial(tab: TabSnapshot): Promise<number> {
   tab.used.forEach((byte, i) => {
     for (let b = 0; b < 8; b++) if (byte & (1 << b)) highestOnchain = i * 8 + b;
   });
-  let serial = 0;
+  let serial = 1; // serials start at 1 so the first voucher reads "No. 0001"
   await update<number>(`phone:next:${tab.address}`, (next) => {
-    serial = Math.max(next ?? 0, highestOnchain + 1);
+    serial = Math.max(next ?? 1, highestOnchain + 1);
     return serial + 1;
   });
-  if (serial >= 1024) throw new Error("This tab has used all 1,024 voucher numbers. Open a new tab.");
+  if (serial >= 1024) throw new Error("This tab has used all its voucher numbers. Open a new tab.");
   return serial;
 }
 

@@ -35,9 +35,20 @@ export function AppHeader() {
             );
           })}
         </nav>
-        <span className="ml-auto flex items-center gap-2 text-sm" role="status" aria-live="polite">
-          <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${online ? "bg-ok" : "bg-warn"}`} />
-          <span className={online ? "text-muted" : "font-semibold text-warn"}>{online ? "Online · devnet" : "Offline"}</span>
+        <span
+          className={`ml-auto flex items-center gap-2 rounded-full px-3 py-1 text-sm ${online ? "text-muted" : "bg-surface font-semibold text-warn ring-[1.5px] ring-warn"}`}
+          role="status"
+          aria-live="polite"
+        >
+          {online ? (
+            <span aria-hidden className="h-2.5 w-2.5 rounded-full bg-ok" />
+          ) : (
+            <svg aria-hidden viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+              <path d="M1.5 6.5a9.5 9.5 0 0 1 13 0M4.2 9.2a5.6 5.6 0 0 1 7.6 0M6.8 11.8a1.9 1.9 0 0 1 2.4 0" />
+              <path d="M2 2l12 12" />
+            </svg>
+          )}
+          {online ? "Online · devnet" : "Offline"}
         </span>
       </div>
     </header>

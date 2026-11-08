@@ -1,0 +1,12 @@
+# Never upload secrets or local-only material to Vercel.
+keys
+.env
+.env.*
+!.env.example
+knowledge
+BUILD-PROMPT.md
+.claude
+anchor/target
+anchor/.anchor
+.next
+node_modules

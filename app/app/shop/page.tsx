@@ -23,6 +23,7 @@ import {
   settleAll,
   shopSigner,
   syncSnapshot,
+  explainError,
   type BatchResult,
   type Queued,
   type Snapshot,
@@ -31,7 +32,11 @@ import { useNow } from "../../lib/use-now.ts";
 import { useOnline } from "../../lib/use-online.ts";
 import { verifyVoucherSignature } from "../../lib/voucher.ts";
 
+const SYNC_ERROR = "Couldn't reach devnet to sync tabs.";
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+// A settlement costs 5,000 lamports for the transaction plus 5,000 per Ed25519 check (one per voucher);
+// the shop's first settlement also opens its token account (rent ~1,488,440 lamports on devnet now).
+const vouchersFor = (lamports: bigint) => Math.max(0, Math.floor(Number(lamports - 1_488_440n) / 10_000));
 const sumOf = (queue: Queued[], codes: string[]) => queue.filter((q) => codes.includes(q.code)).reduce((a, q) => a + q.v.amount, 0n);
 
 type Check = { code: string; v: SignedVoucher; verifyMs: number; signatureOk: boolean; result: Assessment };
@@ -47,6 +52,7 @@ export default function ShopPage() {
   const [lastTrip, setLastTrip] = useState<string | null>(null);
   const [settling, setSettling] = useState(false);
   const [batches, setBatches] = useState<BatchResult[]>([]);
+  const [settleError, setSettleError] = useState<string | null>(null);
   const [arriving, setArriving] = useState<Set<string>>(new Set());
   const [syncError, setSyncError] = useState<string | null>(null);
   const now = useNow();
@@ -64,18 +70,18 @@ export default function ShopPage() {
   }, [reloadQueue]);
 
   const sync = useCallback(async () => {
-    setSyncError(null);
     try {
       setSnap(await syncSnapshot());
+      setSyncError(null);
     } catch {
-      setSyncError("Couldn't reach devnet to sync tabs.");
+      setSyncError(SYNC_ERROR);
     }
   }, []);
 
   // Keep the offline tab list fresh whenever there's a network.
   useEffect(() => {
-    if (online && name) void sync();
-  }, [online, name, sync]);
+    if (online && name) syncSnapshot().then(setSnap, () => setSyncError(SYNC_ERROR));
+  }, [online, name]);
 
   const pending: Pending[] = useMemo(
     () => queue.filter((q) => q.status === "pending").map((q) => ({ tab: q.v.tab, serial: q.v.serial, amount: q.v.amount })),
@@ -115,18 +121,25 @@ export default function ShopPage() {
   async function settle() {
     setSettling(true);
     setBatches([]);
+    setSettleError(null);
+    // ?tx=v0 forces the one-voucher-per-v0-transaction fallback, for testing it.
+    const forceV0 = new URLSearchParams(window.location.search).get("tx") === "v0";
     try {
-      await settleAll(async (r) => {
-        setBatches((b) => [...b, r]);
-        await reloadQueue();
-        if (r.sent) {
-          setArriving((a) => new Set([...a, ...r.codes]));
-          setTimeout(() => setArriving((a) => new Set([...a].filter((c) => !r.codes.includes(c)))), 1500);
-        }
-      });
+      await settleAll(
+        async (r) => {
+          setBatches((b) => [...b, r]);
+          await reloadQueue();
+          const landed = r.codes.filter((c) => !r.failed.some((f) => f.code === c));
+          if (landed.length > 0) {
+            setArriving((a) => new Set([...a, ...landed]));
+            setTimeout(() => setArriving((a) => new Set([...a].filter((c) => !landed.includes(c)))), 1500);
+          }
+        },
+        { forceV0 },
+      );
       await sync();
     } catch (e) {
-      setBatches((b) => [...b, { codes: [], error: e instanceof Error ? e.message : String(e) }]);
+      setSettleError(explainError(e).message);
     } finally {
       setSettling(false);
       await reloadQueue();
@@ -144,8 +157,8 @@ export default function ShopPage() {
   const pendingTotal = pending.reduce((a, p) => a + p.amount, 0n);
   const payer = check ? snap?.payers[snap.tabs[check.v.tab]?.owner ?? ""] : undefined;
   const settlePrimary = !check && pending.length > 0;
-  const lastSig = [...batches].reverse().find((b) => b.sent)?.sent?.signature;
-  const lastSettled = lastSig ? queue.filter((q) => q.sent?.signature === lastSig) : [];
+  const lastSigs = new Set([...batches].reverse().find((b) => b.sents.length > 0)?.sents.map((x) => x.signature) ?? []);
+  const lastSettled = queue.filter((q) => q.sent && lastSigs.has(q.sent.signature));
 
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
@@ -230,28 +243,38 @@ export default function ShopPage() {
           )}
           {batches.length > 0 && (
             <ul className="flex flex-col gap-2" aria-live="polite">
-              {batches.map((b, i) =>
-                b.sent ? (
-                  <li key={i} className="text-ok">
-                    ✓ Settled {plural(b.codes.length, "voucher")} in one transaction. {formatUsd(sumOf(queue, b.codes))} is in your account. Confirmed in{" "}
-                    <span className="mono whitespace-nowrap">{b.sent.seconds.toFixed(1)} s</span>
-                    {b.sent.feeLamports !== null && (
-                      <span className="text-muted">
-                        {" "}
-                        · fee <span className="mono">{lamportsToSol(b.sent.feeLamports)}</span>
+              {batches.map((b, i) => {
+                const landed = b.codes.filter((c) => !b.failed.some((f) => f.code === c));
+                const seconds = Math.max(0, ...b.sents.map((x) => x.seconds));
+                const fee = b.sents.reduce((a, x) => a + (x.feeLamports ?? 0n), 0n);
+                return (
+                  <li key={i} className="flex flex-col gap-1">
+                    {landed.length > 0 && (
+                      <span className="text-ok">
+                        ✓ Settled {plural(landed.length, "voucher")} · {b.sents.length === 1 ? "one transaction" : `${b.sents.length} transactions`} ·{" "}
+                        <span className="mono whitespace-nowrap">{seconds.toFixed(1)} s</span>. {formatUsd(sumOf(queue, landed))} is in your account.{" "}
+                        <span className="text-muted">
+                          Fee <span className="mono">{lamportsToSol(fee)}</span> ·{" "}
+                        </span>
+                        {b.sents.map((x, j) => (
+                          <span key={x.signature}>
+                            {j > 0 && " · "}
+                            <TxLink signature={x.signature}>{b.sents.length === 1 ? "Explorer" : `Tx ${j + 1}`}</TxLink>
+                          </span>
+                        ))}
                       </span>
-                    )}{" "}
-                    · <TxLink signature={b.sent.signature}>Explorer</TxLink>
+                    )}
+                    {b.failed.map((f) => (
+                      <span key={f.code} className="text-err">
+                        ✕ {serialLabel(queue.find((q) => q.code === f.code)?.v.serial ?? 0)} not settled: {f.error}
+                      </span>
+                    ))}
                   </li>
-                ) : (
-                  <li key={i} className="text-err">
-                    ✕ {b.codes.length > 0 ? `${b.codes.length} voucher${b.codes.length === 1 ? "" : "s"} not settled: ` : ""}
-                    {b.error}
-                  </li>
-                ),
-              )}
+                );
+              })}
             </ul>
           )}
+          {settleError && <p className="text-err">✕ {settleError}</p>}
           {lastSettled.length > 0 && (
             <div className="flex flex-wrap gap-4" aria-label="Just settled">
               {lastSettled.map((q) => (
@@ -336,7 +359,10 @@ function Sticker({ shop, name, online }: { shop: KeyPairSigner; name: string; on
         </button>
       </div>
       <div className="flex flex-col items-center gap-1 text-sm print:hidden">
-        <span className="text-muted">Fee money: {sol === null ? "…" : <span className="mono">{lamportsToSol(sol)}</span>}</span>
+        <span className="text-center text-muted">
+          Fee balance: {sol === null ? "…" : <span className="mono">{lamportsToSol(sol)}</span>}
+          {sol !== null && sol > 0n && <> · enough for about {vouchersFor(sol).toLocaleString("en-US")} vouchers</>}
+        </span>
         {sol !== null && sol < 5_000_000n && (
           <button
             type="button"
