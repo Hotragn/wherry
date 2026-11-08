@@ -434,3 +434,50 @@ describe("game seed", () => {
     assert.deepEqual(new Uint8Array(config.seedCommitment), sha(next));
   });
 });
+
+describe("settle properties (seeded random runs)", () => {
+  // Small deterministic PRNG so a failing seed can be replayed.
+  const rng = (seed: number) => () => ((seed = (seed * 1_103_515_245 + 12_345) >>> 0) / 2 ** 32);
+
+  test("25 random worlds: no overpay, no double pay, only the named shop is paid, shortfall adds up", async () => {
+    for (let seed = 1; seed <= 25; seed++) {
+      const r = rng(seed);
+      const deposit = BigInt(1 + Math.floor(r() * 30)) * USD;
+      const w = await world(deposit);
+      const third = await generateKeyPairSigner();
+      w.svm.airdrop(third.address, lamports(10_000_000_000n));
+      const shops = [w.merchant, w.merchant2, third];
+      const paidTo = new Map<string, bigint>(shops.map((s) => [s.address, 0n]));
+      const settledSerials = new Set<number>();
+      let owedShort = 0n;
+
+      for (let k = 0; k < 10; k++) {
+        const named = shops[Math.floor(r() * shops.length)];
+        const serial = 1 + Math.floor(r() * 6); // small range: plenty of reused serials
+        const amount = BigInt(1 + Math.floor(r() * 1_500)) * 10_000n; // $0.01 – $15.00
+        const s = await voucher(w, { serial, amount, merchant: named.address });
+        const submitter = r() < 0.25 ? shops.find((x) => x !== named)! : named; // sometimes the wrong shop tries
+        const vaultBefore = await tokenBalance(w, w.tab);
+        const before = await tokenBalance(w, submitter.address);
+        const { result } = await send(w.svm, submitter, await settleIxs(w, s, { merchant: submitter }));
+        const landed = !(result instanceof FailedTransactionMetadata);
+
+        if (submitter !== named) assert.equal(landed, false, `seed ${seed}: a shop was paid for a voucher naming another shop`);
+        if (landed) {
+          assert.ok(!settledSerials.has(serial), `seed ${seed}: serial ${serial} paid twice`);
+          settledSerials.add(serial);
+          const got = (await tokenBalance(w, submitter.address)) - before;
+          assert.equal(got, amount < vaultBefore ? amount : vaultBefore, `seed ${seed}: paid min(amount, vault)`);
+          paidTo.set(submitter.address, paidTo.get(submitter.address)! + got);
+          owedShort += amount - got;
+        }
+        const tab = read(w.svm, w.tab, (d) => getTabDecoder().decode(d));
+        const totalPaid = [...paidTo.values()].reduce((a, b) => a + b, 0n);
+        assert.equal(tab.settled, totalPaid, `seed ${seed}: tab.settled tracks payouts`);
+        assert.ok(totalPaid <= deposit, `seed ${seed}: paid more than deposited`);
+        assert.equal(await tokenBalance(w, w.tab), deposit - totalPaid, `seed ${seed}: vault + payouts = deposit`);
+        assert.equal(tab.shortfall, owedShort, `seed ${seed}: shortfall = owed minus paid`);
+      }
+    }
+  });
+});
