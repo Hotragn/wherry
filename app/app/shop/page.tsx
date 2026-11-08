@@ -351,7 +351,6 @@ export default function ShopPage() {
           {!online && pending.length > 0 && <p className="text-sm text-warn">Tickets wait safely here. Collect when the network is back.</p>}
           {queue.length === 0 ? (
             <div className="flex items-center gap-4">
-              <Doggett pose="welcome" size={72} />
               <p className="text-muted">No tickets yet. Accepted tickets wait on the near bank and cross when you collect.</p>
             </div>
           ) : (

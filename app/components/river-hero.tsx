@@ -31,7 +31,7 @@ export function RiverHero() {
       <div className="rounded-lg border-2 border-ink bg-night px-3 py-5 text-on-night shadow-2 sm:px-6 sm:py-7">
         <div
           ref={box}
-          className="relative overflow-hidden text-[clamp(8px,2.3vw,17px)]"
+          className="relative overflow-hidden text-[clamp(10px,2.6vw,17px)]"
         >
           <AsciiAnim
             render={(ms) => riverFrame(ms, cols)}

@@ -32,8 +32,8 @@ export function riverFrame(ms: number, cols = 62) {
     travel < 0.46
       ? ""
       : travel < 1
-        ? "  that's fine. tickets still work."
-        : "  ticket landed. collect later.";
+        ? " tickets still work."
+        : " ticket landed.";
   const rows = Array.from({ length: 10 }, () => " ".repeat(cols));
   rows[0] = pad(` signal ${bars}${status}`, cols);
   rows[4] = put(put(rows[4], 1, "PHONE"), cols - 6, "SHOP");

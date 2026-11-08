@@ -442,7 +442,6 @@ export default function PhonePage() {
           <h2 className="text-3xl">Your tickets</h2>
           {mine.length === 0 ? (
             <div className="flex items-center gap-4">
-              <Doggett pose="welcome" size={64} />
               <p className="text-muted">
                 No tickets yet. Your first payment shows up here, even offline.
               </p>

@@ -6,7 +6,7 @@ import "./globals.css";
 
 // Google Fonts (OFL), self-hosted by next/font so they keep working offline.
 const display = Bricolage_Grotesque({ subsets: ["latin"], axes: ["opsz", "wdth"], variable: "--nf-display", display: "swap" });
-const text = Atkinson_Hyperlegible_Next({ subsets: ["latin"], variable: "--nf-text", display: "swap" });
+const text = Atkinson_Hyperlegible_Next({ subsets: ["latin"], variable: "--nf-text", display: "swap", adjustFontFallback: false });
 // Paper Mono (OFL 1.1, github.com/paper-design/paper-mono): amounts, serials and the ASCII art.
 const mono = localFont({ src: "../public/fonts/PaperMono.woff2", weight: "100 800", variable: "--nf-mono", display: "swap" });
 
