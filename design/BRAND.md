@@ -45,7 +45,7 @@ Pure text frames in Paper Mono (`app/components/ascii.tsx`, frames in `ascii-fra
 - Motion: a boat on calm water. 120/200/320 ms, ease `cubic-bezier(.2,.8,.2,1)`, no bounce. The only loop is Doggett's three waiting dots (1.2 s). Everything goes static under `prefers-reduced-motion`.
 
 ## Mascot: Doggett
-- **Who:** Doggett v3: a soft champagne plush ferryman (fur texture, face patch, dot eyes, amber blush) in a folded amber paper-boat hat, holding the product, a ferry ticket, the way the Meta Muse plush holds its brand mark. Hand-built SVG, only the three brand colours.
+- **Who:** Doggett v4, drawn from the owner's mascot sheets (`design/mascot/owner-mascot-*`): a glowing egg-shaped champagne plush with dot eyes, amber blush and two paws on the rim, sitting in a little amber wherry with a waving amber flag over a champagne wave. Flat at small sizes (logo, favicon, 16-64 px); soft inner glow and fur at hero sizes. It is also the logo lockup (mascot + "Wherry" in Cormorant).
 - **Name:** from *Doggett's Coat and Badge*, the race for young Thames watermen rowed every year since 1715, the oldest rowing race in the world.
 - **Personality:** unflappable, cheerful, a little proud of always getting across. Doggett never panics in the dark; it just keeps rowing.
 - **Why it fits:** the product's job is getting money safely across a gap (the outage). A tiny, sturdy ferry that keeps going when the lights are out is the promise in one picture. It's simple enough to read at 32 px: hull, sail, two eyes.
