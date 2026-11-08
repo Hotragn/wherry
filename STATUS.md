@@ -102,4 +102,13 @@ Game PDA: `DtnGwjM1qHsQ7E4GugU1w4CnE31W7X3MAxnixVviwZ3N` (studio = the shop key 
 | 10 Live numbers | Shop "Measured here" panel + README | 1 voucher: 1.0 s confirmed, 1.0 s finalized, 23,688 CU, AI 1.5 s |
 | 11 Threat model | stolen phone, fork, malicious courier added | README |
 | 12 Budget planner | phone, offline, advise-only | "Split by Qwen2.5 1.5B on this phone in 1.3 s, offline"; "This is 40% of today's food budget" |
-| 13 Story | README "When the road is gone"; courier as unshipped design | README |
+| 13 Story | README "When the road is gone"; courier shipped | README |
+
+## Courier upgrade: cost, recorded before deploying (08:11 ET)
+- `solana program show`: Data Length 327,800 bytes, balance 1.66610284 SOL. New `wherry.so`: 375,752 bytes (+47,952).
+- Buffer rent (temporary, refunded after the upgrade): 1.90965836 SOL. Program-data extension rent (permanent): 0.2442464 SOL. Write fees: about 0.003 SOL.
+- Peak needed ≈ 2.16 SOL; net cost ≈ 0.25 SOL. Deployer before: 6.766874263 SOL. Within the 4 SOL approval.
+- Upgrade deployed: `2D55e11NCiTcw75HkYpjjASUQRUvXR1CafGLzSuQoKZuGuu4cos5KQeYLze5iNVLLcAbmoHk4Mo3Xc4aLzMvHYtN`; Data Length now 375,752; deployer 6.521292438 SOL (net cost 0.2456 SOL).
+- Old flow still settles on the upgraded program: open tab `w3KkWJnj82eetyAwevsjZ7qGHrmbDrbgw7ZLBYMmjoZvfqbTnkDueYKZLXwZEpzZWH7mowxE7WKEkPym4tgYnpX` (0.8 s), settle `2bQZpqp8PjpivrmMopiweRAo7LpDanEYjwHuiG9jZxhd3nQDzsVEyPz9yXtBFyyWioany8YS4z84tYYJcoDpxWJR` (0.9 s), replay rejected.
+- Courier settle: `k8HDhMBzV2pM3ZxXdXnZuB8BqXsyU2wHgBJieqGjHeUVo2ZgeBt1wxusiWnthYDnkbignP6QppGcNbt4z73cKBh` (1.1 s, 3 signatures, 15,000 lamports); courier earned $0.03 on a $3.00 voucher (1%, cap $0.05).
+- Courier from the UI (production build): Shop "Hand to a courier" → bundle → Courier view → `45frTaVCUpKMwJfzrasuw8oNCdY6nXDd9dhhwJcqdG4KNg7JZiwEUjBP5PQWS3TDDsUBoWnBcMWKYfxHH27s5A5N` (0.8 s), "You earned $0.03"; the Shop then shows No. 0007 "settled by a courier" without sending a transaction. Tests 35/35.

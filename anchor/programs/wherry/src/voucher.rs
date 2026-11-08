@@ -32,6 +32,32 @@ pub fn voucher_bytes(
     m
 }
 
+/// Shop's consent to a courier settling its vouchers on one tab, signed by the shop's key:
+/// "WHERRYC1" | program_id | merchant | tab | max_fee_bps u16 LE | max_fee_abs u64 LE
+/// | auth_expires_at i64 LE | auth_nonce [u8; 16]
+pub const COURIER_DOMAIN: &[u8; 8] = b"WHERRYC1";
+pub const COURIER_AUTH_LEN: usize = 138;
+
+pub fn courier_auth_bytes(
+    merchant: &Pubkey,
+    tab: &Pubkey,
+    max_fee_bps: u16,
+    max_fee_abs: u64,
+    auth_expires_at: i64,
+    auth_nonce: &[u8; 16],
+) -> [u8; COURIER_AUTH_LEN] {
+    let mut m = [0u8; COURIER_AUTH_LEN];
+    m[..8].copy_from_slice(COURIER_DOMAIN);
+    m[8..40].copy_from_slice(crate::ID.as_ref());
+    m[40..72].copy_from_slice(merchant.as_ref());
+    m[72..104].copy_from_slice(tab.as_ref());
+    m[104..106].copy_from_slice(&max_fee_bps.to_le_bytes());
+    m[106..114].copy_from_slice(&max_fee_abs.to_le_bytes());
+    m[114..122].copy_from_slice(&auth_expires_at.to_le_bytes());
+    m[122..138].copy_from_slice(auth_nonce);
+    m
+}
+
 /// Require that the instruction right before the current one is an Ed25519 precompile call
 /// that verified exactly one signature, by `device_key`, over `expected`, with the key,
 /// signature and message all inline (instruction indexes = u16::MAX).
@@ -41,9 +67,29 @@ pub fn verify_previous_ed25519(
     device_key: &[u8; 32],
     expected: &[u8],
 ) -> Result<()> {
+    verify_ed25519_before(
+        ix_sysvar,
+        1,
+        device_key,
+        expected,
+        WherryError::DeviceKeyMismatch,
+        WherryError::VoucherMismatch,
+    )
+}
+
+/// The same check for the instruction `back` places before the current one, with the errors to
+/// raise for a wrong key and a wrong message.
+pub fn verify_ed25519_before(
+    ix_sysvar: &AccountInfo,
+    back: usize,
+    key: &[u8; 32],
+    expected: &[u8],
+    wrong_key: WherryError,
+    wrong_message: WherryError,
+) -> Result<()> {
     let current = load_current_index_checked(ix_sysvar)? as usize;
-    require!(current > 0, WherryError::MissingEd25519Instruction);
-    let ix = load_instruction_at_checked(current - 1, ix_sysvar)?;
+    require!(current >= back, WherryError::MissingEd25519Instruction);
+    let ix = load_instruction_at_checked(current - back, ix_sysvar)?;
     require_keys_eq!(
         ix.program_id,
         ED25519_PROGRAM_ID,
@@ -66,10 +112,14 @@ pub fn verify_previous_ed25519(
     let pubkey = d
         .get(pk_off..pk_off + 32)
         .ok_or(WherryError::MalformedEd25519Instruction)?;
-    require!(pubkey == device_key, WherryError::DeviceKeyMismatch);
+    if pubkey != key {
+        return Err(wrong_key.into());
+    }
     let message = d
         .get(msg_off..msg_off + msg_len)
         .ok_or(WherryError::MalformedEd25519Instruction)?;
-    require!(message == expected, WherryError::VoucherMismatch);
+    if message != expected {
+        return Err(wrong_message.into());
+    }
     Ok(())
 }

@@ -11,4 +11,5 @@ export * from "./commitSeed.ts";
 export * from "./openTab.ts";
 export * from "./revealSeed.ts";
 export * from "./settle.ts";
+export * from "./settleViaCourier.ts";
 export * from "./topUp.ts";

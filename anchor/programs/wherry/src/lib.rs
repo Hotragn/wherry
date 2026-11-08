@@ -136,9 +136,10 @@ pub mod wherry {
         nonce: [u8; 16],
     ) -> Result<()> {
         let tab = &ctx.accounts.tab;
+        let merchant = ctx.accounts.merchant.key();
         let expected = voucher::voucher_bytes(
             &tab.key(),
-            &ctx.accounts.merchant.key(),
+            &merchant,
             &ctx.accounts.mint.key(),
             amount,
             serial,
@@ -150,92 +151,125 @@ pub mod wherry {
             &tab.device_key,
             &expected,
         )?;
-
-        require!(amount > 0, WherryError::InvalidAmount);
-        require!(serial < MAX_SERIALS, WherryError::SerialOutOfRange);
-        let (byte, bit) = ((serial / 8) as usize, 1u8 << (serial % 8));
-        require!(tab.used[byte] & bit == 0, WherryError::VoucherAlreadySettled);
-        require!(
-            voucher_expires_at <= tab.expires_at,
-            WherryError::VoucherOutlivesTab
-        );
-        require!(
-            Clock::get()?.unix_timestamp <= tab.settle_deadline,
-            WherryError::SettlementWindowClosed
-        );
+        let (byte, bit) = check_voucher(tab, serial, amount, voucher_expires_at)?;
 
         // Shortfall instead of failure: the late shop gets what is left.
         let paid = amount.min(ctx.accounts.vault.amount);
-        if paid > 0 {
-            let owner = tab.owner;
-            let tab_id = tab.tab_id.to_le_bytes();
-            let bump = [tab.bump];
-            let seeds: &[&[&[u8]]] = &[&[b"tab", owner.as_ref(), &tab_id, &bump]];
-            token::transfer_checked(
-                CpiContext::new_with_signer(
-                    Token::id(),
-                    TransferChecked {
-                        from: ctx.accounts.vault.to_account_info(),
-                        mint: ctx.accounts.mint.to_account_info(),
-                        to: ctx.accounts.merchant_token.to_account_info(),
-                        authority: tab.to_account_info(),
-                    },
-                    seeds,
-                ),
-                paid,
-                ctx.accounts.mint.decimals,
-            )?;
-        }
-
-        let tab_key = ctx.accounts.tab.key();
-        let merchant = ctx.accounts.merchant.key();
-        let tab = &mut ctx.accounts.tab;
-        let payer = &mut ctx.accounts.payer_record;
-        tab.used[byte] |= bit;
-        tab.settled = tab
-            .settled
-            .checked_add(paid)
-            .ok_or(WherryError::MathOverflow)?;
-        if paid < amount {
-            let gap = amount - paid;
-            tab.shortfall = tab
-                .shortfall
-                .checked_add(gap)
-                .ok_or(WherryError::MathOverflow)?;
-            payer.shortfalls = payer
-                .shortfalls
-                .checked_add(1)
-                .ok_or(WherryError::MathOverflow)?;
-            payer.shortfall_amount = payer
-                .shortfall_amount
-                .checked_add(gap)
-                .ok_or(WherryError::MathOverflow)?;
-            emit!(Shortfall {
-                tab: tab_key,
-                merchant,
-                serial,
-                amount,
-                paid,
-            });
-        }
-        payer.vouchers_settled = payer
-            .vouchers_settled
-            .checked_add(1)
-            .ok_or(WherryError::MathOverflow)?;
-        payer.volume_settled = payer
-            .volume_settled
-            .checked_add(paid)
-            .ok_or(WherryError::MathOverflow)?;
-
-        emit!(VoucherSettled {
-            tab: tab_key,
+        pay_from_vault(
+            tab,
+            &ctx.accounts.vault,
+            &ctx.accounts.mint,
+            ctx.accounts.merchant_token.to_account_info(),
+            paid,
+        )?;
+        record_settlement(
+            &mut ctx.accounts.tab,
+            &mut ctx.accounts.payer_record,
             merchant,
             serial,
             amount,
             paid,
+            (byte, bit),
             nonce,
+        )
+    }
+
+    /// Anyone-settles courier: anyone with a signal can settle a shop's voucher, with the shop's
+    /// signed consent, and earn a capped fee out of what is paid. The two instructions before this
+    /// one must be the Ed25519 checks of the voucher (phone key) and of the authorization (shop key).
+    #[allow(clippy::too_many_arguments)]
+    pub fn settle_via_courier(
+        ctx: Context<SettleViaCourier>,
+        serial: u32,
+        amount: u64,
+        voucher_expires_at: i64,
+        nonce: [u8; 16],
+        fee_bps: u16,
+        max_fee_bps: u16,
+        max_fee_abs: u64,
+        auth_expires_at: i64,
+        auth_nonce: [u8; 16],
+    ) -> Result<()> {
+        let tab = &ctx.accounts.tab;
+        let merchant = ctx.accounts.merchant.key();
+        let ix_sysvar = ctx.accounts.instructions.to_account_info();
+        let expected = voucher::voucher_bytes(
+            &tab.key(),
+            &merchant,
+            &ctx.accounts.mint.key(),
+            amount,
+            serial,
+            voucher_expires_at,
+            &nonce,
+        );
+        voucher::verify_ed25519_before(
+            &ix_sysvar,
+            2,
+            &tab.device_key,
+            &expected,
+            WherryError::DeviceKeyMismatch,
+            WherryError::VoucherMismatch,
+        )?;
+        let auth = voucher::courier_auth_bytes(
+            &merchant,
+            &tab.key(),
+            max_fee_bps,
+            max_fee_abs,
+            auth_expires_at,
+            &auth_nonce,
+        );
+        voucher::verify_ed25519_before(
+            &ix_sysvar,
+            1,
+            &merchant.to_bytes(),
+            &auth,
+            WherryError::CourierAuthWrongKey,
+            WherryError::CourierAuthMismatch,
+        )?;
+        require!(
+            Clock::get()?.unix_timestamp <= auth_expires_at,
+            WherryError::CourierAuthExpired
+        );
+        require!(
+            fee_bps <= max_fee_bps && max_fee_bps <= 10_000,
+            WherryError::CourierFeeOverCap
+        );
+        let (byte, bit) = check_voucher(tab, serial, amount, voucher_expires_at)?;
+
+        let paid = amount.min(ctx.accounts.vault.amount);
+        // The fee comes out of what is actually paid, and never above the shop's absolute cap.
+        let fee = ((paid as u128 * fee_bps as u128 / 10_000) as u64).min(max_fee_abs);
+        pay_from_vault(
+            tab,
+            &ctx.accounts.vault,
+            &ctx.accounts.mint,
+            ctx.accounts.merchant_token.to_account_info(),
+            paid - fee,
+        )?;
+        pay_from_vault(
+            tab,
+            &ctx.accounts.vault,
+            &ctx.accounts.mint,
+            ctx.accounts.courier_token.to_account_info(),
+            fee,
+        )?;
+        emit!(CourierSettled {
+            tab: tab.key(),
+            courier: ctx.accounts.courier.key(),
+            merchant,
+            serial,
+            fee,
         });
-        Ok(())
+        record_settlement(
+            &mut ctx.accounts.tab,
+            &mut ctx.accounts.payer_record,
+            merchant,
+            serial,
+            amount,
+            paid,
+            (byte, bit),
+            nonce,
+        )
     }
 
     /// After the settlement window: refund what is left and close the tab.
@@ -434,6 +468,52 @@ pub struct Settle<'info> {
 }
 
 #[derive(Accounts)]
+pub struct SettleViaCourier<'info> {
+    #[account(mut)]
+    pub courier: Signer<'info>,
+    /// CHECK: the shop being paid. Bound by both signatures: the voucher names it, and its own key
+    /// signed the courier authorization (checked through the instructions sysvar).
+    pub merchant: UncheckedAccount<'info>,
+    #[account(
+        mut,
+        has_one = mint @ WherryError::WrongMint,
+        constraint = tab.status == TabStatus::Open @ WherryError::TabNotOpen,
+        seeds = [b"tab", tab.owner.as_ref(), &tab.tab_id.to_le_bytes()],
+        bump = tab.bump,
+    )]
+    pub tab: Box<Account<'info, Tab>>,
+    #[account(
+        mut,
+        seeds = [b"payer", tab.owner.as_ref()],
+        bump = payer_record.bump,
+    )]
+    pub payer_record: Box<Account<'info, PayerRecord>>,
+    pub mint: Box<Account<'info, Mint>>,
+    #[account(mut, associated_token::mint = mint, associated_token::authority = tab)]
+    pub vault: Box<Account<'info, TokenAccount>>,
+    #[account(
+        init_if_needed,
+        payer = courier,
+        associated_token::mint = mint,
+        associated_token::authority = merchant,
+    )]
+    pub merchant_token: Box<Account<'info, TokenAccount>>,
+    #[account(
+        init_if_needed,
+        payer = courier,
+        associated_token::mint = mint,
+        associated_token::authority = courier,
+    )]
+    pub courier_token: Box<Account<'info, TokenAccount>>,
+    /// CHECK: pinned to the instructions sysvar by address; read with the `_checked` loaders.
+    #[account(address = solana_instructions_sysvar::ID)]
+    pub instructions: UncheckedAccount<'info>,
+    pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
 pub struct CloseTab<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
@@ -492,4 +572,111 @@ pub struct RevealSeed<'info> {
         bump = game.bump,
     )]
     pub game: Account<'info, GameConfig>,
+}
+
+/// Every voucher rule except the signature. Returns the serial's (byte, bit) in the bitmap.
+fn check_voucher(tab: &Tab, serial: u32, amount: u64, voucher_expires_at: i64) -> Result<(usize, u8)> {
+    require!(amount > 0, WherryError::InvalidAmount);
+    require!(serial < MAX_SERIALS, WherryError::SerialOutOfRange);
+    let (byte, bit) = ((serial / 8) as usize, 1u8 << (serial % 8));
+    require!(tab.used[byte] & bit == 0, WherryError::VoucherAlreadySettled);
+    require!(
+        voucher_expires_at <= tab.expires_at,
+        WherryError::VoucherOutlivesTab
+    );
+    require!(
+        Clock::get()?.unix_timestamp <= tab.settle_deadline,
+        WherryError::SettlementWindowClosed
+    );
+    Ok((byte, bit))
+}
+
+/// Move `amount` from the vault to `to`, signed by the tab PDA. Zero is a no-op.
+fn pay_from_vault<'info>(
+    tab: &Account<'info, Tab>,
+    vault: &Account<'info, TokenAccount>,
+    mint: &Account<'info, Mint>,
+    to: AccountInfo<'info>,
+    amount: u64,
+) -> Result<()> {
+    if amount == 0 {
+        return Ok(());
+    }
+    let owner = tab.owner;
+    let tab_id = tab.tab_id.to_le_bytes();
+    let bump = [tab.bump];
+    let seeds: &[&[&[u8]]] = &[&[b"tab", owner.as_ref(), &tab_id, &bump]];
+    token::transfer_checked(
+        CpiContext::new_with_signer(
+            Token::id(),
+            TransferChecked {
+                from: vault.to_account_info(),
+                mint: mint.to_account_info(),
+                to,
+                authority: tab.to_account_info(),
+            },
+            seeds,
+        ),
+        amount,
+        mint.decimals,
+    )
+}
+
+/// Mark the serial used, update the tab and payer record, and emit the events.
+#[allow(clippy::too_many_arguments)]
+fn record_settlement(
+    tab: &mut Account<Tab>,
+    payer: &mut Account<PayerRecord>,
+    merchant: Pubkey,
+    serial: u32,
+    amount: u64,
+    paid: u64,
+    (byte, bit): (usize, u8),
+    nonce: [u8; 16],
+) -> Result<()> {
+    let tab_key = tab.key();
+    tab.used[byte] |= bit;
+    tab.settled = tab
+        .settled
+        .checked_add(paid)
+        .ok_or(WherryError::MathOverflow)?;
+    if paid < amount {
+        let gap = amount - paid;
+        tab.shortfall = tab
+            .shortfall
+            .checked_add(gap)
+            .ok_or(WherryError::MathOverflow)?;
+        payer.shortfalls = payer
+            .shortfalls
+            .checked_add(1)
+            .ok_or(WherryError::MathOverflow)?;
+        payer.shortfall_amount = payer
+            .shortfall_amount
+            .checked_add(gap)
+            .ok_or(WherryError::MathOverflow)?;
+        emit!(Shortfall {
+            tab: tab_key,
+            merchant,
+            serial,
+            amount,
+            paid,
+        });
+    }
+    payer.vouchers_settled = payer
+        .vouchers_settled
+        .checked_add(1)
+        .ok_or(WherryError::MathOverflow)?;
+    payer.volume_settled = payer
+        .volume_settled
+        .checked_add(paid)
+        .ok_or(WherryError::MathOverflow)?;
+    emit!(VoucherSettled {
+        tab: tab_key,
+        merchant,
+        serial,
+        amount,
+        paid,
+        nonce,
+    });
+    Ok(())
 }

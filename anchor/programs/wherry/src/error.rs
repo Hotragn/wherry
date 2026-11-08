@@ -40,4 +40,12 @@ pub enum WherryError {
     SeedAlreadyCommitted,
     #[msg("No seed is committed")]
     NoSeedCommitted,
+    #[msg("The courier authorization was not signed by this shop")]
+    CourierAuthWrongKey,
+    #[msg("The signed courier authorization does not match this settlement")]
+    CourierAuthMismatch,
+    #[msg("The courier authorization has expired")]
+    CourierAuthExpired,
+    #[msg("The courier fee is over what the shop allowed")]
+    CourierFeeOverCap,
 }

@@ -1,12 +1,12 @@
 // The accepting shop: its own key (pays settlement fees), its offline tab table, its queue, its limits.
-import { type Instruction, type KeyPairSigner, type TransactionSigner, createSignerFromKeyPair, generateKeyPair } from "@solana/kit";
+import { type Instruction, type KeyPairSigner, type TransactionSigner, createSignerFromKeyPair, generateKeyPair, signBytes } from "@solana/kit";
 import { get, set, update } from "idb-keyval";
 import { findPayerRecordPda, getSettleInstructionAsync, getWherryErrorMessage } from "../generated/wherry/index.ts";
 import { DEFAULT_RISK, type PayerSnapshot, type RiskSettings, type TabSnapshot } from "./assess.ts";
-import type { SignedVoucher } from "./codes.ts";
+import { encodeCourierAuth, type SignedVoucher } from "./codes.ts";
 import { fetchSnapshot, send, type Sent } from "./chain.ts";
 import { PROGRAM_ID } from "./config.ts";
-import { ed25519Instruction, voucherBytes } from "./voucher.ts";
+import { courierAuthBytes, ed25519Instruction, voucherBytes } from "./voucher.ts";
 
 export type Snapshot = { at: number; tabs: Record<string, TabSnapshot>; payers: Record<string, PayerSnapshot> };
 
@@ -78,7 +78,7 @@ async function settleIxs(shop: TransactionSigner, items: Queued[], snap: Snapsho
 export function explainError(e: unknown): { message: string; final: boolean } {
   for (let cur: unknown = e; cur; cur = (cur as { cause?: unknown }).cause) {
     const code = (cur as { context?: { code?: unknown } }).context?.code;
-    if (typeof code === "number" && code >= 6000 && code <= 6018) {
+    if (typeof code === "number" && code >= 6000 && code <= 6022) {
       return { message: getWherryErrorMessage(code as Parameters<typeof getWherryErrorMessage>[0]), final: true };
     }
   }
@@ -133,7 +133,14 @@ async function settleSingles(shop: KeyPairSigner, items: Queued[], snap: Snapsho
 export async function settleAll(onBatch: (r: BatchResult) => void, opts: { forceV0?: boolean } = {}): Promise<BatchResult[]> {
   const shop = await shopSigner();
   const snap = await syncSnapshot();
-  const pending = (await loadQueue()).filter((q) => q.status === "pending").reverse();
+  const queued = (await loadQueue()).filter((q) => q.status === "pending");
+  // Vouchers a courier already settled for this shop: mark them settled instead of sending them again.
+  const doneOnchain = queued.filter((q) => {
+    const used = snap.tabs[q.v.tab]?.used;
+    return used && q.v.serial < 1024 && (used[q.v.serial >> 3] & (1 << (q.v.serial & 7))) !== 0;
+  });
+  if (doneOnchain.length) await patch(doneOnchain.map((q) => q.code), { status: "settled", error: "settled by a courier" });
+  const pending = queued.filter((q) => !doneOnchain.includes(q)).reverse();
   const results: BatchResult[] = [];
   for (let i = 0; i < pending.length; i += BATCH) {
     const batch = pending.slice(i, i + BATCH);
@@ -152,4 +159,20 @@ export async function settleAll(onBatch: (r: BatchResult) => void, opts: { force
     onBatch(r);
   }
   return results;
+}
+
+/** The shop's consent for a courier: one signed authorization per tab it holds vouchers from, plus those vouchers. */
+export async function courierBundle(maxFeeBps = 100, maxFeeAbs = 50_000n, hours = 48): Promise<{ text: string; count: number }> {
+  const shop = await shopSigner();
+  const pending = (await loadQueue()).filter((q) => q.status === "pending");
+  const tabs = [...new Set(pending.map((q) => q.v.tab))];
+  const authExpiresAt = BigInt(Math.floor(Date.now() / 1000) + hours * 3600);
+  const lines = pending.map((q) => q.code);
+  for (const tab of tabs) {
+    const authNonce = crypto.getRandomValues(new Uint8Array(16));
+    const msg = courierAuthBytes({ programId: PROGRAM_ID, merchant: shop.address, tab, maxFeeBps, maxFeeAbs, authExpiresAt, authNonce });
+    const signature = new Uint8Array(await signBytes(shop.keyPair.privateKey, msg));
+    lines.push(encodeCourierAuth({ merchant: shop.address, tab, maxFeeBps, maxFeeAbs, authExpiresAt, authNonce, signature }));
+  }
+  return { text: lines.join("\n"), count: pending.length };
 }

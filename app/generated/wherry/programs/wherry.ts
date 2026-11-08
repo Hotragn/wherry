@@ -51,12 +51,14 @@ import {
   getOpenTabInstructionAsync,
   getRevealSeedInstructionAsync,
   getSettleInstructionAsync,
+  getSettleViaCourierInstructionAsync,
   getTopUpInstructionAsync,
   parseCloseTabInstruction,
   parseCommitSeedInstruction,
   parseOpenTabInstruction,
   parseRevealSeedInstruction,
   parseSettleInstruction,
+  parseSettleViaCourierInstruction,
   parseTopUpInstruction,
   type CloseTabAsyncInput,
   type CommitSeedAsyncInput,
@@ -66,9 +68,11 @@ import {
   type ParsedOpenTabInstruction,
   type ParsedRevealSeedInstruction,
   type ParsedSettleInstruction,
+  type ParsedSettleViaCourierInstruction,
   type ParsedTopUpInstruction,
   type RevealSeedAsyncInput,
   type SettleAsyncInput,
+  type SettleViaCourierAsyncInput,
   type TopUpAsyncInput,
 } from "../instructions/index.ts";
 import { findGamePda, findPayerRecordPda, findTabPda } from "../pdas/index.ts";
@@ -134,18 +138,20 @@ export function identifyWherryAccount(
 }
 
 export const WherryEvent = {
-  0: "SeedCommitted",
-  1: "SeedRevealed",
-  2: "Shortfall",
-  3: "TabClosed",
-  4: "TabOpened",
-  5: "VoucherSettled",
-  SeedCommitted: 0,
-  SeedRevealed: 1,
-  Shortfall: 2,
-  TabClosed: 3,
-  TabOpened: 4,
-  VoucherSettled: 5,
+  0: "CourierSettled",
+  1: "SeedCommitted",
+  2: "SeedRevealed",
+  3: "Shortfall",
+  4: "TabClosed",
+  5: "TabOpened",
+  6: "VoucherSettled",
+  CourierSettled: 0,
+  SeedCommitted: 1,
+  SeedRevealed: 2,
+  Shortfall: 3,
+  TabClosed: 4,
+  TabOpened: 5,
+  VoucherSettled: 6,
 } as const;
 
 export type WherryEvent = (typeof WherryEvent)[Exclude<
@@ -157,6 +163,17 @@ export function identifyWherryEvent(
   event: { data: ReadonlyUint8Array } | ReadonlyUint8Array
 ): WherryEvent {
   const data = "data" in event ? event.data : event;
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([225, 146, 47, 21, 85, 9, 71, 200])
+      ),
+      0
+    )
+  ) {
+    return WherryEvent.CourierSettled;
+  }
   if (
     containsBytes(
       data,
@@ -234,13 +251,15 @@ export const WherryInstruction = {
   2: "OpenTab",
   3: "RevealSeed",
   4: "Settle",
-  5: "TopUp",
+  5: "SettleViaCourier",
+  6: "TopUp",
   CloseTab: 0,
   CommitSeed: 1,
   OpenTab: 2,
   RevealSeed: 3,
   Settle: 4,
-  TopUp: 5,
+  SettleViaCourier: 5,
+  TopUp: 6,
 } as const;
 
 export type WherryInstruction = (typeof WherryInstruction)[Exclude<
@@ -311,6 +330,17 @@ export function identifyWherryInstruction(
     containsBytes(
       data,
       fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([22, 195, 143, 45, 135, 104, 167, 25])
+      ),
+      0
+    )
+  ) {
+    return WherryInstruction.SettleViaCourier;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
         new Uint8Array([236, 225, 96, 9, 60, 106, 77, 208])
       ),
       0
@@ -342,6 +372,9 @@ export type ParsedWherryInstruction<
   | ({
       instructionType: typeof WherryInstruction.Settle;
     } & ParsedSettleInstruction<TProgram>)
+  | ({
+      instructionType: typeof WherryInstruction.SettleViaCourier;
+    } & ParsedSettleViaCourierInstruction<TProgram>)
   | ({
       instructionType: typeof WherryInstruction.TopUp;
     } & ParsedTopUpInstruction<TProgram>);
@@ -384,6 +417,13 @@ export function parseWherryInstruction<TProgram extends string>(
       return {
         instructionType: WherryInstruction.Settle,
         ...parseSettleInstruction(instruction),
+      };
+    }
+    case WherryInstruction.SettleViaCourier: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: WherryInstruction.SettleViaCourier,
+        ...parseSettleViaCourierInstruction(instruction),
       };
     }
     case WherryInstruction.TopUp: {
@@ -442,6 +482,11 @@ export type WherryPluginInstructions = {
     input: SettleAsyncInput,
     config?: { programAddress?: Address | HasAddress }
   ) => ReturnType<typeof getSettleInstructionAsync> & SelfPlanAndSendFunctions;
+  settleViaCourier: (
+    input: SettleViaCourierAsyncInput,
+    config?: { programAddress?: Address | HasAddress }
+  ) => ReturnType<typeof getSettleViaCourierInstructionAsync> &
+    SelfPlanAndSendFunctions;
   topUp: (
     input: TopUpAsyncInput,
     config?: { programAddress?: Address | HasAddress }
@@ -510,6 +555,14 @@ export function wherryProgram(
             addSelfPlanAndSendFunctions(
               client,
               getSettleInstructionAsync(input, {
+                programAddress:
+                  instructionConfig?.programAddress ?? config.programAddress,
+              })
+            ),
+          settleViaCourier: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getSettleViaCourierInstructionAsync(input, {
                 programAddress:
                   instructionConfig?.programAddress ?? config.programAddress,
               })
