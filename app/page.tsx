@@ -46,7 +46,7 @@ export default function Landing() {
     <div className="min-h-dvh overflow-x-clip">
       <header className="mx-auto flex max-w-page items-center justify-between gap-3 px-4 py-5 md:px-8">
         <Link href="/" className="display flex items-center gap-2 text-2xl">
-          <span aria-hidden className="grid h-9 w-9 place-items-center rounded-full bg-brand text-on-brand">
+          <span aria-hidden className="grid h-9 w-9 place-items-center rounded-full bg-accent text-on-accent">
             <span className="text-lg leading-none">W</span>
           </span>
           Wherry
@@ -58,7 +58,7 @@ export default function Landing() {
           <a href="#safe" className="hidden rounded-full px-3 py-1.5 font-medium hover:bg-sunk sm:inline">
             Is it safe
           </a>
-          <Link href="/app" className="rounded-full bg-ink px-3 py-1.5 font-medium text-on-night">
+          <Link href="/app" className="rounded-full bg-accent px-3 py-1.5 font-medium text-on-accent">
             Open app
           </Link>
         </nav>
@@ -67,7 +67,10 @@ export default function Landing() {
       <main>
         <section className="mx-auto grid max-w-page items-center gap-10 px-4 pb-10 pt-6 md:px-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:pt-14">
           <div className="flex flex-col gap-7">
-            <h1 className="headline-fade max-w-[680px] text-[clamp(48px,7.2vw,96px)]">Pay with no signal. Get paid when it&apos;s back.</h1>
+            <p className="label">Offline · Signed · Settled on Solana</p>
+            <h1 className="headline-fade max-w-[720px] text-[clamp(56px,8.4vw,120px)]">
+              Pay with <em className="font-normal italic">no signal.</em> Get paid when it&apos;s back.
+            </h1>
             <p className="max-w-[540px] text-xl text-muted">
               Wherry is a ferry for your money when the network&apos;s gone. Your phone pays the shop with a signed ticket, offline. The money was locked on Solana first, so the
               ticket is always good.
@@ -107,7 +110,7 @@ export default function Landing() {
                 className={`paper flex flex-col gap-3 p-6 md:p-8 ${i === 1 ? "lg:col-start-2 lg:row-span-2 lg:row-start-1 bg-night text-on-night" : ""}`}
               >
                 <div className="flex items-center gap-3">
-                  <span className={`mono grid h-9 w-9 place-items-center rounded-full text-sm ${i === 1 ? "bg-on-night text-ink" : "bg-brand text-on-brand"}`}>{s.n}</span>
+                  <span className={`mono grid h-9 w-9 place-items-center rounded-full text-sm ${i === 1 ? "bg-accent text-on-accent" : "bg-accent text-on-accent"}`}>{s.n}</span>
                   <span className={`text-sm font-medium ${i === 1 ? "text-on-night-muted" : "text-muted"}`}>{s.when}</span>
                 </div>
                 <h3 className="text-3xl">{s.title}</h3>

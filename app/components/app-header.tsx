@@ -30,7 +30,7 @@ export function AppHeader() {
                 key={r.href}
                 href={r.href}
                 aria-current={active ? "page" : undefined}
-                className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium sm:px-4 ${active ? "bg-ink text-on-night" : "text-muted hover:bg-sunk hover:text-ink"}`}
+                className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium sm:px-4 ${active ? "bg-accent text-on-accent" : "text-muted hover:bg-sunk hover:text-ink"}`}
               >
                 {r.n > 0 && (
                   <span className="mono mr-1 text-xs" aria-hidden>

@@ -40,7 +40,7 @@ export function Ticket({
           <span className="text-sm opacity-80">Pay to</span>
           <span className="display truncate text-2xl">{shopName}</span>
         </div>
-        {qr && <div className="w-fit max-w-full rounded-lg bg-surface p-2">{qr}</div>}
+        {qr && <div className="w-fit max-w-full rounded-lg border border-on-paper/25 bg-paper p-2">{qr}</div>}
         <div className="flex flex-col gap-1">
           <span className="mono text-4xl leading-none">{formatUsd(amount)}</span>
           {tab && <span className="mono truncate text-xs opacity-75">from tab {shortAddress(tab)}</span>}
@@ -48,7 +48,7 @@ export function Ticket({
       </div>
       <div
         aria-hidden
-        className={`flex w-16 shrink-0 flex-col items-center justify-between border-l-2 border-dashed border-on-brand/40 py-5 ${stamp ? "w-tear" : ""}`}
+        className={`flex w-16 shrink-0 flex-col items-center justify-between border-l-2 border-dashed border-on-paper/40 py-5 ${stamp ? "w-tear" : ""}`}
       >
         <span className="mono text-xs opacity-80 [writing-mode:vertical-rl]">{serialLabel(serial)}</span>
         <span className="display text-base [writing-mode:vertical-rl]">Wherry</span>

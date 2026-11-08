@@ -713,7 +713,7 @@ function RiskCircuit({
             </span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-sunk" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={meter(row.value, risk[row.key])} aria-label={`${row.label} exposure`}>
-            <div className={`h-full ${meter(row.value, risk[row.key]) >= 100 ? "bg-err" : "bg-ink"}`} style={{ width: `${meter(row.value, risk[row.key])}%` }} />
+            <div className={`h-full ${meter(row.value, risk[row.key]) >= 100 ? "bg-spark" : "bg-ink"}`} style={{ width: `${meter(row.value, risk[row.key])}%` }} />
           </div>
         </div>
       ))}

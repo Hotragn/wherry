@@ -54,8 +54,8 @@ export function QrCode({ text, size = 232, label }: { text: string; size?: numbe
   data.forEach((row, y) => row.forEach((on, x) => on && (d += `M${x} ${y}h1v1h-1z`)));
   return (
     <svg viewBox={`0 0 ${n} ${n}`} width={size} height={size} role="img" aria-label={label} shapeRendering="crispEdges" className="block max-w-full h-auto">
-      <rect width={n} height={n} fill="var(--w-surface)" />
-      <path d={d} fill="var(--w-ink)" />
+      <rect width={n} height={n} fill="var(--w-paper)" />
+      <path d={d} fill="var(--w-on-paper)" />
     </svg>
   );
 }
@@ -63,10 +63,9 @@ export function QrCode({ text, size = 232, label }: { text: string; size?: numbe
 /** Ok / err / warn line: never colour alone, always a word and a mark. */
 export function Signal({ tone, children }: { tone: "ok" | "err" | "warn"; children: React.ReactNode }) {
   const mark = tone === "ok" ? "✓" : tone === "err" ? "✕" : "!";
-  const color = tone === "ok" ? "text-ok" : tone === "err" ? "text-err" : "text-warn";
   return (
-    <p className={`flex gap-2 ${color}`}>
-      <span aria-hidden className="mono w-4 shrink-0 text-center font-bold">
+    <p className={`flex gap-2 ${tone === "ok" ? "text-ok" : "text-ink"} ${tone === "err" ? "font-semibold" : ""}`}>
+      <span aria-hidden className={`mono w-4 shrink-0 text-center font-bold ${tone === "err" ? "text-spark" : ""}`}>
         {mark}
       </span>
       <span>{children}</span>
