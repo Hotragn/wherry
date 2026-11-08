@@ -2,8 +2,8 @@ import type { CSSProperties, ReactNode } from "react";
 import { formatUsd, serialLabel, shortAddress } from "../lib/config.ts";
 
 /**
- * A ferry ticket (the voucher): saffron card stock, serial, destination shop, mono fare,
- * a perforated stub with punched notches. When collected, a stamp lands and the stub tears off.
+ * A ferry ticket (the voucher): emerald card stock like a banknote, serial, destination shop, mono fare,
+ * a perforated stub with punched notches. When collected, a vermilion stamp lands and the stub tears off.
  */
 export function Ticket({
   serial,
@@ -19,7 +19,7 @@ export function Ticket({
   amount: bigint;
   tab?: string;
   qr?: ReactNode;
-  /** e.g. "0.7 s": shows the green COLLECTED stamp and tears the stub */
+  /** e.g. "0.7 s": shows the COLLECTED stamp and tears the stub */
   stamp?: string;
   /** true when the ticket sits on a surface panel, so the notches match it */
   onPaper?: boolean;
@@ -31,27 +31,27 @@ export function Ticket({
       style={style}
       aria-label={`Ferry ticket ${serialLabel(serial)}, ${formatUsd(amount)}, to ${shopName}${stamp ? ", collected" : ""}`}
     >
-      <div className="flex min-w-0 flex-1 flex-col gap-3 p-4 pr-5">
+      <div className="flex min-w-0 flex-1 flex-col gap-4 p-5">
         <header className="flex flex-wrap items-baseline justify-between gap-x-3">
-          <span className="label whitespace-nowrap text-ink">Wherry ferry</span>
-          <span className="mono whitespace-nowrap text-sm">{serialLabel(serial)}</span>
+          <span className="text-sm font-medium opacity-80">Wherry ferry ticket</span>
+          <span className="mono whitespace-nowrap text-sm opacity-80">{serialLabel(serial)}</span>
         </header>
-        <div className="flex flex-col">
-          <span className="label text-ink">Admit one crossing to</span>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-sm opacity-80">Pay to</span>
           <span className="display truncate text-2xl">{shopName}</span>
         </div>
-        {qr && <div className="w-fit max-w-full rounded-sm border-2 border-ink bg-surface p-1">{qr}</div>}
+        {qr && <div className="w-fit max-w-full rounded-lg bg-surface p-2">{qr}</div>}
         <div className="flex flex-col gap-1">
           <span className="mono text-4xl leading-none">{formatUsd(amount)}</span>
-          {tab && <span className="mono truncate text-xs">from tab {shortAddress(tab)}</span>}
+          {tab && <span className="mono truncate text-xs opacity-75">from tab {shortAddress(tab)}</span>}
         </div>
       </div>
       <div
         aria-hidden
-        className={`flex w-16 shrink-0 flex-col items-center justify-between border-l-[3px] border-dotted border-ink py-4 ${stamp ? "w-tear" : ""}`}
+        className={`flex w-16 shrink-0 flex-col items-center justify-between border-l-2 border-dashed border-on-brand/40 py-5 ${stamp ? "w-tear" : ""}`}
       >
-        <span className="mono text-xs [writing-mode:vertical-rl]">{serialLabel(serial)}</span>
-        <span className="display text-lg [writing-mode:vertical-rl]">Wherry</span>
+        <span className="mono text-xs opacity-80 [writing-mode:vertical-rl]">{serialLabel(serial)}</span>
+        <span className="display text-base [writing-mode:vertical-rl]">Wherry</span>
       </div>
       {stamp && (
         <span className="stamp w-stamp absolute bottom-5 right-20 z-[2]">

@@ -66,8 +66,8 @@ export function ListenButton({ onCode }: { onCode: (code: string, seconds: numbe
           <button type="button" className="btn btn-quiet" onClick={() => stop.current?.abort()}>
             Stop listening
           </button>
-          <div className="h-3 w-32 overflow-hidden rounded-sm border-2 border-ink bg-surface" role="meter" aria-label="Microphone level" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(level * 100)}>
-            <div className="h-full bg-accent transition-[width] duration-75" style={{ width: `${Math.round(level * 100)}%` }} />
+          <div className="h-3 w-32 overflow-hidden rounded-sm border border-line bg-surface" role="meter" aria-label="Microphone level" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(level * 100)}>
+            <div className="h-full bg-brand transition-[width] duration-75" style={{ width: `${Math.round(level * 100)}%` }} />
           </div>
           <span className="text-sm text-muted">Listening… play the sound on the phone.</span>
         </>
