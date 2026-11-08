@@ -5,12 +5,13 @@ import { get, set } from "idb-keyval";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Crossing, type Boat } from "../../components/crossing";
 import { Doggett } from "../../components/doggett";
+import { FirstRun } from "../../components/guide";
 import { Scanner } from "../../components/scanner";
 import { Ticket } from "../../components/ticket";
 import { TxStatus, lamportsToSol, type TxState } from "../../components/tx-status";
 import { hex } from "../../lib/fair.ts";
 import { commitSeed, revealSeed, studioState } from "../../lib/game.ts";
-import { Addr, Money, QrCode, Signal, TxLink } from "../../components/ui";
+import { Addr, Money, QrCode, Signal, TxLink, WhatsThis } from "../../components/ui";
 import { assess, type Assessment, type Pending, type RiskSettings } from "../../lib/assess.ts";
 import { fetchSolBalance, secondsToFinalized } from "../../lib/chain.ts";
 import { decodeVoucher, stickerCode, type SignedVoucher } from "../../lib/codes.ts";
@@ -140,7 +141,13 @@ export default function ShopPage() {
     [queue],
   );
 
-  if (!shop || name === null || !risk) return <p className="text-muted">Opening the shop…</p>;
+  if (!shop || name === null || !risk)
+    return (
+      <div className="flex items-center gap-3">
+        <Doggett pose="waiting" size={56} />
+        <p className="text-lg">Opening the shop…</p>
+      </div>
+    );
   if (!name) return <Setup onDone={(n) => setName(n)} />;
 
   async function onVoucher(code: string) {
@@ -250,19 +257,29 @@ export default function ShopPage() {
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
       <div className="flex min-w-0 flex-col gap-10">
-        <section aria-label="Accept a voucher" className="flex flex-col gap-4">
-          <h1 className="text-4xl">Accept a voucher</h1>
+        <FirstRun role="shop" />
+        {!online && (
+          <p role="status" className="flex items-center gap-3 rounded-sm border-2 border-ink bg-accent px-4 py-3 text-lg font-bold">
+            <span aria-hidden className="mono">[....]</span>
+            No signal. That&apos;s fine. Tickets still check offline.
+          </p>
+        )}
+        <section aria-label="Check a ferry ticket" className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+            <h1 className="text-5xl md:text-6xl">Check a ferry ticket</h1>
+            <span className="mono text-sm">{name}</span>
+          </div>
           {!check ? (
             <div className="paper p-5">
               <Scanner
-                title="Scan the customer's voucher"
-                pasteHint="No camera? Paste the voucher code (it starts with WV1.)"
+                title="Scan the customer's ferry ticket"
+                pasteHint="No camera? Paste the ticket code (it starts with WV1.)"
                 accept={(t) => (decodeVoucher(t) ? null : "That isn't a Wherry voucher.")}
                 onResult={onVoucher}
               />
             </div>
           ) : (
-            <div className="paper grid gap-6 p-5 md:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
+            <div className="paper grid gap-6 p-5 md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
               <div className="self-start">
                 <Ticket serial={check.v.serial} shopName={name} amount={check.v.amount} tab={check.v.tab} onPaper />
               </div>
@@ -272,6 +289,7 @@ export default function ShopPage() {
                     Signature valid · checked offline in <span className="mono">{check.verifyMs < 1 ? "<1" : Math.round(check.verifyMs)} ms</span>
                   </Signal>
                 ) : null}
+                {check.result.decision !== "accept" && <Doggett pose="error" size={56} />}
                 <Signal tone={check.result.decision === "accept" ? "ok" : "err"}>{check.result.headline}</Signal>
                 {check.result.warnings.map((w) => (
                   <Signal key={w} tone="warn">
@@ -310,25 +328,31 @@ export default function ShopPage() {
           )}
         </section>
 
-        <section aria-label="Vouchers" className="flex flex-col gap-5">
+        <section aria-label="Tickets to collect" className="flex flex-col gap-5 border-t-2 border-ink pt-8">
           <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h2 className="text-2xl">The Crossing</h2>
-              <p className="text-sm text-muted">
-                {pending.length === 0 ? "Nothing waiting to settle." : `${pending.length} waiting · ${formatUsd(pendingTotal)} to collect.`}
+            <div className="flex flex-col gap-1">
+              <span className="label text-ink">The crossing</span>
+              <h2 className="text-4xl">Tickets to collect</h2>
+              <p className="text-lg">
+                {pending.length === 0 ? "Nothing waiting to collect." : (
+                  <>
+                    <span className="mono">{pending.length}</span> waiting · <Money units={pendingTotal} /> to collect.
+                  </>
+                )}
               </p>
+              <WhatsThis term="Settle">Collecting sends your tickets to Solana in one transaction. It checks every signature again and pays you from each customer&apos;s locked tab.</WhatsThis>
             </div>
             {pending.length > 0 && (
               <button type="button" className={`btn ${settlePrimary ? "btn-sail" : "btn-quiet"}`} disabled={!online || settling} onClick={settle}>
-                {settling ? "Settling…" : `Settle ${pending.length} voucher${pending.length === 1 ? "" : "s"}`}
+                {settling ? "Collecting…" : `Collect ${formatUsd(pendingTotal)}`}
               </button>
             )}
           </div>
-          {!online && pending.length > 0 && <p className="text-sm text-warn">You&apos;re offline. Vouchers wait safely here; settle when the network is back.</p>}
+          {!online && pending.length > 0 && <p className="text-sm text-warn">Tickets wait safely here. Collect when the network is back.</p>}
           {queue.length === 0 ? (
             <div className="flex items-center gap-4">
               <Doggett pose="welcome" size={72} />
-              <p className="text-muted">No vouchers yet. Accepted vouchers wait on the near bank and cross when you settle.</p>
+              <p className="text-muted">No tickets yet. Accepted tickets wait on the near bank and cross when you collect.</p>
             </div>
           ) : (
             <Crossing boats={boats} />
@@ -336,7 +360,7 @@ export default function ShopPage() {
           {settling && batches.length === 0 && (
             <div className="flex items-center gap-3">
               <Doggett pose="waiting" size={48} />
-              <span>Settling: checking every signature onchain…</span>
+              <span className="text-lg">Collecting: Solana is checking every signature…</span>
             </div>
           )}
           {batches.length > 0 && (
@@ -349,7 +373,7 @@ export default function ShopPage() {
                   <li key={i} className="flex flex-col gap-1">
                     {landed.length > 0 && (
                       <span className="text-ok">
-                        ✓ Settled {plural(landed.length, "voucher")} · {b.sents.length === 1 ? "one transaction" : `${b.sents.length} transactions`} ·{" "}
+                        ✓ Collected {plural(landed.length, "ticket")} · {b.sents.length === 1 ? "one transaction" : `${b.sents.length} transactions`} ·{" "}
                         <span className="mono whitespace-nowrap">{seconds.toFixed(1)} s</span>. {formatUsd(sumOf(queue, landed))} is in your account.{" "}
                         <span className="text-muted">
                           Fee <span className="mono">{lamportsToSol(fee)}</span> ·{" "}
@@ -374,9 +398,10 @@ export default function ShopPage() {
           )}
           {settleError && <p className="text-err">✕ {settleError}</p>}
           {lastSettled.length > 0 && (
-            <div className="flex flex-wrap gap-4" aria-label="Just settled">
+            <div className="flex flex-wrap items-center gap-6" aria-label="Just collected">
+              <Doggett pose="success" size={72} />
               {lastSettled.map((q) => (
-                <div key={q.code} className="w-72 w-rise">
+                <div key={q.code} className="w-80 w-rise">
                   <Ticket serial={q.v.serial} shopName={name} amount={q.v.amount} stamp={`${q.sent!.seconds.toFixed(1)} s`} />
                 </div>
               ))}
@@ -385,14 +410,14 @@ export default function ShopPage() {
         </section>
       </div>
 
-      <aside className="flex flex-col gap-8">
+      <aside className="flex flex-col gap-8 [&>section+section]:border-t-2 [&>section+section]:border-ink [&>section+section]:pt-6">
         <Sticker shop={shop} name={name} online={online} />
         <RiskCircuit risk={risk} pending={pending} lastTrip={lastTrip} onChange={async (r) => (setRisk(r), await saveRisk(r))} />
         <OfficerPanel state={officer} onStart={startOfficer} onStop={async () => (await set("shop:officer-on", false), setOfficer({ status: "off" }))} />
         <StudioPanel shop={shop} online={online} />
         <NumbersPanel n={numbers} />
         <section aria-label="Tab list" className="flex flex-col gap-2">
-          <h2 className="text-xl">Tab list</h2>
+          <h2 className="text-2xl">Tab list</h2>
           <p className="text-sm">
             {snap ? (
               <>
@@ -425,9 +450,9 @@ function Setup({ onDone }: { onDone: (name: string) => void }) {
         onDone(value.trim().slice(0, 40));
       }}
     >
-      <Doggett pose="welcome" size={88} />
-      <h1 className="text-4xl">Set up your shop</h1>
-      <p>Your shop gets its own key in this browser. Customers scan your sticker to pay you, and you settle their vouchers with this key later.</p>
+      <FirstRun role="shop" />
+      <h1 className="text-5xl">Set up your shop</h1>
+      <p className="text-lg">Your shop gets its own key in this browser. Customers scan your sticker to pay you, and you collect their ferry tickets with this key later.</p>
       <label className="flex flex-col gap-1">
         <span className="label">Shop name</span>
         <input className="field" value={value} maxLength={40} onChange={(e) => setValue(e.target.value)} placeholder="Amara's kiosk" />
@@ -448,7 +473,7 @@ function Sticker({ shop, name, online }: { shop: KeyPairSigner; name: string; on
   }, [online, shop.address, faucet]);
   return (
     <section aria-label="Your sticker" className="paper print-area flex flex-col items-center gap-3 p-5">
-      <span className="label">Pay {name} with Wherry</span>
+      <span className="label text-ink">Pay {name} with Wherry</span>
       <QrCode text={code} size={200} label={`Shop sticker QR for ${name}`} />
       <Addr value={shop.address} />
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm print:hidden">
@@ -496,7 +521,7 @@ function NumbersPanel({ n }: { n: Numbers | null }) {
   ];
   return (
     <section aria-label="Measured on this device" className="flex flex-col gap-2">
-      <h2 className="text-xl">Measured here</h2>
+      <h2 className="text-2xl">Measured here</h2>
       <p className="text-sm text-muted">Real numbers from your last settlement on devnet and the last AI decision. Nothing estimated.</p>
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
         {rows.map(([k, v]) => (
@@ -531,7 +556,7 @@ function StudioPanel({ shop, online }: { shop: KeyPairSigner; online: boolean })
 
   return (
     <section aria-label="Game studio" className="flex flex-col gap-2">
-      <h2 className="text-xl">Game studio</h2>
+      <h2 className="text-2xl">Game studio</h2>
       <p className="text-sm text-muted">
         Sell power-ups for Doggett&apos;s Crossing. Commit a secret seed before you sell and reveal it after you settle, so players can check their bonus drops.
       </p>
@@ -559,7 +584,7 @@ function StudioPanel({ shop, online }: { shop: KeyPairSigner; online: boolean })
 function OfficerPanel({ state, onStart, onStop }: { state: OfficerState; onStart: () => void; onStop: () => void }) {
   return (
     <section aria-label="AI risk officer" className="flex flex-col gap-2">
-      <h2 className="text-xl">AI risk officer</h2>
+      <h2 className="text-2xl">AI risk officer</h2>
       <p className="text-sm text-muted">
         A small language model ({OFFICER_LABEL}) running in this browser on WebGPU. It reads each voucher your rules accept and can
         turn it down. It can never accept one the rules decline.
@@ -622,7 +647,7 @@ function RiskCircuit({
   return (
     <section aria-label="Risk circuit" className="flex flex-col gap-4">
       <div>
-        <h2 className="text-xl">Risk circuit</h2>
+        <h2 className="text-2xl">Risk circuit</h2>
         <p className="text-sm text-muted">Limits on what you hold unsettled while offline. A voucher that would cross one is declined.</p>
       </div>
       {[

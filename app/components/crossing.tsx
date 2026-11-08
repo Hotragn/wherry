@@ -12,7 +12,7 @@ export type Boat = {
 };
 
 export function BoatGlyph({ where = "near", size = 28 }: { where?: Boat["where"]; size?: number }) {
-  const sail = where === "far" ? "var(--w-ok)" : where === "stuck" ? "var(--w-err)" : "var(--w-surface)";
+  const sail = where === "far" ? "var(--w-ok)" : where === "stuck" ? "var(--w-err)" : "var(--w-accent)";
   return (
     <svg viewBox="0 0 28 20" width={size} height={(size * 20) / 28} aria-hidden className="shrink-0">
       <path d="M2 13 Q14 14.5 26 12 Q24 18.5 15 18.8 Q6 19 2 13 Z" fill="var(--w-ink)" />
@@ -37,9 +37,9 @@ export function River({ vertical, soundings = ["4", "3½", "5", "2¾"] }: { vert
             key={i}
             d={wave(i)}
             fill="none"
-            stroke="var(--w-muted)"
-            strokeWidth={i % 2 ? 0.75 : 1.25}
-            strokeOpacity={i % 2 ? 0.45 : 0.7}
+            stroke="var(--w-ink)"
+            strokeWidth={i % 2 ? 1 : 2}
+            strokeOpacity={i % 2 ? 0.4 : 0.85}
             vectorEffect="non-scaling-stroke"
           />
         ))}
@@ -47,7 +47,7 @@ export function River({ vertical, soundings = ["4", "3½", "5", "2¾"] }: { vert
       {soundings.map((s, i) => (
         <span
           key={i}
-          className="absolute font-display text-xs italic text-muted"
+          className="mono absolute text-xs text-muted"
           style={vertical ? { top: `${14 + i * 22}%`, left: i % 2 ? "58%" : "22%" } : { left: `${10 + i * 24}%`, top: i % 2 ? "58%" : "8%" }}
         >
           {s}
@@ -59,9 +59,9 @@ export function River({ vertical, soundings = ["4", "3½", "5", "2¾"] }: { vert
 
 function Bank({ title, sub, boats, empty }: { title: string; sub: string; boats: Boat[]; empty: string }) {
   return (
-    <div className="flex min-w-0 flex-col gap-3">
+    <div className="paper flex min-w-0 flex-col gap-3 p-4">
       <div>
-        <h3 className="text-lg">{title}</h3>
+        <h3 className="text-2xl">{title}</h3>
         <p className="text-sm text-muted">{sub}</p>
       </div>
       {boats.length === 0 ? (
@@ -71,8 +71,8 @@ function Bank({ title, sub, boats, empty }: { title: string; sub: string; boats:
           {boats.map((b) => (
             <li key={b.id} className={`flex items-center gap-3 ${b.arriving ? "w-arrive" : ""}`}>
               <BoatGlyph where={b.where} />
-              <span className="label w-[72px] shrink-0 text-ink">{serialLabel(b.serial)}</span>
-              <span className="mono">{formatUsd(b.amount)}</span>
+              <span className="mono w-[78px] shrink-0 text-sm">{serialLabel(b.serial)}</span>
+              <span className="mono text-lg">{formatUsd(b.amount)}</span>
               {b.note && <span className={`truncate text-sm ${b.where === "stuck" ? "text-err" : "text-muted"}`}>{b.note}</span>}
             </li>
           ))}
@@ -89,14 +89,14 @@ export function Crossing({ boats }: { boats: Boat[] }) {
       aria-label="The Crossing: vouchers checked offline on the near bank, settled onchain on the far bank"
       className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_88px_minmax(0,1fr)]"
     >
-      <Bank title="Near bank" sub="Checked offline, waiting to settle" boats={boats.filter((b) => b.where !== "far")} empty="No vouchers waiting." />
+      <Bank title="Near bank" sub="Checked offline, waiting to collect" boats={boats.filter((b) => b.where !== "far")} empty="No tickets waiting." />
       <div className="hidden sm:block">
         <River vertical />
       </div>
       <div className="sm:hidden">
         <River vertical={false} />
       </div>
-      <Bank title="Far bank" sub="Settled onchain" boats={boats.filter((b) => b.where === "far")} empty="Nothing settled yet." />
+      <Bank title="Far bank" sub="Collected: paid onchain" boats={boats.filter((b) => b.where === "far")} empty="Nothing collected yet." />
     </section>
   );
 }
