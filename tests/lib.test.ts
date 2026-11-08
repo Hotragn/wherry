@@ -149,3 +149,12 @@ test("tighten-only: the officer never overrides a rules decline, and no answer m
   assert.equal(await withTimeout(new Promise(() => {}), 20), null);
   assert.equal(await withTimeout(Promise.resolve("ok"), 20), "ok");
 });
+
+test("the phone key can't leave the device: exporting the private key fails", async () => {
+  // Same call the phone uses (app/lib/phone.ts deviceKey): Kit's generateKeyPair makes a non-extractable Ed25519 key.
+  const pair = await generateKeyPair();
+  assert.equal(pair.privateKey.extractable, false);
+  await assert.rejects(crypto.subtle.exportKey("pkcs8", pair.privateKey));
+  await assert.rejects(crypto.subtle.exportKey("jwk", pair.privateKey));
+  assert.equal((await crypto.subtle.exportKey("raw", pair.publicKey)).byteLength, 32); // the public half is shareable
+});

@@ -1,7 +1,7 @@
 // Wherry service worker: after the first visit, /app and /play keep working with no network.
 // Pages: network first, cached copy offline. Hashed build assets: cache first.
 // Solana RPC and the faucet are never cached.
-const CACHE = "wherry-v1";
+const CACHE = "wherry-v2"; // bump on each release so the new pages are precached
 const SHELL = ["/", "/app", "/app/phone", "/app/shop", "/app/owner", "/play"];
 
 async function precache() {
@@ -37,7 +37,20 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(async (keys) => {
+        const current = await caches.open(CACHE);
+        for (const old of keys.filter((k) => k !== CACHE)) {
+          // Keep hashed build files (e.g. the lazily loaded AI officer chunk): they never change, and offline they can't be refetched.
+          const cache = await caches.open(old);
+          for (const req of await cache.keys()) {
+            if (new URL(req.url).pathname.startsWith("/_next/static/") && !(await current.match(req))) {
+              const res = await cache.match(req);
+              if (res) await current.put(req, res);
+            }
+          }
+          await caches.delete(old);
+        }
+      })
       .then(() => self.clients.claim()),
   );
 });

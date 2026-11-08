@@ -36,6 +36,7 @@ import { useNow } from "../../lib/use-now.ts";
 import { useOnline } from "../../lib/use-online.ts";
 import { verifyVoucherSignature } from "../../lib/voucher.ts";
 
+const OFFICER_LABEL = OFFICER_MODEL.split("-Instruct")[0].replace(/-/g, " ");
 const SYNC_ERROR = "Couldn't reach devnet to sync tabs.";
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 // A settlement costs 5,000 lamports for the transaction plus 5,000 per Ed25519 check (one per voucher);
@@ -254,7 +255,7 @@ export default function ShopPage() {
                     <span className="label mr-2 text-ink">AI officer</span>
                     {check.officer.opinion.line}{" "}
                     <span className="text-sm text-muted">
-                      (<span className="mono">{(check.officer.opinion.ms / 1000).toFixed(1)} s</span>, on this device)
+                      ({OFFICER_LABEL}, <span className="mono">{(check.officer.opinion.ms / 1000).toFixed(1)} s</span>, on this device)
                     </span>
                   </Signal>
                 )}
@@ -499,7 +500,7 @@ function OfficerPanel({ state, onStart, onStop }: { state: OfficerState; onStart
     <section aria-label="AI risk officer" className="flex flex-col gap-2">
       <h2 className="text-xl">AI risk officer</h2>
       <p className="text-sm text-muted">
-        A small language model ({OFFICER_MODEL.split("-q4")[0].replace(/-/g, " ")}) running in this browser on WebGPU. It reads each voucher your rules accept and can
+        A small language model ({OFFICER_LABEL}) running in this browser on WebGPU. It reads each voucher your rules accept and can
         turn it down. It can never accept one the rules decline.
       </p>
       {state.status === "off" && (
@@ -530,7 +531,7 @@ function OfficerPanel({ state, onStart, onStop }: { state: OfficerState; onStart
       )}
       {state.status === "error" && (
         <p className="text-sm text-err">
-          The officer didn&apos;t load (it needs about 1.6 GB of graphics memory).{" "}
+          The officer didn&apos;t load. Its first load needs the network, and it needs about 1.6 GB of graphics memory. Your rules still apply.{" "}
           <button type="button" className="link" onClick={onStart}>
             Try again
           </button>
