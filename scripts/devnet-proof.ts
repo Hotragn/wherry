@@ -36,8 +36,9 @@ import {
   findTabPda,
   getOpenTabInstructionAsync,
   getSettleInstructionAsync,
+  getSettleViaCourierInstructionAsync,
 } from "../app/generated/wherry/index.ts";
-import { ed25519Instruction, voucherBytes, type Voucher } from "../app/lib/voucher.ts";
+import { courierAuthBytes, ed25519Instruction, voucherBytes, type Voucher } from "../app/lib/voucher.ts";
 
 const RPC_URL = process.env.SOLANA_RPC_URL ?? "https://api.devnet.solana.com";
 const KEYS = new URL("../keys/", import.meta.url).pathname;
@@ -160,4 +161,50 @@ try {
 } catch (e) {
   const text = JSON.stringify(e, (_, v) => (typeof v === "bigint" ? v.toString() : v)) + String((e as Error).message);
   console.log(`replay of the first voucher: rejected (${/VoucherAlreadySettled|6011|0x177b/.test(text) ? "VoucherAlreadySettled" : (e as Error).message})`);
+}
+
+// 7. Optional: anyone-settles courier. The shop signs its consent offline; a different key settles and earns the fee.
+if (process.argv[3] === "courier") {
+  const courier = await keypairFile("demo-courier.json");
+  if ((await read(() => owner.rpc.getBalance(courier.address).send())).value < 10_000_000n) {
+    await send(owner, "fund courier with 0.02 SOL for fees", [
+      getTransferSolInstruction({ source: deployer, destination: courier.address, amount: lamports(20_000_000n) }),
+    ]);
+  }
+  const v = await signVoucher(COUNT + 1, 3_000_000n);
+  const auth = {
+    programId: WHERRY_PROGRAM_ADDRESS,
+    merchant: shop.address,
+    tab,
+    maxFeeBps: 100,
+    maxFeeAbs: 50_000n,
+    authExpiresAt: BigInt(Math.floor(Date.now() / 1000) + 86_400),
+    authNonce: crypto.getRandomValues(new Uint8Array(16)),
+  };
+  const authMsg = courierAuthBytes(auth);
+  const authSig = new Uint8Array(await signBytes(shop.keyPair.privateKey, authMsg));
+  const courierClient = rpcClient(courier);
+  await send(courierClient, `courier settles a $3.00 voucher for ${shop.address.slice(0, 4)}… (fee 1%)`, [
+    ed25519Instruction(devicePk, v.sig, v.msg),
+    ed25519Instruction(new Uint8Array(getAddressEncoder().encode(shop.address)), authSig, authMsg),
+    await getSettleViaCourierInstructionAsync({
+      courier,
+      merchant: shop.address,
+      tab,
+      payerRecord,
+      mint,
+      serial: v.v.serial,
+      amount: v.v.amount,
+      voucherExpiresAt: v.v.voucherExpiresAt,
+      nonce: v.v.nonce,
+      feeBps: 100,
+      maxFeeBps: auth.maxFeeBps,
+      maxFeeAbs: auth.maxFeeAbs,
+      authExpiresAt: auth.authExpiresAt,
+      authNonce: auth.authNonce,
+    }),
+  ]);
+  const [courierAta] = await findAssociatedTokenPda({ mint, owner: courier.address, tokenProgram: TOKEN_PROGRAM_ADDRESS });
+  const bal = await read(() => owner.rpc.getTokenAccountBalance(courierAta).send());
+  console.log(`courier ${courier.address} holds ${bal.value.uiAmountString} test USD in fees`);
 }
