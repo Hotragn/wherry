@@ -23,24 +23,14 @@ Design translation:
 - serial-numbered tickets for vouchers;
 - one red sail for the one primary action.
 
-## Palette (redesign, 2026-11-08): owner combo 2, "Fog · Aubergine · Saffron"
-Swatch page with all three owner combos on the same real UI: `design/swatches.html` (screenshot `design/after/swatches.png`).
-
-| Combo | Colours | Verdict |
-|---|---|---|
-| 1 | coffee #6F4E37 · platinum #E5E4E2 (owner wrote "ese4e2") · lavender mist #E6E0F0 | Rejected. Lavender on platinum is 1.01:1, so the primary action and the ticket vanish. |
-| **2** | **fog #DDE3E8 · aubergine #3A0F34 · saffron #EAAA00** | **Picked.** Saffron is real ferry-ticket card stock. Aubergine on fog is 12.5:1, aubergine on saffron 7.9:1. Readable in daylight, nothing like a dark crypto site. |
-| 3 | walnut #5B4632 · hot pink #FA4D90 · copper #C8792C | Rejected. Pink on walnut is 2.76:1 and copper 2.63:1, and it reads as a promo site. |
-
-Tokens (`design/tokens.css`): base fog · surface #EEF1F4 (lifted fog) · sunk #CDD5DC · ink aubergine · muted #5C4A5A (6.28:1) · accent saffron, with aubergine text on it · ok #1C6641 (5.36:1) · err #A3231C (5.77:1) · night = aubergine, with on-night = fog.
-Rules: saffron is only ever a fill (as text on fog it's 1.58:1). Warnings are ink plus a "!" mark, never a fourth hue. No #FFFFFF or #000000.
-
-**Superseded:** palette A "Admiralty chart" (paper #F3EBDD / river ink #11313A / red-oxide sail #B0432A), with Fraunces, Instrument Sans and IBM Plex Mono.
-
-## Type (redesign)
-- **Display: Bricolage Grotesque** at 78% width and weight 800. A condensed, slightly quirky grotesque, like a printed ferry notice. OFL, via next/font.
-- **Text: Atkinson Hyperlegible Next.** Made for low-vision readers, so it suits a first-time user on a phone at a market stall. Body 17 px, lead 19 px. OFL.
-- **Mono: Paper Mono** (paper.design, OFL 1.1, self-hosted at `public/fonts/PaperMono.woff2`) for every amount, serial, label and all the ASCII art.
+## Palette, type and buttons (redesign v2, 2026-11-08): owner combo 4, "Ivory · Emerald · Vermilion"
+Full reasoning, the references and the persona brief: `design/persona-brief.md`. Swatch page with all four owner combos: `design/swatches.html`.
+- Core: warm ivory #F9EBD7 · emerald #046A38 · vermilion #E34222. Derived: ivory-50 #FDF7EE (cards), ivory-200/300 (wells, hairlines), ink #0E2A1D, action vermilion #C8361A (ivory text 4.89:1), err #9A2B12.
+- Type: Geist (one family) + Paper Mono for numbers and ASCII. Sentence case.
+- Buttons: a vermilion pill with an arrow chip (one per screen). Secondary is an ivory pill with a hairline.
+- Surfaces: flat ivory cards, 24 px radius, hairline all the way round, soft tactile shadow. The only gradient is on the hero heading text.
+- Tickets: emerald card stock like a banknote, with a vermilion COLLECTED stamp.
+- Superseded the same day: v1 fog/aubergine/saffron with Bricolage and Atkinson. Before that: palette A "Admiralty chart".
 
 ## ASCII animation
 Pure text frames in Paper Mono (`app/components/ascii.tsx`, frames in `ascii-frames.ts`, tested). They run on requestAnimationFrame at 10–30 fps, pause off-screen, render one static frame under reduced motion, and are aria-hidden with a text alternative.
@@ -55,7 +45,7 @@ Pure text frames in Paper Mono (`app/components/ascii.tsx`, frames in `ascii-fra
 - Motion: a boat on calm water. 120/200/320 ms, ease `cubic-bezier(.2,.8,.2,1)`, no bounce. The only loop is Doggett's three waiting dots (1.2 s). Everything goes static under `prefers-reduced-motion`.
 
 ## Mascot: Doggett
-- **Who:** Doggett, a chubby little Thames wherry with an aubergine hull, a saffron sail and stripe, big eyes with highlights, and a saffron blush (redrawn 2026-11-08).
+- **Who:** Doggett v2: a soft cream plush ferryman (fur texture, smooth face patch, dot eyes, vermilion blush) sitting in a little emerald wherry with a vermilion pennant. Inspired by the Meta Muse plush style the owner shared; hand-built SVG.
 - **Name:** from *Doggett's Coat and Badge*, the race for young Thames watermen rowed every year since 1715, the oldest rowing race in the world.
 - **Personality:** unflappable, cheerful, a little proud of always getting across. Doggett never panics in the dark; it just keeps rowing.
 - **Why it fits:** the product's job is getting money safely across a gap (the outage). A tiny, sturdy ferry that keeps going when the lights are out is the promise in one picture. It's simple enough to read at 32 px: hull, sail, two eyes.

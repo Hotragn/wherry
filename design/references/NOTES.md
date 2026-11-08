@@ -13,3 +13,9 @@ How it shows up in Wherry:
 - Bricolage Grotesque, condensed and very bold, for headlines that read like a printed ferry notice.
 - One saffron action per screen. Everything else is aubergine ink on fog.
 - Hard offset shadows (a ticket lying on a counter) instead of blurs.
+
+## v2 (after owner feedback)
+- `dribbble-crypto-animation.jpg`: character-led 3D objects floating over soft fields. That's where the orb + plush Doggett + drifting ticket hero comes from.
+- Figma "Web design trends 2026": we took 3D/WebGL, bold type, motion and tactile soft UI. We left out neo-brutalism (v1's hard shadows), neon retrofuturism and collage.
+- Rare UI fluid-orb is vendored as `app/components/fluid-orb.tsx` and credited in the footer.
+- elaya `figma-designer` rules applied: see `design/persona-brief.md`.

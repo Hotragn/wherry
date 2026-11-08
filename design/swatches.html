@@ -8,11 +8,14 @@
   @font-face { font-family: "Paper Mono"; src: url("../public/fonts/PaperMono.woff2") format("woff2"); font-weight: 100 800; }
   body { margin: 0; font-family: system-ui, sans-serif; background: #CDD5DC; color: #3A0F34; }
   h1 { font-size: 30px; margin: 24px 24px 4px; } .sub { margin: 0 24px 16px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; padding: 0 16px 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; padding: 0 16px 24px; }
   .pal { background: var(--base); color: var(--ink); border: 2px solid var(--ink); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
   .c1 { --base:#E5E4E2; --surface:#F0EFEE; --ink:#6F4E37; --accent:#E6E0F0; --on:#6F4E37; --ok:#1C6641; --err:#A3231C; }
   .c2 { --base:#DDE3E8; --surface:#EEF1F4; --ink:#3A0F34; --accent:#EAAA00; --on:#3A0F34; --ok:#1C6641; --err:#A3231C; }
-  .c3 { --base:#5B4632; --surface:#6A5440; --ink:#FA4D90; --accent:#C8792C; --on:#5B4632; --ok:#9BE0B4; --err:#FFB4A8; }
+  .c3 { --base:#F4D9A0; --surface:#F8E6C0; --ink:#5B4632; --accent:#C8792C; --on:#2E2318; --ok:#1C6641; --err:#9A2B12; }
+  .c4 { --base:#F9EBD7; --surface:#FDF7EE; --ink:#0E2A1D; --accent:#C8361A; --on:#FDF7EE; --ok:#046A38; --err:#9A2B12; }
+  .c4 .ticket { background:#046A38; color:#F9EBD7; }
+  .pal { border-radius: 24px; } .ticket, .btn { border-radius: 16px; } .btn { border-radius: 999px; box-shadow:none; border:0; }
   .label { font: 600 12px/1 "Paper Mono", monospace; letter-spacing: .12em; text-transform: uppercase; }
   h2 { margin: 0; font-size: 28px; }
   .ticket { background: var(--accent); color: var(--on); border: 2px solid var(--ink); border-radius: 6px; padding: 12px 16px; display: flex; justify-content: space-between; box-shadow: 4px 4px 0 var(--ink); }
@@ -25,7 +28,7 @@
 </style>
 </head>
 <body>
-<h1>Owner's three palettes on the same real UI</h1>
+<h1>Owner's four palettes on the same real UI</h1>
 <p class="sub">Contrast ratios are WCAG 2.x, computed with the relative-luminance formula. Text needs 4.5:1, UI boundaries 3:1.</p>
 <div class="grid">
   <section class="pal c1">
@@ -44,16 +47,25 @@
     <button class="btn">Sign the ticket</button>
     <div class="card"><p class="ok">✓ Collected in 0.9 s</p><p class="err">✕ Already collected: No. 0007</p></div>
     <p class="ratio">aubergine/fog 12.50 · aubergine on saffron 7.90 · ok/fog 5.36 · err/fog 5.77</p>
-    <p class="verdict">Picked: saffron is real ferry-ticket card stock, aubergine reads in sunlight, and the saffron button is unmistakable. Nothing like a dark crypto site.</p>
+    <p class="verdict">v1 pick, superseded: the owner found it ineffective; marigold fails as text (1.58).</p>
   </section>
   <section class="pal c3">
-    <span class="label">Combo 3 · walnut · hot pink · copper</span>
+    <span class="label">Combo 3 · mocha · champagne gold · burnt amber</span>
     <h2>Pay with a ferry ticket</h2>
     <div class="ticket"><span class="label">No. 0007 · Amara's kiosk</span><span class="amount">$3.50</span></div>
     <button class="btn">Sign the ticket</button>
     <div class="card"><p class="ok">✓ Collected in 0.9 s</p><p class="err">✕ Already collected: No. 0007</p></div>
-    <p class="ratio">pink/walnut 2.76 · copper/walnut 2.63</p>
-    <p class="verdict">Rejected: every text pair fails 4.5:1, and hot pink on brown reads as a promo site, not money.</p>
+    <p class="ratio">mocha/champagne 6.46 · amber on champagne 2.45</p>
+    <p class="verdict">Rejected: luxurious, but the amber action fails contrast and brown reads as coffee, not money.</p>
+  </section>
+  <section class="pal c4">
+    <span class="label">Combo 4 · warm ivory · emerald · vermilion</span>
+    <h2>Pay with a ferry ticket</h2>
+    <div class="ticket"><span class="label">No. 0007 · Amara's kiosk</span><span class="amount">$3.50</span></div>
+    <button class="btn">Sign the ticket</button>
+    <div class="card"><p class="ok">✓ Collected in 0.9 s</p><p class="err">✕ Already collected: No. 0007</p></div>
+    <p class="ratio">ink/ivory 13.08 · emerald/ivory 5.73 · ivory on #C8361A 4.89</p>
+    <p class="verdict">Picked (v2): emerald is money and safety, ivory is calm and premium, vermilion is the one action.</p>
   </section>
 </div>
 </body>
