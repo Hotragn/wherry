@@ -22,7 +22,7 @@ export function AppHeader() {
         <Link href="/" className="display text-3xl">
           Wherry
         </Link>
-        <nav aria-label="Roles" className="order-3 flex w-full gap-1 sm:order-none sm:w-auto">
+        <nav aria-label="Roles" className="order-3 flex w-full flex-wrap gap-1 sm:order-none sm:w-auto">
           {ROLES.map((r) => {
             const active = path === r.href;
             return (

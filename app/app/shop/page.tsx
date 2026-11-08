@@ -527,16 +527,16 @@ function CourierPanel({ pending }: { pending: number }) {
   const [bundle, setBundle] = useState<string | null>(null);
   return (
     <section aria-label="Hand to a courier" className="flex flex-col gap-2">
-      <h2 className="text-xl">Hand to a courier</h2>
+      <h2 className="text-2xl">Hand to a courier</h2>
       <p className="text-sm text-muted">
-        No signal here? Anyone who finds one can settle your vouchers for you. You sign a note allowing a fee of 1%, at most $0.05 a voucher, valid for 48 hours. The money
+        No signal here? Anyone who finds one can collect your tickets for you. You sign a note allowing a fee of 1%, at most $0.05 a ticket, valid for 48 hours. The money
         still comes to you.
       </p>
       {pending === 0 ? (
-        <p className="text-sm text-muted">No vouchers waiting.</p>
+        <p className="text-sm text-muted">No tickets waiting.</p>
       ) : (
         <button type="button" className="link self-start text-sm" onClick={async () => setBundle((await courierBundle()).text)}>
-          Make a courier bundle for {pending} voucher{pending === 1 ? "" : "s"}
+          Make a courier bundle for {pending} ticket{pending === 1 ? "" : "s"}
         </button>
       )}
       {bundle && (

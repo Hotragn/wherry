@@ -26,7 +26,7 @@ export function PlaySound({ code }: { code: string }) {
           }
         }}
       >
-        {state === "playing" ? "Playing… hold the phone near the shop" : state === "done" ? "Play the sound again" : "Pay by sound"}
+        {state === "playing" ? "Playing… hold the phone near the shop" : state === "done" ? "Play the sound again" : "Pay by sound instead"}
       </button>
       <span className="text-sm text-muted" aria-live="polite">
         {state === "failed" ? "This phone couldn't play it. Show the QR instead." : "Works best in a quiet room. About 12 s of chirps; the shop taps Listen first. The QR is quicker."}
@@ -52,7 +52,7 @@ export function ListenButton({ onCode }: { onCode: (code: string, seconds: numbe
     } catch (e) {
       const denied = e instanceof DOMException && e.name === "NotAllowedError";
       const stopped = e instanceof DOMException && e.name === "AbortError";
-      setState({ s: "failed", note: denied ? "No microphone access. Scan the QR or paste the code." : stopped ? "Didn't catch a voucher. Try again, or scan the QR." : "Listening failed here. Scan the QR or paste the code." });
+      setState({ s: "failed", note: denied ? "No microphone access. Scan the QR or paste the code." : stopped ? "Didn't catch a ticket. Try again, or scan the QR." : "Listening failed here. Scan the QR or paste the code." });
     } finally {
       clearTimeout(timer);
       setLevel(0);
@@ -66,14 +66,14 @@ export function ListenButton({ onCode }: { onCode: (code: string, seconds: numbe
           <button type="button" className="btn btn-quiet" onClick={() => stop.current?.abort()}>
             Stop listening
           </button>
-          <div className="h-2 w-32 overflow-hidden rounded-full bg-sunk" role="meter" aria-label="Microphone level" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(level * 100)}>
-            <div className="h-full bg-ok transition-[width] duration-75" style={{ width: `${Math.round(level * 100)}%` }} />
+          <div className="h-3 w-32 overflow-hidden rounded-sm border-2 border-ink bg-surface" role="meter" aria-label="Microphone level" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(level * 100)}>
+            <div className="h-full bg-accent transition-[width] duration-75" style={{ width: `${Math.round(level * 100)}%` }} />
           </div>
           <span className="text-sm text-muted">Listening… play the sound on the phone.</span>
         </>
       ) : (
         <button type="button" className="btn btn-quiet" onClick={listen}>
-          Listen for a voucher (works best in a quiet room)
+          Listen for a ticket (works best in a quiet room)
         </button>
       )}
       {(state.s === "heard" || state.s === "failed") && (

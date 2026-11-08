@@ -307,7 +307,7 @@ export default function PhonePage() {
             />
           </PrintedTicket>
           <PlaySound code={showing.code} />
-          <CopyButton text={showing.code} label="Copy voucher code" />
+          <CopyButton text={showing.code} label="Copy ticket code" />
           <button
             type="button"
             className="btn btn-sail"
