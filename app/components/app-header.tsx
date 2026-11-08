@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useOnline } from "../lib/use-online";
+import { StepLine } from "./guide";
 
 const ROLES = [
-  { href: "/app/owner", label: "Owner" },
-  { href: "/app/phone", label: "Phone" },
-  { href: "/app/shop", label: "Shop" },
-  { href: "/play", label: "Play" },
+  { href: "/app/owner", label: "Owner", n: 1 },
+  { href: "/app/phone", label: "Phone", n: 2 },
+  { href: "/app/shop", label: "Shop", n: 3 },
+  { href: "/play", label: "Play", n: 0 },
 ];
 
 export function AppHeader() {
@@ -28,8 +29,13 @@ export function AppHeader() {
                 key={r.href}
                 href={r.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-sm px-3 py-2 font-semibold ${active ? "bg-surface shadow-1 ring-[1.5px] ring-ink" : "text-muted hover:text-ink"}`}
+                className={`rounded-sm px-2.5 py-2 font-semibold sm:px-3 ${active ? "bg-surface shadow-1 ring-[1.5px] ring-ink" : "text-muted hover:text-ink"}`}
               >
+                {r.n > 0 && (
+                  <span className="mono mr-1 text-xs" aria-hidden>
+                    {r.n}
+                  </span>
+                )}
                 {r.label}
               </Link>
             );
@@ -51,6 +57,7 @@ export function AppHeader() {
           {online ? "Online · devnet" : "Offline"}
         </span>
       </div>
+      <StepLine />
     </header>
   );
 }

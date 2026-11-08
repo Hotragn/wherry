@@ -1,34 +1,45 @@
 import Link from "next/link";
-import { BoatGlyph } from "../components/crossing";
+import { STEPS } from "../components/guide";
 
-export const metadata = { title: "Open the app" };
-
-const ROLES = [
-  { href: "/app/owner", role: "Owner", line: "Lock test dollars in a tab and pair your phone. Needs a wallet and the network, once." },
-  { href: "/app/phone", role: "Phone", line: "Pay with signed vouchers. Works with no signal." },
-  { href: "/app/shop", role: "Shop", line: "Check vouchers offline, see your worst case, settle them later in one transaction." },
-];
+export const metadata = { title: "Try it in 60 seconds" };
 
 export default function AppHome() {
   return (
     <div className="flex max-w-text flex-col gap-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-4xl">Pick your side of the counter</h1>
-        <p className="text-muted">Use two devices for the real thing: a phone that pays and a shop that accepts. Everything runs on Solana devnet with test dollars.</p>
+        <span className="label">Devnet · test dollars</span>
+        <h1 className="text-4xl">Try it in 60 seconds</h1>
+        <p className="text-muted">
+          Three roles, one crossing. A real run uses two devices, a phone that pays and a shop that accepts, but one laptop with two windows works too: copy and paste the codes
+          between them.
+        </p>
       </div>
       <ol className="flex flex-col border-t-[1.5px] border-line">
-        {ROLES.map((r) => (
-          <li key={r.href} className="border-b-[1.5px] border-line">
-            <Link href={r.href} className="group flex items-center gap-4 py-5">
-              <BoatGlyph size={36} />
+        {STEPS.map((s) => (
+          <li key={s.href} className="border-b-[1.5px] border-line">
+            <Link href={s.href} className="group flex items-start gap-4 py-5">
+              <span
+                aria-hidden
+                className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[1.5px] border-ink bg-surface font-display text-lg font-bold"
+              >
+                {s.n}
+              </span>
               <span className="flex flex-col">
-                <span className="font-display text-2xl font-bold group-hover:underline">{r.role}</span>
-                <span className="text-muted">{r.line}</span>
+                <span className="font-display text-2xl font-bold group-hover:underline">
+                  {s.role}: {s.line}
+                </span>
+                <span className="text-muted">{s.todo}</span>
               </span>
             </Link>
           </li>
         ))}
       </ol>
+      <Link href={STEPS[0].href} className="btn btn-sail self-start">
+        Start with step 1
+      </Link>
+      <p className="text-sm text-muted">
+        Then try <Link href="/play" className="link">Play</Link>: the same vouchers buy an in-game power-up offline, with a bonus drop you can prove was fair.
+      </p>
     </div>
   );
 }
