@@ -29,7 +29,7 @@ export function NextStep() {
   if (i < 0) return null;
   const next = STEPS[i + 1];
   return (
-    <nav aria-label="Next step" className="mx-auto mt-4 max-w-page border-t-2 border-ink px-4 py-6">
+    <nav aria-label="Next step" className="mx-auto mt-4 max-w-page border-t border-line px-4 py-6">
       {next ? (
         <Link href={next.href} className="group inline-flex flex-col">
           <span className="label">Next: step {next.n} of 3</span>

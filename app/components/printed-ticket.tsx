@@ -23,7 +23,7 @@ export function PrintedTicket({
   if (done)
     return <div className="w-rise flex w-full justify-center">{children}</div>;
   return (
-    <div className="flex w-full justify-center rounded-lg border-2 border-ink bg-surface p-4 text-[clamp(12px,3.6vw,16px)]">
+    <div className="flex w-full justify-center rounded-lg border border-line bg-surface p-4 text-[clamp(12px,3.6vw,16px)]">
       <AsciiAnim
         render={(ms) => typed(text, ms, CPS)}
         duration={(text.length / CPS) * 1000 + 350}
