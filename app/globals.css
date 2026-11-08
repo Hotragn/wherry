@@ -15,6 +15,8 @@
   --color-brand: var(--w-brand);
   --color-on-brand: var(--w-on-brand);
   --color-spark: var(--w-spark);
+  --color-paper: var(--w-paper);
+  --color-on-paper: var(--w-on-paper);
   --color-on-accent: var(--w-on-accent);
   --color-ok: var(--w-ok);
   --color-err: var(--w-err);
@@ -59,7 +61,7 @@
 
 /* Bind the token font stacks to the self-hosted fonts from the root layout. */
 :root {
-  --w-font-display: var(--nf-text), system-ui, sans-serif;
+  --w-font-display: var(--nf-display), Georgia, serif;
   --w-font-text: var(--nf-text), system-ui, -apple-system, "Segoe UI", sans-serif;
   --w-font-mono: var(--nf-mono), ui-monospace, "SF Mono", Menlo, monospace;
 }
@@ -82,8 +84,8 @@
   h3 {
     font-family: var(--w-font-display);
     line-height: var(--w-leading-tight);
-    font-weight: 600;
-    letter-spacing: -0.035em;
+    font-weight: 500;
+    letter-spacing: -0.015em;
     text-wrap: balance;
   }
   :focus-visible {
@@ -93,6 +95,12 @@
   .bg-night :focus-visible {
     outline-color: var(--w-on-night);
   }
+  body {
+    background:
+      radial-gradient(60rem 40rem at 85% -10%, color-mix(in srgb, var(--w-amber) 28%, transparent), transparent 70%),
+      var(--w-base);
+    background-attachment: fixed;
+  }
   ::selection {
     background: var(--w-brand);
     color: var(--w-on-brand);
@@ -101,11 +109,14 @@
 
 @layer components {
   /* Small field label: sentence case, quiet. No shouty uppercase eyebrows. */
+  /* Tiny tracked caps in Paper Mono, as in the owner's references. */
   .label {
-    font-size: var(--w-text-sm);
+    font-family: var(--w-font-mono);
+    font-size: 11px;
     font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--w-tracking-label);
     color: var(--w-muted);
-    letter-spacing: 0;
   }
   .mono {
     font-family: var(--w-font-mono);
@@ -115,13 +126,13 @@
   }
   .display {
     font-family: var(--w-font-display);
-    font-weight: 600;
+    font-weight: 500;
     line-height: var(--w-leading-tight);
-    letter-spacing: -0.035em;
+    letter-spacing: -0.015em;
   }
   /* The one gradient allowed: hero heading text only, ink to muted, left to right. */
   .headline-fade {
-    background: linear-gradient(90deg, var(--w-ink) 0%, var(--w-ink) 45%, var(--w-muted) 100%);
+    background: linear-gradient(100deg, var(--w-champagne) 0%, var(--w-champagne) 40%, color-mix(in srgb, var(--w-champagne) 50%, var(--w-amber)) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -167,9 +178,7 @@
     background: var(--w-accent);
     color: var(--w-on-accent);
     padding-right: 6px;
-    box-shadow:
-      inset 0 1px 0 rgba(253, 247, 238, 0.18),
-      var(--w-shadow-2);
+    box-shadow: var(--w-shadow-2);
   }
   .btn-sail::after {
     content: "→";
@@ -190,14 +199,15 @@
   .btn-sail:hover:not(:disabled)::after {
     transform: translateX(3px);
   }
+  /* Secondary: an outlined champagne pill, like the references' "Explore →". */
   .btn-quiet {
-    background: var(--w-surface);
+    background: transparent;
     color: var(--w-ink);
-    border-color: var(--w-line);
-    box-shadow: var(--w-shadow-1);
+    border-color: color-mix(in srgb, var(--w-champagne) 55%, transparent);
   }
   .btn-quiet:hover:not(:disabled) {
-    border-color: var(--w-muted);
+    border-color: var(--w-champagne);
+    background: color-mix(in srgb, var(--w-champagne) 8%, transparent);
   }
   .btn-night {
     background: var(--w-on-night);
@@ -229,15 +239,15 @@
   }
   .field:focus-visible {
     outline: none;
-    border-color: var(--w-brand);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--w-brand) 18%, transparent);
+    border-color: var(--w-champagne);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--w-amber) 30%, transparent);
   }
 
   /* Ferry ticket: emerald card stock like a banknote, two punched notches where the stub tears off. */
   .ticket {
     position: relative;
-    background: var(--w-brand);
-    color: var(--w-on-brand);
+    background: var(--w-paper);
+    color: var(--w-on-paper);
     border-radius: var(--w-radius-md);
     box-shadow: var(--w-shadow-lift);
   }
@@ -260,7 +270,7 @@
     bottom: -11px;
   }
   .ticket .label {
-    color: var(--w-on-night-muted);
+    color: var(--w-on-paper);
   }
   .perf {
     border-top: 2px dashed color-mix(in srgb, var(--w-on-brand) 45%, transparent);
@@ -270,10 +280,10 @@
     flex-direction: column;
     align-items: center;
     padding: 6px 14px;
-    border: 2px solid var(--w-spark);
+    border: 3px double var(--w-spark);
     border-radius: var(--w-radius-sm);
-    color: var(--w-spark);
-    background: var(--w-surface);
+    color: var(--w-on-paper);
+    background: var(--w-paper);
     font: 700 var(--w-text-lg) / 1.05 var(--w-font-mono);
     letter-spacing: 0.06em;
     text-transform: uppercase;

@@ -1,71 +1,68 @@
-/* Wherry design tokens, redesign v2 (2026-11-08): owner's palette "Ivory · Emerald · Vermilion".
-   Two layers, as the elaya figma-designer skill asks: core colours, then roles. Components use roles only.
-   Superseded: v1 fog/aubergine/saffron (same day) and palette A "Admiralty chart".
-   Contrast (WCAG): ink/ivory 13.08 · muted/ivory 6.06 · emerald/ivory 5.73 · ivory on emerald 5.73 ·
-   ivory on action-vermilion 4.89 · err/ivory 6.56 · on-night-muted/night 8.76. */
+/* Wherry design tokens, redesign v3 (2026-11-08): ONLY the owner's combo 3, chosen from the owner's
+   reference ("Inner Peace": dark mocha, champagne serif, amber light on folded paper).
+   Mocha #5B4632 · Champagne Gold #F4D9A0 · Burnt Amber #C8792C. No other hue anywhere:
+   every other value is one of these three, or one mixed into another.
+   Contrast (WCAG): champagne/mocha 6.46 · champagne/surface 5.51 · muted (champagne 88%)/mocha 5.35, /surface 4.62 ·
+   mocha on champagne 6.46 (buttons, tickets) · hero gradient end (champagne 50% amber)/mocha 4.21, large text only.
+   Amber on mocha is 2.63:1, so amber is light, glow and decoration only: never text, never a focus ring. */
 
 :root {
-  /* core: the owner's three colours */
-  --w-ivory: #F9EBD7;
-  --w-emerald: #046A38;
-  --w-vermilion: #E34222;
-  /* core: derived shades of those three (allowed: one deep text colour, one ok/err pair) */
-  --w-ivory-50: #FDF7EE;      /* lifted ivory: cards */
-  --w-ivory-200: #F1DFC5;     /* sunk ivory: wells, meters */
-  --w-ivory-300: #E6D2B4;     /* hairlines */
-  --w-emerald-900: #0E2A1D;   /* deep text (ink) and night bands */
-  --w-emerald-700: #035A2F;   /* emerald hover */
-  --w-vermilion-700: #C8361A; /* action: ivory text passes 4.89:1 */
-  --w-vermilion-800: #A92C14; /* action hover */
+  --w-mocha: #5B4632;
+  --w-champagne: #F4D9A0;
+  --w-amber: #C8792C;
 
-  /* roles */
-  --w-base: var(--w-ivory);
-  --w-surface: var(--w-ivory-50);
-  --w-sunk: var(--w-ivory-200);
-  --w-line: var(--w-ivory-300);
-  --w-ink: var(--w-emerald-900);
-  --w-muted: #4F5B53;         /* 6.06:1 on ivory */
-  --w-brand: var(--w-emerald);
-  --w-on-brand: var(--w-ivory);
-  --w-accent: var(--w-vermilion-700);   /* the ONE primary action per screen */
-  --w-accent-hover: var(--w-vermilion-800);
-  --w-on-accent: var(--w-ivory-50);
-  --w-spark: var(--w-vermilion);        /* decoration only: stamps, punches, sail */
-  --w-ok: var(--w-emerald);
-  --w-err: #9A2B12;           /* 6.56:1 */
-  --w-warn: var(--w-ink);     /* warnings are ink plus a "!" mark */
-  --w-night: var(--w-emerald-900);
-  --w-on-night: var(--w-ivory);
-  --w-on-night-muted: #B6C8BC;
-  --w-focus: var(--w-emerald);
+  /* roles: all built from the three */
+  --w-base: var(--w-mocha);
+  --w-surface: color-mix(in srgb, var(--w-champagne) 7%, var(--w-mocha));
+  --w-sunk: color-mix(in srgb, var(--w-champagne) 14%, var(--w-mocha));
+  --w-line: color-mix(in srgb, var(--w-champagne) 24%, var(--w-mocha));
+  --w-ink: var(--w-champagne);
+  --w-muted: color-mix(in srgb, var(--w-champagne) 88%, var(--w-mocha));
+  --w-brand: var(--w-amber);
+  --w-on-brand: var(--w-mocha);           /* only on large amber shapes, never small text */
+  --w-accent: var(--w-champagne);          /* the ONE primary action: a champagne pill with mocha text */
+  --w-accent-hover: color-mix(in srgb, var(--w-amber) 22%, var(--w-champagne));
+  --w-on-accent: var(--w-mocha);
+  --w-spark: var(--w-amber);
+  --w-paper: var(--w-champagne);           /* tickets, QR ground */
+  --w-on-paper: var(--w-mocha);
+  --w-ok: var(--w-champagne);
+  --w-err: var(--w-champagne);
+  --w-err-mark: var(--w-amber);
+  --w-warn: var(--w-champagne);
+  --w-night: color-mix(in srgb, var(--w-amber) 18%, var(--w-mocha));
+  --w-on-night: var(--w-champagne);
+  --w-on-night-muted: color-mix(in srgb, var(--w-champagne) 88%, var(--w-mocha));
+  --w-focus: var(--w-champagne);
 
-  /* type: one typeface (Geist) plus Paper Mono for numbers, serials and ASCII */
-  --w-font-display: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* mascot shading, from the same three */
+  --w-fur: color-mix(in srgb, var(--w-amber) 14%, var(--w-champagne));
+  --w-fur-shade: color-mix(in srgb, var(--w-amber) 45%, var(--w-champagne));
+  --w-face: var(--w-champagne);
+
+  /* type: an editorial serif for display (as in the owner's references), Geist for UI, Paper Mono for numbers */
+  --w-font-display: "Cormorant", "Cormorant Garamond", Georgia, serif;
   --w-font-text: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
   --w-font-mono: "Paper Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  /* Tailwind type scale only */
   --w-text-xs: 12px;  --w-text-sm: 14px;  --w-text-md: 16px;  --w-text-lg: 18px;
   --w-text-xl: 20px;  --w-text-2xl: 24px; --w-text-3xl: 30px; --w-text-4xl: 48px; --w-text-5xl: 72px;
-  --w-leading-tight: 1.02; --w-leading-body: 1.55;
-  --w-tracking-label: 0;
+  --w-leading-tight: 0.92; --w-leading-body: 1.6;
+  --w-tracking-label: 0.28em;
 
-  /* spacing (Tailwind steps) */
   --w-space-1: 4px;  --w-space-2: 8px;  --w-space-3: 12px; --w-space-4: 16px; --w-space-5: 20px;
   --w-space-6: 24px; --w-space-8: 32px; --w-space-10: 40px; --w-space-14: 56px; --w-space-18: 72px;
-  --w-max-text: 64ch; --w-max-page: 1240px;
+  --w-max-text: 64ch; --w-max-page: 1280px;
 
-  /* radii (Tailwind steps; nested rule: inner = outer - gap) */
   --w-radius-sm: 8px;
   --w-radius-md: 16px;
   --w-radius-lg: 24px;
   --w-radius-pill: 999px;
 
-  /* shadows: soft and tactile (fintech neumorphism, light touch). Never a glow. */
-  --w-shadow-1: 0 1px 2px rgba(14, 42, 29, .06), 0 1px 1px rgba(14, 42, 29, .04);
-  --w-shadow-2: 0 1px 2px rgba(14, 42, 29, .05), 0 12px 32px -12px rgba(14, 42, 29, .18);
-  --w-shadow-lift: 0 2px 4px rgba(14, 42, 29, .06), 0 24px 48px -16px rgba(14, 42, 29, .26);
+  /* shadows: mocha deepened (a shade, not a new hue), plus an amber glow for lit paper (from the reference's light rays) */
+  --w-shadow-1: 0 1px 2px color-mix(in srgb, var(--w-mocha) 60%, black 40%);
+  --w-shadow-2: 0 20px 40px -20px color-mix(in srgb, var(--w-mocha) 40%, black 60%);
+  --w-shadow-lift: 0 30px 60px -24px color-mix(in srgb, var(--w-mocha) 30%, black 70%), 0 0 60px -20px color-mix(in srgb, var(--w-amber) 60%, transparent);
 
-  /* motion: smooth for a premium feel */
   --w-ease: cubic-bezier(.22, 1, .36, 1);
   --w-dur-fast: 140ms; --w-dur: 240ms; --w-dur-slow: 480ms;
   --w-dur-row: 1200ms;
