@@ -14,6 +14,12 @@ With Wherry, a customer locks money in an escrow account on Solana while they st
 
 It is for places like Amara's coffee and phone-credit kiosk in a Nairobi market, where the signal drops every day, and for travellers stranded when a storm or landslide takes the towers down.
 
+## Screenshots
+
+![Wherry landing page: "The ferry for your money when the network's gone."](docs/landing-hero.png)
+
+![The shop after collecting a ticket: the ticket is stamped "Collected" and the transaction confirmed in 0.7 s](docs/shop-collected.png)
+
 ## How it works
 
 One payment, start to finish:
@@ -38,52 +44,25 @@ flowchart LR
   end
 ```
 
+On Solana, one program owns every account, and each instruction touches only the accounts it needs:
+
+```mermaid
+flowchart TB
+  P["wherry program<br/>7QcwJ8…r4MM"]
+  P --> I1["open_tab · top_up · close_tab<br/>signed by the owner"]
+  P --> I2["settle · settle_via_courier<br/>signed by the shop or a courier,<br/>after inline Ed25519 checks"]
+  P --> I3["commit_seed · reveal_seed<br/>signed by the game studio"]
+  I1 --> T[("Tab PDA<br/>['tab', owner, tab_id]")]
+  I1 --> V[("Vault: the Tab PDA's<br/>associated token account")]
+  I1 --> R[("PayerRecord PDA<br/>['payer', owner]")]
+  I2 --> T
+  I2 --> V
+  I2 --> R
+  I2 --> M[("Shop's token account<br/>(and the courier's, for its fee)")]
+  I3 --> G[("GameConfig PDA<br/>['game', studio]")]
+```
+
 Other offline payment projects on Solana sign a whole transaction offline and broadcast it later. Until it lands, the payer can still empty the account, so the shop holds a promise. A Wherry voucher is backed by money that is already locked, so the shop holds a claim on real funds.
-
-## Try it in 2 minutes
-
-Laptop only, one browser, two windows. Everything runs on devnet.
-
-1. **Window A:** open https://wherry-pay.vercel.app/app and go to **Owner**. Click "No wallet? Use a test wallet in this browser (devnet only)", then **Get $50 test dollars**. That is the faucet: a fixed $50 of devnet test dollars, up to 3 times per address.
-2. **Window B:** open https://wherry-pay.vercel.app/app/phone. It says "Pair this phone". Click **Copy code**.
-3. **Window A (Owner):** paste the code under "Pair your phone", enter 40, and click **Lock $40.00 in a tab**. Wait for "Confirmed in … s" and the Explorer link.
-4. **Window A:** go to **Shop**. Under the shop's sticker, click **Copy code**.
-5. **Window B (Phone):** click **Refresh** until it shows your $40 tab. From here you can turn off Wi-Fi; paying needs no network. Under "Pay with a ferry ticket", paste the shop code, enter 3, and click **Sign a $3.00 ticket for Amara's kiosk**. The phone prints a ticket. Click **Copy ticket code**.
-6. **Window A (Shop):** under "Check a ferry ticket", paste the ticket code. You will see "Signature valid · checked offline in <1 ms". Click **Accept $3.00**. Turn Wi-Fi back on and click **Collect $3.00**. The ticket crosses to the far bank ("Collected: paid onchain") with its confirm time and an Explorer link.
-
-Optional: paste the same ticket code again. The shop declines it, and the program would reject it too.
-
-## Methodology
-
-**Research.** I started from problems, not from tech. I ranked ten money problems by how many people they hit, how much Solana's one-second, sub-cent settlement changes the outcome, and whether I could show it working on devnet in two minutes. Offline payments came first: 2.2 billion people offline, a measured 55% drop in card payments in a real blackout, and a demo anyone can follow.
-
-**Idea selection.** I rejected:
-- Invoice financing: many hackathon clones already exist, and Solana changes the cost more than the outcome.
-- Savings circles and merchant card fees: crowded, and judges have seen them.
-- Aid payouts and gig payouts: good problems, but the aid case fits inside offline payments (an aid group can pre-fund tabs before storm season).
-
-Then I looked at prior offline projects. Every Solana one I found (anon0mesh, MeshT, Zypp, OfflineSolanaPay) relays a pre-signed transaction to whoever reconnects first. That does not stop the payer from spending the money first. Cashu-style ecash moves tokens offline but makes the receiver trust a mint. I chose vouchers backed by an onchain escrow: the shop's worst case is known before it hands over the goods.
-
-**Design.** I wrote the account layout, the voucher bytes and the threat model before the UI. I drew the brand (warm chart paper, river ink, a red barge sail) and a mascot, Doggett, a small wherry boat. Vouchers look like ferry tickets, and the shop screen shows them crossing a river when they settle.
-
-**Build.** One Anchor program, a Next.js app with three roles (Owner, Phone, Shop), and a typed client generated from the program with Codama. A service worker keeps the phone and shop screens working offline after the first visit.
-
-**Testing.** 38 TypeScript tests. The program tests run the real program in LiteSVM (a fast local Solana VM), including seeded property tests that try random overspends and replays. Then I ran every milestone on devnet from the real UI and recorded the signatures and timings below.
-
-### Decisions and why
-
-| Decision | Why |
-|---|---|
-| Vouchers backed by an escrow tab | The money exists before the sale. A relayed transaction can be beaten by the payer emptying the account first. |
-| Ed25519 precompile + instructions sysvar | Solana has a built-in program that checks Ed25519 signatures cheaply. My program reads the instruction right before it (through the instructions sysvar, a read-only list of the transaction's instructions) and requires it to have checked exactly this voucher, with this tab's phone key. |
-| Sequential tab ids | Tab number N must equal the number of tabs the owner has opened. A closed tab's address never comes back, so an old voucher can't be replayed on a new tab. |
-| A 1,024-bit bitmap per tab | Each voucher serial flips one bit when settled. Replay protection costs 128 bytes per tab and no extra accounts. |
-| Shortfall instead of failure | If a customer overspends across shops, the late shop gets what is left and the gap goes on the customer's public record. A failed transaction would pay that shop nothing. |
-| Shop risk limits | Each shop caps what it holds unsettled per customer and in total. Its worst case is a number it chose. |
-| AI that can only tighten | The on-device model can turn an accept into a decline, never the reverse. If it fails or times out, the rules decide. |
-| Courier fee only with the shop's consent | Anyone may settle a shop's vouchers, but only with a note the shop signed that caps the fee and expires. The money still goes to the shop. |
-| No zero-copy account | A tab is 282 bytes. Reading it is a small share of the ~22,000 compute units per voucher (most go to the token transfer and the signature check), and a new layout would break every existing devnet tab. |
-| No onchain hash chain | Each voucher links to the previous one (nonce bytes 4–11), and shops decline forks. Checking the chain onchain would force vouchers from different shops to settle in order, and they don't. |
 
 ## Under the hood
 
@@ -123,12 +102,6 @@ Each voucher needs its own 284-byte Ed25519 instruction, so three vouchers make 
 
 ## Proof it works
 
-**Tests: 38/38 pass** (`pnpm test`). They cover:
-- the program on LiteSVM: the rejection paths, replays, shortfalls and the courier rules;
-- seeded property tests: 25 random worlds with no overpay, no double pay, only the named shop paid, and shortfalls that add up; and for the courier, vault + shop + courier = deposit;
-- the offline logic: codes, risk limits, the AI tighten-only rule and the sound encoding;
-- the landing page's ASCII animation frames.
-
 ### Devnet transactions
 
 | What | Signature |
@@ -161,29 +134,6 @@ A replayed voucher fails with `VoucherAlreadySettled`. I checked this on devnet 
 | AI risk officer decision, offline | 1.2–1.7 s (Qwen2.5 1.5B on WebGPU, Apple M-series laptop) |
 | Budget planner, offline | 1.2–1.3 s per plan |
 
-## Security
-
-**What is trusted**
-- *Whoever holds the paired phone.* They can sign vouchers up to what is in the tab. The key is a non-extractable browser key: it can sign but can't be exported, and a test checks that export fails.
-- *The shop's last sync.* Offline, a shop judges coverage from its last copy of the tab list. The screen shows how old it is and warns about tabs it has never seen.
-- *The game studio,* to reveal its seed (see Limits).
-
-**What an attacker could try, and what stops it**
-
-| Attack | What stops it |
-|---|---|
-| Overspend across shops while offline | The program pays only `min(amount, what's left)`. The gap goes on the payer's public record. Each shop's risk limits cap what it holds per customer and in total. |
-| Replay a voucher | Each serial flips a bit in the tab; a second settle fails. The shop also refuses a serial it already took, before any sync. |
-| Replay on another tab | The tab address is inside the signed bytes, and tab addresses are never reused. |
-| Change the amount or the shop | The program rebuilds the voucher from its own arguments, with merchant = the signer, and requires an exact match. |
-| Fake signature check | It must be the instruction right before, the real Ed25519 program, one signature, inline data, the tab's phone key. The instructions sysvar is pinned by address. |
-| Close the tab before shops collect | Shops can settle until expiry + 24 h; the owner can close only after that. |
-| Fake QR sticker over the shop's | The phone shows the shop's name and key before signing. A voucher made out to a fake key fails the real shop's check at the counter. |
-| Stolen phone | The thief can spend at most what is left in the tab, and can't copy the key off the phone. |
-| A tampered app signing two different next vouchers | Vouchers link to the previous one. A shop holding both declines the fork and keeps both as proof. |
-| A courier redirecting money or raising its fee | The voucher fixes the shop; the shop's signed note fixes the tab, the fee caps and an expiry. Tests check no note, wrong key, fee over cap, expired note, mismatch, replays, and that vault + shop + courier always equals the deposit. |
-| Faucet abuse | Devnet only, $50 per request, at most 3 per address and 10 per IP per hour. |
-
 ## Features beyond payments
 
 - **AI risk officer (shop, on-device, offline).** Qwen2.5-1.5B runs in the shop's browser with WebLLM on WebGPU. It is opt-in: about 1 GB to download once, then it loads from cache in under a second with no network. Code lists the warning signs (past shortfalls, a large share of the tab, a first tab, a stale sync). The model picks the main reason from a fixed list, and the decision follows from that reason. I built it this way because, in my tests, the 0.5B and 1.5B models read the numbers correctly but ignored written rules. Picking a reason from a list got 7 of 8 test cases right with no false declines. It can only tighten.
@@ -192,20 +142,18 @@ A replayed voucher fails with `VoucherAlreadySettled`. I checked this on devnet 
 - **Courier.** The first device with a signal can settle everyone's vouchers. The shop signs a note (1%, at most $0.05 a voucher, valid 48 hours) and hands over a text bundle. Anyone pastes it into the Courier view and settles; the money still lands with the shop. On devnet a courier settled a $3.00 voucher in 0.8 s and earned $0.03.
 - **Pay by sound.** The phone can play its voucher as chirps ([ggwave](https://github.com/ggerganov/ggwave)), and the shop's mic decodes it. A voucher needs two messages, 12 s of sound. QR is the default; sound is labelled "works best in a quiet room". I tested it only by feeding the phone's exact sound into the shop's decoder: 10 of 10 decoded, including 5 with added noise. I have not tested it through the air between two devices.
 
-## Limits and what's next
+## Try it in 2 minutes
 
-- **Unrevealed game rounds.** The studio could refuse to reveal a seed, and players who paid get no drop. The Play page shows how long a round has gone unrevealed. Fix (needs a program upgrade): a game voucher can only settle after its round's seed is revealed.
-- **Keys live in the browser.** The phone key and the shop key are browser keys. The next step is the phone's secure element, which Solana can already check with its secp256r1 precompile, and a way for a shop to sweep its test dollars to a wallet.
-- **Coverage is only as fresh as the last sync.** A shop that has been offline for days decides with old data. The risk limits bound the loss; they do not remove it.
-- **Faucet limits are in memory**, per server instance.
-- **Pay by sound is untested over the air.**
-- **Not tested with a real wallet extension**, only the in-browser test wallet, and not yet in airplane mode on two real phones.
+Laptop only, one browser, two windows. Everything runs on devnet.
 
-With a microgrant, I would:
-- run a pilot with a few market kiosks;
-- move the phone key into the secure element;
-- get the program audited;
-- switch from the test token to a real stablecoin on mainnet.
+1. **Window A:** open https://wherry-pay.vercel.app/app and go to **Owner**. Click "No wallet? Use a test wallet in this browser (devnet only)", then **Get $50 test dollars**. That is the faucet: a fixed $50 of devnet test dollars, up to 3 times per address.
+2. **Window B:** open https://wherry-pay.vercel.app/app/phone. It says "Pair this phone". Click **Copy code**.
+3. **Window A (Owner):** paste the code under "Pair your phone", enter 40, and click **Lock $40.00 in a tab**. Wait for "Confirmed in … s" and the Explorer link.
+4. **Window A:** go to **Shop**. Under the shop's sticker, click **Copy code**.
+5. **Window B (Phone):** click **Refresh** until it shows your $40 tab. From here you can turn off Wi-Fi; paying needs no network. Under "Pay with a ferry ticket", paste the shop code, enter 3, and click **Sign a $3.00 ticket for Amara's kiosk**. The phone prints a ticket. Click **Copy ticket code**.
+6. **Window A (Shop):** under "Check a ferry ticket", paste the ticket code. You will see "Signature valid · checked offline in <1 ms". Click **Accept $3.00**. Turn Wi-Fi back on and click **Collect $3.00**. The ticket crosses to the far bank ("Collected: paid onchain") with its confirm time and an Explorer link.
+
+Optional: paste the same ticket code again. The shop declines it, and the program would reject it too.
 
 ## Run it locally
 
@@ -235,6 +183,86 @@ Versions I used ([VERSIONS.md](VERSIONS.md) has all of them and why):
 | @solana/kit | 8.6.0 |
 | LiteSVM | 1.6.2 |
 
+## Tests
+
+**Tests: 38/38 pass** (`pnpm test`, run on main on Nov 8, 2026 after the final merge). They cover:
+- the program on LiteSVM: the rejection paths, replays, shortfalls and the courier rules;
+- seeded property tests: 25 random worlds with no overpay, no double pay, only the named shop paid, and shortfalls that add up; and for the courier, vault + shop + courier = deposit;
+- the offline logic: codes, risk limits, the AI tighten-only rule and the sound encoding;
+- the landing page's ASCII animation frames.
+
+Run them with `pnpm anchor-build && pnpm test` (see Run it locally).
+
+## Security
+
+**What is trusted**
+- *Whoever holds the paired phone.* They can sign vouchers up to what is in the tab. The key is a non-extractable browser key: it can sign but can't be exported, and a test checks that export fails.
+- *The shop's last sync.* Offline, a shop judges coverage from its last copy of the tab list. The screen shows how old it is and warns about tabs it has never seen.
+- *The game studio,* to reveal its seed (see Limits).
+
+**What an attacker could try, and what stops it**
+
+| Attack | What stops it |
+|---|---|
+| Overspend across shops while offline | The program pays only `min(amount, what's left)`. The gap goes on the payer's public record. Each shop's risk limits cap what it holds per customer and in total. |
+| Replay a voucher | Each serial flips a bit in the tab; a second settle fails. The shop also refuses a serial it already took, before any sync. |
+| Replay on another tab | The tab address is inside the signed bytes, and tab addresses are never reused. |
+| Change the amount or the shop | The program rebuilds the voucher from its own arguments, with merchant = the signer, and requires an exact match. |
+| Fake signature check | It must be the instruction right before, the real Ed25519 program, one signature, inline data, the tab's phone key. The instructions sysvar is pinned by address. |
+| Close the tab before shops collect | Shops can settle until expiry + 24 h; the owner can close only after that. |
+| Fake QR sticker over the shop's | The phone shows the shop's name and key before signing. A voucher made out to a fake key fails the real shop's check at the counter. |
+| Stolen phone | The thief can spend at most what is left in the tab, and can't copy the key off the phone. |
+| A tampered app signing two different next vouchers | Vouchers link to the previous one. A shop holding both declines the fork and keeps both as proof. |
+| A courier redirecting money or raising its fee | The voucher fixes the shop; the shop's signed note fixes the tab, the fee caps and an expiry. Tests check no note, wrong key, fee over cap, expired note, mismatch, replays, and that vault + shop + courier always equals the deposit. |
+| Faucet abuse | Devnet only, $50 per request, at most 3 per address and 10 per IP per hour. |
+
+## Limits and what's next
+
+- **Unrevealed game rounds.** The studio could refuse to reveal a seed, and players who paid get no drop. The Play page shows how long a round has gone unrevealed. Fix (needs a program upgrade): a game voucher can only settle after its round's seed is revealed.
+- **Keys live in the browser.** The phone key and the shop key are browser keys. The next step is the phone's secure element, which Solana can already check with its secp256r1 precompile, and a way for a shop to sweep its test dollars to a wallet.
+- **Coverage is only as fresh as the last sync.** A shop that has been offline for days decides with old data. The risk limits bound the loss; they do not remove it.
+- **Faucet limits are in memory**, per server instance.
+- **Pay by sound is untested over the air.**
+- **Not tested with a real wallet extension**, only the in-browser test wallet, and not yet in airplane mode on two real phones.
+
+With a microgrant, I would:
+- run a pilot with a few market kiosks;
+- move the phone key into the secure element;
+- get the program audited;
+- switch from the test token to a real stablecoin on mainnet.
+
+## Methodology
+
+**Research.** I started from problems, not from tech. I ranked ten money problems by how many people they hit, how much Solana's one-second, sub-cent settlement changes the outcome, and whether I could show it working on devnet in two minutes. Offline payments came first: 2.2 billion people offline, a measured 55% drop in card payments in a real blackout, and a demo anyone can follow.
+
+**Idea selection.** I rejected:
+- Invoice financing: many hackathon clones already exist, and Solana changes the cost more than the outcome.
+- Savings circles and merchant card fees: crowded, and judges have seen them.
+- Aid payouts and gig payouts: good problems, but the aid case fits inside offline payments (an aid group can pre-fund tabs before storm season).
+
+Then I looked at prior offline projects. Every Solana one I found (anon0mesh, MeshT, Zypp, OfflineSolanaPay) relays a pre-signed transaction to whoever reconnects first. That does not stop the payer from spending the money first. Cashu-style ecash moves tokens offline but makes the receiver trust a mint. I chose vouchers backed by an onchain escrow: the shop's worst case is known before it hands over the goods.
+
+**Design.** I wrote the account layout, the voucher bytes and the threat model before the UI. I drew the brand (warm chart paper, river ink, a red barge sail) and a mascot, Doggett, a small wherry boat. Vouchers look like ferry tickets, and the shop screen shows them crossing a river when they settle.
+
+**Build.** One Anchor program, a Next.js app with three roles (Owner, Phone, Shop), and a typed client generated from the program with Codama. A service worker keeps the phone and shop screens working offline after the first visit.
+
+**Testing.** 38 TypeScript tests. The program tests run the real program in LiteSVM (a fast local Solana VM), including seeded property tests that try random overspends and replays. Then I ran every milestone on devnet from the real UI and recorded the signatures and timings in "Proof it works".
+
+### Decisions and why
+
+| Decision | Why |
+|---|---|
+| Vouchers backed by an escrow tab | The money exists before the sale. A relayed transaction can be beaten by the payer emptying the account first. |
+| Ed25519 precompile + instructions sysvar | Solana has a built-in program that checks Ed25519 signatures cheaply. My program reads the instruction right before it (through the instructions sysvar, a read-only list of the transaction's instructions) and requires it to have checked exactly this voucher, with this tab's phone key. |
+| Sequential tab ids | Tab number N must equal the number of tabs the owner has opened. A closed tab's address never comes back, so an old voucher can't be replayed on a new tab. |
+| A 1,024-bit bitmap per tab | Each voucher serial flips one bit when settled. Replay protection costs 128 bytes per tab and no extra accounts. |
+| Shortfall instead of failure | If a customer overspends across shops, the late shop gets what is left and the gap goes on the customer's public record. A failed transaction would pay that shop nothing. |
+| Shop risk limits | Each shop caps what it holds unsettled per customer and in total. Its worst case is a number it chose. |
+| AI that can only tighten | The on-device model can turn an accept into a decline, never the reverse. If it fails or times out, the rules decide. |
+| Courier fee only with the shop's consent | Anyone may settle a shop's vouchers, but only with a note the shop signed that caps the fee and expires. The money still goes to the shop. |
+| No zero-copy account | A tab is 282 bytes. Reading it is a small share of the ~22,000 compute units per voucher (most go to the token transfer and the signature check), and a new layout would break every existing devnet tab. |
+| No onchain hash chain | Each voucher links to the previous one (nonce bytes 4–11), and shops decline forks. Checking the chain onchain would force vouchers from different shops to settle in order, and they don't. |
+
 ## Built with
 
 - The Solana Foundation template [`kit/nextjs-anchor`](https://github.com/solana-foundation/templates/tree/main/kit/nextjs-anchor). I kept its Next.js, `@solana/kit`, Codama and Anchor setup and its wallet-standard layer, and replaced the program and the UI.
@@ -246,3 +274,18 @@ Versions I used ([VERSIONS.md](VERSIONS.md) has all of them and why):
 
 - **Claude Code** (Anthropic) to research the problem and prior work and to write the program, the tests, the app and this README with me. I made the calls on what to build and what to cut.
 - **Qwen2.5-1.5B-Instruct via WebLLM** runs inside the product, on the shop's and the phone's own devices, as the risk officer and the budget planner.
+
+## Honest notes
+
+- **Devnet only.** The program, the test-USD mint and every transaction in this README are on Solana devnet.
+- **Test dollars, not money.** The "dollars" are a devnet token I minted; the faucet hands out a fixed $50.
+- **Simulated users.** Amara's kiosk is a demo shop. There has been no pilot with a real kiosk yet.
+- **Pay by sound is untested over the air.** It passed 10 of 10 tries when I fed the phone's sound straight into the shop's decoder, not through a speaker and a microphone. QR is the default.
+- **Not yet tried** with a real wallet extension or in airplane mode on two real phones.
+- **Forked template.** The project started from the Solana Foundation template `kit/nextjs-anchor`; the program and the UI are mine.
+- **AI help.** I built it with Claude Code (see AI tools I used).
+- **Licence:** MIT.
+
+## Licence
+
+MIT. See [LICENSE](LICENSE). Copyright (c) 2026 Hotragn Pettugani.
