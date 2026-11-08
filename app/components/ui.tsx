@@ -82,3 +82,17 @@ export function Stat({ label, children }: { label: string; children: React.React
     </div>
   );
 }
+
+/** A plain word with its technical term tucked in a "what's this?" note. */
+export function WhatsThis({ term, children }: { term: string; children: React.ReactNode }) {
+  return (
+    <details className="group text-sm">
+      <summary className="inline-flex cursor-pointer list-none items-center gap-1 font-bold underline decoration-accent decoration-2 underline-offset-4 [&::-webkit-details-marker]:hidden">
+        <span aria-hidden className="mono">?</span> What&apos;s this?
+      </summary>
+      <p className="mt-2 max-w-sm border-l-[3px] border-accent pl-3 text-muted">
+        <span className="mono text-ink">{term}.</span> {children}
+      </p>
+    </details>
+  );
+}

@@ -118,7 +118,7 @@ export default function PlayPage() {
   if (tab === null) {
     return (
       <div className="flex max-w-text flex-col gap-4">
-        <h1 className="text-4xl">Doggett&apos;s Crossing</h1>
+        <h1 className="text-5xl md:text-6xl">Doggett&apos;s Crossing</h1>
         <p>The game pays for power-ups with your phone&apos;s tab. Pair this phone first: open the Phone tab, show its code to the Owner view, then find your tab.</p>
       </div>
     );
@@ -131,7 +131,7 @@ export default function PlayPage() {
       <section aria-label="Game" className="flex min-w-0 flex-col gap-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-4xl">Doggett&apos;s Crossing</h1>
+            <h1 className="text-5xl md:text-6xl">Doggett&apos;s Crossing</h1>
             <p className="text-muted">Row the ferry across. Every crossing lands a crate. Works offline.</p>
           </div>
           <div className="flex flex-col sm:items-end">
@@ -159,7 +159,7 @@ export default function PlayPage() {
         <section aria-label="Bonus drops" className="mt-6 flex flex-col gap-3">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="text-2xl">Bonus drops</h2>
+              <h2 className="text-3xl">Bonus drops</h2>
               <p className="text-sm text-muted">Each power-up comes with a sealed drop. It opens once the studio reveals its seed, and you can check it was fair.</p>
             </div>
             {purchases.length > 0 && (
@@ -171,7 +171,7 @@ export default function PlayPage() {
           {purchases.length === 0 ? (
             <p className="text-muted">No power-ups yet.</p>
           ) : (
-            <ul className="flex flex-col divide-y-[1.5px] divide-line border-y-[1.5px] border-line">
+            <ul className="flex flex-col divide-y-2 divide-ink border-y-2 border-ink">
               {purchases.map((p) => (
                 <DropRow key={p.code} p={p} proof={proofs[p.code]} now={now} />
               ))}
@@ -202,7 +202,7 @@ export default function PlayPage() {
           <div className="paper flex flex-col gap-4 p-5">
             <div>
               <span className="label">Power-up</span>
-              <h2 className="text-2xl">{POWER_UP.name}</h2>
+              <h2 className="text-3xl">{POWER_UP.name}</h2>
               <p className="text-muted">
                 {POWER_UP.effect}. <span className="mono">{formatUsd(POWER_UP.price)}</span> in test dollars, paid with a voucher from your tab.
               </p>

@@ -3,6 +3,8 @@
 import type { KeyPairSigner } from "@solana/kit";
 import { useEffect, useState } from "react";
 import { Doggett } from "../../components/doggett";
+import { FirstRun } from "../../components/guide";
+import { WhatsThis } from "../../components/ui";
 import { lamportsToSol } from "../../components/tx-status";
 import { Addr, Money, Signal, TxLink } from "../../components/ui";
 import { fetchSolBalance } from "../../lib/chain.ts";
@@ -28,22 +30,30 @@ export default function CourierPage() {
     if (me && online) fetchSolBalance(me.address).then(setSol, () => {});
   }, [me, online, faucet, earned]);
 
-  if (!me) return <p className="text-muted">Opening the courier…</p>;
+  if (!me)
+    return (
+      <div className="flex items-center gap-3">
+        <Doggett pose="waiting" size={56} />
+        <p className="text-lg">Opening the courier…</p>
+      </div>
+    );
   const total = plan?.jobs.reduce((a, j) => a + j.v.amount, 0n) ?? 0n;
   const maxEarn = plan?.jobs.reduce((a, j) => a + feeFor(j.v.amount, j.auth), 0n) ?? 0n;
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <span className="label">Anyone can settle</span>
-        <h1 className="text-4xl">Courier</h1>
-        <p>
-          The first phone to find a signal settles everyone. Shops hand you their vouchers with a signed note that says you may settle them and keep a small fee. The money
-          still goes to the shop; you can&apos;t redirect it.
+    <div className="flex max-w-3xl flex-col gap-8">
+      <FirstRun role="courier" />
+      <div className="flex flex-col gap-3">
+        <span className="label text-ink">Anyone can collect for a shop</span>
+        <h1 className="text-5xl md:text-7xl">Carry the tickets across.</h1>
+        <p className="max-w-[60ch] text-lg">
+          The first phone to find a signal collects for everyone. Shops hand you their ferry tickets with a signed note that lets you collect them and keep a small fee. The
+          money still goes to the shop; you can&apos;t redirect it.
         </p>
+        <WhatsThis term="Courier authorization">A note the shop signs with its own key. It names a fee cap (1%, at most $0.05 a ticket) and expires after 48 hours. Solana checks it onchain.</WhatsThis>
       </div>
 
-      <section aria-label="Your courier key" className="flex flex-wrap items-baseline gap-x-6 gap-y-2 text-sm">
+      <section aria-label="Your courier key" className="flex flex-wrap items-baseline gap-x-6 gap-y-2 border-y-2 border-ink py-4 text-sm">
         <span>
           Courier key: <Addr value={me.address} />
         </span>
@@ -68,9 +78,9 @@ export default function CourierPage() {
 
       <section aria-label="Bundle" className="paper flex flex-col gap-3 p-5">
         <label className="flex flex-col gap-1">
-          <span className="label">Paste a shop&apos;s courier bundle</span>
+          <span className="label text-ink">Paste a shop&apos;s courier bundle</span>
           <textarea
-            className="field mono min-h-28 text-xs"
+            className="field mono min-h-32 text-sm"
             value={text}
             spellCheck={false}
             onChange={(e) => (setText(e.target.value), setPlan(null), setResults([]), setEarned(null))}
@@ -84,7 +94,7 @@ export default function CourierPage() {
           <div className="flex flex-col gap-2 text-sm">
             {plan.jobs.length > 0 ? (
               <Signal tone="ok">
-                {plan.jobs.length} voucher{plan.jobs.length === 1 ? "" : "s"} for <Money units={total} />, signed and authorized by{" "}
+                {plan.jobs.length} ticket{plan.jobs.length === 1 ? "" : "s"} for <Money units={total} />, signed and authorized by{" "}
                 {[...new Set(plan.jobs.map((j) => shortAddress(j.auth.merchant)))].join(", ")}. You can earn up to <Money units={maxEarn} />.
               </Signal>
             ) : (
@@ -109,7 +119,7 @@ export default function CourierPage() {
               setBusy(false);
             }}
           >
-            {busy ? "Settling…" : online ? `Settle ${plan.jobs.length} for the shop` : "Settle when you have a signal"}
+            {busy ? "Collecting…" : online ? `Collect ${formatUsd(total)} for the shop` : "Collect when you have a signal"}
           </button>
         )}
       </section>
@@ -117,12 +127,12 @@ export default function CourierPage() {
       {busy && results.length === 0 && (
         <div className="flex items-center gap-3">
           <Doggett pose="waiting" size={48} />
-          <span>Settling: every signature is checked onchain…</span>
+          <span className="text-lg">Collecting: Solana is checking every signature…</span>
         </div>
       )}
       {results.length > 0 && (
         <section aria-label="Results" className="flex flex-col gap-2" aria-live="polite">
-          <ul className="flex flex-col gap-1 text-sm">
+          <ul className="flex flex-col gap-2">
             {results.map((r) =>
               r.sent ? (
                 <li key={`${r.v.tab}-${r.v.serial}`} className="text-ok">
@@ -139,13 +149,13 @@ export default function CourierPage() {
           {earned !== null && (
             <div className="flex items-center gap-3">
               <Doggett pose={earned > 0n ? "success" : "error"} size={56} />
-              <p className="font-display text-2xl font-bold">
+              <p className="display text-4xl">
                 {earned > 0n ? (
                   <>
                     You earned <Money units={earned} />.
                   </>
                 ) : (
-                  "Nothing settled this time."
+                  "Nothing collected this time."
                 )}
               </p>
             </div>

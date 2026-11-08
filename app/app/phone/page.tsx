@@ -34,6 +34,10 @@ import {
 } from "../../lib/planner.ts";
 import { useNow } from "../../lib/use-now.ts";
 import { Planner } from "../../components/planner";
+import { FirstRun } from "../../components/guide";
+import { HullGauge } from "../../components/hull";
+import { PrintedTicket } from "../../components/printed-ticket";
+import { WhatsThis } from "../../components/ui";
 import { get, set } from "idb-keyval";
 import { useOnline } from "../../lib/use-online.ts";
 
@@ -114,20 +118,25 @@ export default function PhonePage() {
     );
   }
   if (saved === undefined || !pk)
-    return <p className="text-muted">Opening your phone wallet…</p>;
+    return (
+      <div className="mx-auto flex max-w-[440px] items-center gap-3">
+        <Doggett pose="waiting" size={56} />
+        <p className="text-lg">Opening your phone wallet…</p>
+      </div>
+    );
 
   if (saved === null) {
     const code = pairingCode(pk);
     return (
-      <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+      <div className="mx-auto grid max-w-[880px] gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
         <div className="flex max-w-text flex-col gap-5">
-          <Doggett pose="welcome" size={88} />
-          <h1 className="text-4xl">Pair this phone</h1>
-          <p>
-            This phone now holds a key that signs vouchers. The private half
-            never leaves this browser, even offline.
+          <FirstRun role="phone" />
+          <h1 className="text-5xl">Pair this phone</h1>
+          <p className="text-lg">
+            This phone now holds a key that signs ferry tickets. The private
+            half never leaves this browser, even offline.
           </p>
-          <ol className="flex list-decimal flex-col gap-2 pl-5">
+          <ol className="flex list-decimal flex-col gap-2 pl-6 text-lg marker:font-bold">
             <li>On a laptop, open Wherry and go to Owner.</li>
             <li>
               Scan this phone&apos;s code there (or paste it) and lock test
@@ -156,7 +165,7 @@ export default function PhonePage() {
           {note && <p className="text-sm text-muted">{note}</p>}
         </div>
         <div className="paper flex flex-col items-center gap-3 p-5">
-          <span className="label">Phone code</span>
+          <span className="label text-ink">This phone&apos;s code</span>
           <QrCode
             text={code}
             size={232}
@@ -206,15 +215,40 @@ export default function PhonePage() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-[440px] flex-col gap-8">
+      {!showing && <FirstRun role="phone" />}
+      {!online && (
+        <p
+          role="status"
+          className="flex items-center gap-3 rounded-sm border-2 border-ink bg-accent px-4 py-3 text-lg font-bold"
+        >
+          <span aria-hidden className="mono">
+            [....]
+          </span>
+          No signal. That&apos;s fine. Tickets still work.
+        </p>
+      )}
       <section
-        aria-label="Your tab"
-        className="flex flex-wrap items-end gap-x-8 gap-y-3 border-b-[1.5px] border-line pb-5"
+        aria-label="Your locked tab"
+        className="paper flex flex-col gap-3 p-5"
       >
-        <div className="flex flex-col">
-          <span className="label">You can spend</span>
-          <Money units={spendable > 0n ? spendable : 0n} className="text-4xl" />
+        <div className="flex flex-col gap-1">
+          <span className="label text-ink">
+            Your locked tab · you can spend
+          </span>
+          <Money
+            units={spendable > 0n ? spendable : 0n}
+            className="text-[clamp(40px,12vw,56px)] leading-none"
+          />
         </div>
+        <HullGauge
+          left={spendable > 0n ? spendable : 0n}
+          total={tab.deposited}
+        />
+        <WhatsThis term="Escrow">
+          Money held by a Solana program for this phone. Nobody else can spend
+          it, and the phone can&apos;t promise more than it holds.
+        </WhatsThis>
         <div className="flex flex-col text-sm">
           <span>
             <Money units={tab.deposited} /> locked in tab · expires in{" "}
@@ -244,27 +278,36 @@ export default function PhonePage() {
           aria-label="Your voucher"
           className="flex flex-col items-center gap-4"
         >
-          <h1 className="text-3xl">Show this to {showing.shopName}</h1>
-          <p className="max-w-text text-center text-muted">
+          <h1 className="text-center text-4xl">
+            Show this to {showing.shopName}
+          </h1>
+          <p className="max-w-text text-center text-lg">
             They check it without a network. You can close this once
             they&apos;ve scanned it.
           </p>
-          <Ticket
-            serial={showing.serial}
-            shopName={showing.shopName}
-            amount={showing.amount}
-            tab={showing.tab}
-            qr={
-              <QrCode
-                text={showing.code}
-                size={260}
-                label={`Voucher ${serialLabel(showing.serial)} QR code`}
-              />
-            }
-            stamp={isSettled(tab, showing.serial) ? "onchain" : undefined}
-          />
+          <PrintedTicket
+            key={showing.code}
+            serial={serialLabel(showing.serial)}
+            shop={showing.shopName}
+            amount={formatUsd(showing.amount)}
+          >
+            <Ticket
+              serial={showing.serial}
+              shopName={showing.shopName}
+              amount={showing.amount}
+              tab={showing.tab}
+              qr={
+                <QrCode
+                  text={showing.code}
+                  size={260}
+                  label={`Voucher ${serialLabel(showing.serial)} QR code`}
+                />
+              }
+              stamp={isSettled(tab, showing.serial) ? "onchain" : undefined}
+            />
+          </PrintedTicket>
           <PlaySound code={showing.code} />
-          <CopyButton text={showing.code} label="Copy voucher code" />
+          <CopyButton text={showing.code} label="Copy ticket code" />
           <button
             type="button"
             className="btn btn-sail"
@@ -275,17 +318,17 @@ export default function PhonePage() {
         </section>
       ) : (
         <>
-          <Planner
-            spendable={spendable > 0n ? spendable : 0n}
-            plan={plan}
-            onPlan={async (p) => (setPlan(p), await set("phone:plan", p))}
-            spentToday={spentToday}
-          />
           <section
             aria-label="Pay a shop"
             className="flex max-w-xl flex-col gap-5"
           >
-            <h1 className="text-3xl">Pay a shop</h1>
+            <div className="flex flex-col gap-1">
+              <h1 className="text-5xl">Pay with a ferry ticket</h1>
+              <WhatsThis term="Voucher">
+                A ferry ticket is an IOU your phone signs for one shop and one
+                amount. The shop can check it with no network.
+              </WhatsThis>
+            </div>
             {!shop ? (
               <div className="paper p-5">
                 <Scanner
@@ -380,34 +423,39 @@ export default function PhonePage() {
                   disabled={busy || !amount || !!amountProblem}
                 >
                   {amount && !amountProblem
-                    ? `Pay ${formatUsd(amount)} to ${shop.name}`
-                    : "Pay"}
+                    ? `Sign a ${formatUsd(amount)} ticket for ${shop.name}`
+                    : "Sign the ticket"}
                 </button>
               </form>
             )}
             {note && <p className="text-sm text-err">{note}</p>}
           </section>
+          <Planner
+            spendable={spendable > 0n ? spendable : 0n}
+            plan={plan}
+            onPlan={async (p) => (setPlan(p), await set("phone:plan", p))}
+            spentToday={spentToday}
+          />
         </>
       )}
 
       {!showing && (
         <section aria-label="Your vouchers" className="flex flex-col gap-3">
-          <h2 className="text-2xl">Your vouchers</h2>
+          <h2 className="text-3xl">Your tickets</h2>
           {mine.length === 0 ? (
             <div className="flex items-center gap-4">
-              <Doggett pose="welcome" size={64} />
               <p className="text-muted">
-                No vouchers yet. Your first payment shows up here, even offline.
+                No tickets yet. Your first payment shows up here, even offline.
               </p>
             </div>
           ) : (
-            <ul className="flex flex-col divide-y-[1.5px] divide-line border-y-[1.5px] border-line">
+            <ul className="flex flex-col divide-y-2 divide-ink border-y-2 border-ink">
               {mine.map((h) => (
                 <li
                   key={h.code}
                   className="flex flex-wrap items-center gap-x-4 gap-y-1 py-3"
                 >
-                  <span className="label w-[72px] text-ink">
+                  <span className="mono w-[78px] text-sm">
                     {serialLabel(h.serial)}
                   </span>
                   <span className="min-w-0 flex-1 truncate">{h.shopName}</span>
@@ -416,8 +464,8 @@ export default function PhonePage() {
                     className={`text-sm ${isSettled(tab, h.serial) ? "text-ok" : "text-muted"}`}
                   >
                     {isSettled(tab, h.serial)
-                      ? "✓ Settled"
-                      : "Waiting for the shop to settle"}
+                      ? "✓ Collected"
+                      : "Waiting for the shop to collect"}
                   </span>
                   <button
                     type="button"
