@@ -28,7 +28,7 @@ export function RiverHero() {
   }, []);
   return (
     <figure className="flex flex-col gap-2">
-      <div className="rounded-lg border-2 border-ink bg-night px-3 py-5 text-on-night shadow-2 sm:px-6 sm:py-7">
+      <div className="rounded-3xl bg-night px-4 py-6 text-on-night shadow-2 sm:px-8 sm:py-8">
         <div
           ref={box}
           className="relative overflow-hidden text-[clamp(10px,2.6vw,17px)]"
