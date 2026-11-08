@@ -194,7 +194,7 @@ export default function Landing() {
             <a className="link" href="https://www.rareui.com" target="_blank" rel="noreferrer">
               Rare UI
             </a>
-            . Type: Geist and Paper Mono (OFL).
+            . Type: Cormorant Garamond, Geist and Paper Mono (OFL).
           </span>
         </div>
       </footer>
