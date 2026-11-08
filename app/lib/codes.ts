@@ -97,3 +97,54 @@ export function decodeVoucher(text: string): SignedVoucher | null {
     signature: b.slice(132, 196),
   };
 }
+
+export type SignedCourierAuth = {
+  merchant: Address;
+  tab: Address;
+  maxFeeBps: number;
+  maxFeeAbs: bigint;
+  authExpiresAt: bigint;
+  authNonce: Uint8Array;
+  signature: Uint8Array;
+};
+
+// merchant 32 | tab 32 | max_fee_bps 2 | max_fee_abs 8 | expires 8 | nonce 16 | signature 64
+const AUTH_CODE_LEN = 162;
+
+/** Courier authorization: WC1.<base64url>. The shop's signed consent for one tab. */
+export function encodeCourierAuth(a: SignedCourierAuth): string {
+  const b = new Uint8Array(AUTH_CODE_LEN);
+  b.set(addrEnc.encode(a.merchant), 0);
+  b.set(addrEnc.encode(a.tab), 32);
+  new DataView(b.buffer).setUint16(64, a.maxFeeBps, true);
+  b.set(getU64Encoder().encode(a.maxFeeAbs), 66);
+  b.set(getI64Encoder().encode(a.authExpiresAt), 74);
+  b.set(a.authNonce, 82);
+  b.set(a.signature, 98);
+  return `WC1.${toBase64Url(b)}`;
+}
+
+export function decodeCourierAuth(text: string): SignedCourierAuth | null {
+  const t = text.trim();
+  if (!t.startsWith("WC1.")) return null;
+  const b = fromBase64Url(t.slice(4));
+  if (!b || b.length !== AUTH_CODE_LEN) return null;
+  return {
+    merchant: addrDec.decode(b.subarray(0, 32)),
+    tab: addrDec.decode(b.subarray(32, 64)),
+    maxFeeBps: new DataView(b.buffer, b.byteOffset).getUint16(64, true),
+    maxFeeAbs: getU64Decoder().decode(b.subarray(66, 74)),
+    authExpiresAt: getI64Decoder().decode(b.subarray(74, 82)),
+    authNonce: b.slice(82, 98),
+    signature: b.slice(98, 162),
+  };
+}
+
+/** A courier bundle is plain text: one WV1 (voucher) or WC1 (authorization) code per line. */
+export function parseBundle(text: string) {
+  const lines = text.split(/\s+/).filter(Boolean);
+  return {
+    vouchers: lines.map(decodeVoucher).filter((v): v is SignedVoucher => v !== null),
+    auths: lines.map(decodeCourierAuth).filter((a): a is SignedCourierAuth => a !== null),
+  };
+}

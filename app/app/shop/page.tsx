@@ -28,6 +28,7 @@ import {
   shopSigner,
   syncSnapshot,
   explainError,
+  courierBundle,
   type BatchResult,
   type Queued,
   type Snapshot,
@@ -391,6 +392,7 @@ export default function ShopPage() {
         <OfficerPanel state={officer} onStart={startOfficer} onStop={async () => (await set("shop:officer-on", false), setOfficer({ status: "off" }))} />
         <StudioPanel shop={shop} online={online} />
         <NumbersPanel n={numbers} />
+        <CourierPanel pending={pending.length} />
         <section aria-label="Tab list" className="flex flex-col gap-2">
           <h2 className="text-xl">Tab list</h2>
           <p className="text-sm">
@@ -481,6 +483,35 @@ function Sticker({ shop, name, online }: { shop: KeyPairSigner; name: string; on
         )}
         {faucet && <span className="text-muted">{faucet.length > 60 ? <TxLink signature={faucet}>Sent ✓ Explorer</TxLink> : faucet}</span>}
       </div>
+    </section>
+  );
+}
+
+/** Hand vouchers to whoever finds a signal first, with this shop's signed consent to a capped fee. */
+function CourierPanel({ pending }: { pending: number }) {
+  const [bundle, setBundle] = useState<string | null>(null);
+  return (
+    <section aria-label="Hand to a courier" className="flex flex-col gap-2">
+      <h2 className="text-xl">Hand to a courier</h2>
+      <p className="text-sm text-muted">
+        No signal here? Anyone who finds one can settle your vouchers for you. You sign a note allowing a fee of 1%, at most $0.05 a voucher, valid for 48 hours. The money
+        still comes to you.
+      </p>
+      {pending === 0 ? (
+        <p className="text-sm text-muted">No vouchers waiting.</p>
+      ) : (
+        <button type="button" className="link self-start text-sm" onClick={async () => setBundle((await courierBundle()).text)}>
+          Make a courier bundle for {pending} voucher{pending === 1 ? "" : "s"}
+        </button>
+      )}
+      {bundle && (
+        <div className="flex flex-col gap-1">
+          <textarea className="field mono min-h-24 text-xs" readOnly value={bundle} aria-label="Courier bundle" />
+          <button type="button" className="link self-start text-sm" onClick={() => navigator.clipboard.writeText(bundle)}>
+            Copy bundle
+          </button>
+        </div>
+      )}
     </section>
   );
 }
