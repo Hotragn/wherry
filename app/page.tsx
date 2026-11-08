@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BuiltWith, BuiltWithTiles } from "./components/built-with";
+import { Doggett } from "./components/doggett";
 import { Logo } from "./components/logo";
 import { ProductCrux } from "./components/product-crux";
 import { RiverHero } from "./components/river-hero";
@@ -155,17 +156,71 @@ export default function Landing() {
             <div className="flex flex-col gap-5">
               <p className="text-sm text-on-night-muted">April 28, 2025 · Spain and Portugal</p>
               <p className="display text-[clamp(36px,5vw,64px)]">The power went out. In-store card payments fell 55%.</p>
-              <p className="text-sm text-on-night-muted">Banco de España, Financial Stability Report, autumn 2025.</p>
+              <p className="text-sm text-on-night-muted">
+                Source:{" "}
+                <a className="link" href="https://www.bde.es/f/webbe/GAP/Secciones/Publicaciones/InformesBoletinesRevistas/RevistaEstabilidadFinanciera/25/3_FSR49_Apagon.pdf" target="_blank" rel="noreferrer">
+                  Banco de España, Financial Stability Report, autumn 2025
+                </a>
+                .
+              </p>
             </div>
             <div className="flex flex-col justify-end gap-4">
               <p className="flex flex-col">
                 <span className="mono whitespace-nowrap text-4xl sm:text-5xl">2.2 billion</span>
-                <span className="text-on-night-muted">people were offline in 2025 (ITU).</span>
+                <span className="text-on-night-muted">
+                  people were offline in 2025 (
+                  <a className="link" href="https://www.itu.int/en/mediacentre/Pages/PR-2025-11-17-Facts-and-Figures.aspx" target="_blank" rel="noreferrer">
+                    ITU
+                  </a>
+                  ).
+                </span>
               </p>
               <p className="text-on-night-muted">
                 When the network drops, card payments stop and the shop eats the loss. Wherry hands the shop money that was locked before the signal went.
               </p>
             </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="why-title" className="mx-auto max-w-page px-4 pb-20 md:px-8">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,9fr)]">
+            <h2 id="why-title" className="label pt-3 text-ink">
+              Why I built this
+            </h2>
+            <figure className="flex flex-col gap-8">
+              <blockquote className="flex flex-col gap-6">
+                <p className="display text-[clamp(28px,3.4vw,44px)] leading-[1.15]">
+                  <span aria-hidden className="mr-1 text-accent">&ldquo;</span>A year ago, a landslide cut off the remote area I was in. There was no network, my fuel was running low, and I had no cash. I had money in
+                  my account and couldn&apos;t spend a cent of it, because every way I knew to pay needed a signal.
+                </p>
+                <p className="max-w-[62ch] text-lg text-muted">
+                  I looked online for something that worked offline and found very little a shop could actually trust. Later I learned how common this is:{" "}
+                  <a className="link text-ink" href="https://www.itu.int/en/mediacentre/Pages/PR-2025-11-17-Facts-and-Figures.aspx" target="_blank" rel="noreferrer">
+                    2.2 billion people are still offline (ITU, 2025)
+                  </a>
+                  , and when the power went out across Spain and Portugal in April 2025,{" "}
+                  <a
+                    className="link text-ink"
+                    href="https://www.bde.es/f/webbe/GAP/Secciones/Publicaciones/InformesBoletinesRevistas/RevistaEstabilidadFinanciera/25/3_FSR49_Apagon.pdf"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    in-store card payments fell 55%
+                  </a>
+                  .
+                </p>
+                <p className="display text-[clamp(24px,2.6vw,34px)] italic text-accent">
+                  Wherry is what I wish I&apos;d had that day. I don&apos;t want anyone else to be stuck the way I was.
+                </p>
+              </blockquote>
+              <figcaption className="flex items-center gap-4 border-t border-line pt-5">
+                <Doggett pose="welcome" size={48} decorative glow={false} />
+                <span className="flex flex-col">
+                  <span className="text-lg font-semibold">&mdash; Hotragn, solo builder</span>
+                  <span className="text-sm text-muted">Built for the MLH Solana Hackathon, November 2026</span>
+                </span>
+              </figcaption>
+            </figure>
           </div>
         </section>
 
