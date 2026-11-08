@@ -14,7 +14,7 @@ Other offline Solana payment projects sign a full transaction offline and broadc
 ## How it works
 1. **Escrow (online, once).** The customer locks test dollars in a *tab*, an escrow account on Solana, and pairs their phone's key with it. The tab can't be emptied until shops have had time to settle.
 2. **Voucher (offline).** The phone signs a 172-byte voucher: this tab, this shop, this amount, serial number, expiry, a random nonce. The shop checks the signature, what's left in the tab, the payer's public record and its own risk limits, all offline, in milliseconds. An on-device AI risk officer can add a "Caution".
-3. **Settlement (back online).** The shop settles up to three vouchers in one transaction. The program checks every signature onchain with Solana's Ed25519 precompile and pays the shop from the escrow in about a second.
+3. **Settlement (back online).** The shop settles up to five vouchers in one transaction. The program checks every signature onchain with Solana's Ed25519 precompile and pays the shop from the escrow in about a second.
 
 ```mermaid
 flowchart LR
@@ -77,7 +77,7 @@ A replayed voucher fails in simulation with `VoucherAlreadySettled`. Test-USD mi
 - **Try it in 60 seconds** (`/app`): Owner, then Phone, then Shop, with a "Next" link at the end of each view.
   - **Owner** connects a wallet (the only place that needs one) or uses a devnet test wallet kept in the browser, gets test dollars from the faucet, pairs the phone by QR or code, and opens, tops up or closes a tab. It also shows the settlements and the public payer record.
   - **Phone** holds a non-extractable WebCrypto Ed25519 key. It finds its tab, scans the shop's sticker, shows the shop's name and key before signing, and shows each voucher as a ferry ticket with a QR. It works offline after the first load.
-  - **Shop** has a printable sticker, scans or pastes vouchers, checks them offline (signature, coverage from its last sync, the payer record), and runs the **risk circuit**: a per-customer and a total limit on what it holds unsettled, which trips visibly. It also runs the **AI risk officer**, queues vouchers in IndexedDB, shows **The Crossing** (vouchers wait on the near bank and cross when settled), and settles up to three per transaction with Explorer links and measured confirm times.
+  - **Shop** has a printable sticker, scans or pastes vouchers, checks them offline (signature, coverage from its last sync, the payer record), and runs the **risk circuit**: a per-customer and a total limit on what it holds unsettled, which trips visibly. It also runs the **AI risk officer**, queues vouchers in IndexedDB, shows **The Crossing** (vouchers wait on the near bank and cross when settled), and settles up to five per transaction with Explorer links and measured confirm times.
 - **Play** (`/play`): Doggett's Crossing. Buy a power-up offline with a voucher; it unlocks at once. After the studio settles and reveals its seed, the bonus drop opens, with the proof.
 - A service worker keeps `/app` and `/play` working offline after the first visit. The only server code is the test-dollar faucet (`/api/faucet`: fixed $50, at most 3 per address and 10 per IP per hour).
 

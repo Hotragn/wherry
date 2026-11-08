@@ -291,6 +291,20 @@ describe("settle", () => {
     console.log(`  batch of 3: ${sent.size} bytes, ${meta.computeUnitsConsumed()} CU`);
   });
 
+  test("settles 5 vouchers in one v1 transaction, and measures compute per voucher", async () => {
+    const w = await world();
+    const one = await send(w.svm, w.merchant, await settleIxs(w, await voucher(w, { serial: 1, amount: USD })));
+    const ixs: Instruction[] = [];
+    for (let serial = 2; serial <= 6; serial++) ixs.push(...(await settleIxs(w, await voucher(w, { serial, amount: USD }))));
+    const five = await send(w.svm, w.merchant, ixs);
+    assert.ok(five.size <= 4096, `5 vouchers are ${five.size} bytes`);
+    assert.equal(await tokenBalance(w, w.merchant.address), 6n * USD);
+    console.log(
+      `  CU: 1 voucher ${ok(one).computeUnitsConsumed()} (${one.size} bytes, first settle also opens the shop's token account); ` +
+        `5 vouchers ${ok(five).computeUnitsConsumed()} (${five.size} bytes)`,
+    );
+  });
+
   test("rejects a voucher signed by a different key", async () => {
     const w = await world();
     const s = await voucher(w, { serial: 1, amount: USD, key: await rawKey() });

@@ -89,7 +89,10 @@ export function explainError(e: unknown): { message: string; final: boolean } {
   return { message: text.length > 160 ? `${text.slice(0, 160)}…` : text, final: false };
 }
 
-/** One settlement step: either one v1 transaction for up to 3 vouchers, or one v0 transaction per voucher sent in parallel. */
+/** One settlement step: either one v1 transaction for up to BATCH vouchers, or one v0 transaction per voucher sent in parallel. */
+/** Vouchers per v1 settlement transaction: 5 measured at about 2.2 KB of 4,096 (tests/wherry.test.ts). */
+export const BATCH = 5;
+
 export type BatchResult = {
   codes: string[];
   /** Every transaction that landed for these vouchers. */
@@ -123,7 +126,7 @@ async function settleSingles(shop: KeyPairSigner, items: Queued[], snap: Snapsho
 }
 
 /**
- * Settle every pending voucher, up to 3 per v1 transaction (3 inline Ed25519 checks need 1,536 bytes,
+ * Settle every pending voucher, up to BATCH per v1 transaction (even 3 inline Ed25519 checks need 1,536 bytes,
  * over the 1,232-byte legacy limit). If a v1 batch fails, or `forceV0` is set, fall back to one v0
  * transaction per voucher, sent in parallel, so one bad voucher or a v1-shy RPC doesn't block the rest.
  */
@@ -132,8 +135,8 @@ export async function settleAll(onBatch: (r: BatchResult) => void, opts: { force
   const snap = await syncSnapshot();
   const pending = (await loadQueue()).filter((q) => q.status === "pending").reverse();
   const results: BatchResult[] = [];
-  for (let i = 0; i < pending.length; i += 3) {
-    const batch = pending.slice(i, i + 3);
+  for (let i = 0; i < pending.length; i += BATCH) {
+    const batch = pending.slice(i, i + BATCH);
     let r: BatchResult;
     if (opts.forceV0) {
       r = await settleSingles(shop, batch, snap);

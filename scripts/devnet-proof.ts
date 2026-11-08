@@ -121,15 +121,17 @@ await send(owner, `open tab #${tabId} with $40`, [
   await getOpenTabInstructionAsync({ owner: deployer, mint, ownerToken, tabId, deviceKey: devicePk, amount: 40n * USD, expiresAt }),
 ]);
 
-// 4. Offline: the phone signs 3 vouchers for the shop.
+// 4. Offline: the phone signs the vouchers for the shop.
 async function signVoucher(serial: number, amount: bigint) {
   const v: Voucher = { programId: WHERRY_PROGRAM_ADDRESS, tab, merchant: shop.address, mint, amount, serial, voucherExpiresAt: expiresAt, nonce: crypto.getRandomValues(new Uint8Array(16)) };
   const msg = voucherBytes(v);
   return { v, msg, sig: new Uint8Array(await signBytes(device.privateKey, msg)) };
 }
-const vouchers = [await signVoucher(0, 3_500_000n), await signVoucher(1, 2_000_000n), await signVoucher(2, 1_250_000n)];
+const COUNT = Number(process.argv[2] ?? 3); // vouchers settled in the one transaction
+const vouchers = [];
+for (let i = 1; i <= COUNT; i++) vouchers.push(await signVoucher(i, BigInt(500_000 + 250_000 * i)));
 
-// 5. Back online: the shop settles all 3 in one transaction (it pays its own fee and token account).
+// 5. Back online: the shop settles all of them in one transaction (it pays its own fee and token account).
 const shopBalance = (await read(() => owner.rpc.getBalance(shop.address).send())).value;
 if (shopBalance < 10_000_000n) {
   await send(owner, "fund shop with 0.02 SOL for fees", [
@@ -143,7 +145,7 @@ const settleIxs = async (s: Awaited<ReturnType<typeof signVoucher>>) => [
 ];
 const batch: Instruction[] = [];
 for (const s of vouchers) batch.push(...(await settleIxs(s)));
-await send(shopClient, "settle 3 vouchers in one tx", batch);
+await send(shopClient, `settle ${COUNT} vouchers in one tx`, batch);
 
 const t = (await read(() => fetchTab(owner.rpc, tab))).data;
 const p = (await read(() => fetchPayerRecord(owner.rpc, payerRecord))).data;
@@ -152,10 +154,10 @@ console.log(`payer record: tabs ${p.tabsOpened}, vouchers ${p.vouchersSettled}, 
 
 // 6. A replayed voucher is rejected (simulation fails before anything lands).
 try {
-  await send(shopClient, "replay voucher #0", await settleIxs(vouchers[0]));
+  await send(shopClient, "replay the first voucher", await settleIxs(vouchers[0]));
   console.log("UNEXPECTED: replay landed");
   process.exitCode = 1;
 } catch (e) {
   const text = JSON.stringify(e, (_, v) => (typeof v === "bigint" ? v.toString() : v)) + String((e as Error).message);
-  console.log(`replay voucher #0: rejected (${/VoucherAlreadySettled|6011|0x177b/.test(text) ? "VoucherAlreadySettled" : (e as Error).message})`);
+  console.log(`replay of the first voucher: rejected (${/VoucherAlreadySettled|6011|0x177b/.test(text) ? "VoucherAlreadySettled" : (e as Error).message})`);
 }
