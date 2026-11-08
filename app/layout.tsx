@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { Fraunces, IBM_Plex_Mono, Instrument_Sans } from "next/font/google";
+import { Atkinson_Hyperlegible_Next, Bricolage_Grotesque } from "next/font/google";
+import localFont from "next/font/local";
 import { OfflineShell } from "./components/offline-shell";
 import "./globals.css";
 
-// Google Fonts, self-hosted by next/font so they keep working offline.
-const fraunces = Fraunces({ subsets: ["latin"], axes: ["opsz"], variable: "--font-fraunces", display: "swap" });
-const instrument = Instrument_Sans({ subsets: ["latin"], variable: "--font-instrument", display: "swap" });
-const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: "500", variable: "--font-plex-mono", display: "swap" });
+// Google Fonts (OFL), self-hosted by next/font so they keep working offline.
+const display = Bricolage_Grotesque({ subsets: ["latin"], axes: ["opsz", "wdth"], variable: "--nf-display", display: "swap" });
+const text = Atkinson_Hyperlegible_Next({ subsets: ["latin"], variable: "--nf-text", display: "swap" });
+// Paper Mono (OFL 1.1, github.com/paper-design/paper-mono): amounts, serials and the ASCII art.
+const mono = localFont({ src: "../public/fonts/PaperMono.woff2", weight: "100 800", variable: "--nf-mono", display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "Wherry: the ferry for your money when the network's gone", template: "%s · Wherry" },
@@ -16,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${instrument.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${display.variable} ${text.variable} ${mono.variable}`}>
       <body>
         {children}
         <OfflineShell />
