@@ -72,6 +72,21 @@ Tab ids run 0, 1, 2… per owner (`tab_id` must equal `tabs_opened`), so a close
 
 A replayed voucher fails in simulation with `VoucherAlreadySettled`. Test-USD mint: `DQRut6HQcdzu1bpKFzYRCPYfW1u7MCHso2EVGK6tuFs`.
 
+## Measured numbers (devnet, real runs)
+| What | Number | Source |
+|---|---|---|
+| Back online → confirmed, 3-voucher batch | 0.8–0.93 s | Shop view, `3GWbVawE…`, `5dwbbrL6…` |
+| Back online → finalized, 1 voucher | 1.0 s (status polled once a second) | Shop "Measured here" panel |
+| Compute, 1 voucher (shop's token account already open) | 23,688 CU | Shop panel; v0 fallback tx `4cFQHx9M…`: 23,838 CU |
+| Compute, 5 vouchers in one v1 tx | 110,940 CU (≈22,200 per voucher) | `xF5ViLRC…`, decoded with `scripts/tx-info.ts` |
+| Transaction size, 5 vouchers | 2,228 bytes of 4,096 | LiteSVM test |
+| Fee per voucher | 5,000 lamports per Ed25519 check, plus 5,000 per transaction (6,000 per voucher in a batch of 5) | `xF5ViLRC…`: 30,000 lamports |
+| AI officer decision, offline | 1.2–1.7 s (Qwen2.5 1.5B, WebGPU, Apple M-series) | Shop verdict line |
+
+Settlement transactions carry explicit compute-unit and loaded-data limits in their v1 message config (measured by simulation; for `xF5ViLRC…`: 120,065 CU and 543,222 bytes).
+
+We didn't move `Tab` to a zero-copy account: at 282 bytes, deserializing it is a small share of the ~22k CU per voucher (most of it is the token transfer CPI and the Ed25519 introspection), and a new layout would make every existing devnet tab unreadable.
+
 ## The app
 - **Landing** (`/`): what it is and how it works, plus the blackout numbers.
 - **Try it in 60 seconds** (`/app`): Owner, then Phone, then Shop, with a "Next" link at the end of each view.

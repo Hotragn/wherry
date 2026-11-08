@@ -12,7 +12,7 @@ import { hex } from "../../lib/fair.ts";
 import { commitSeed, revealSeed, studioState } from "../../lib/game.ts";
 import { Addr, Money, QrCode, Signal, TxLink } from "../../components/ui";
 import { assess, type Assessment, type Pending, type RiskSettings } from "../../lib/assess.ts";
-import { fetchSolBalance } from "../../lib/chain.ts";
+import { fetchSolBalance, secondsToFinalized } from "../../lib/chain.ts";
 import { decodeVoucher, stickerCode, type SignedVoucher } from "../../lib/codes.ts";
 import { PROGRAM_ID, ago, formatUsd, parseUsd, serialLabel } from "../../lib/config.ts";
 import { OFFICER_MODEL, askOfficer, finalDecision, loadOfficer, officerSupported, type OfficerFacts, type Opinion } from "../../lib/officer.ts";
@@ -52,6 +52,16 @@ type Check = {
   result: Assessment;
   officer?: { s: "thinking" } | { s: "done"; opinion: Opinion } | { s: "failed" };
 };
+/** Real measurements from this device's last settlement and AI decision. */
+type Numbers = {
+  vouchers?: number;
+  txs?: number;
+  confirmedS?: number;
+  finalizedS?: number | null | "waiting";
+  cu?: bigint;
+  feeLamports?: bigint;
+  aiMs?: number;
+};
 type OfficerState = { status: "off" | "unsupported" | "ready" | "error" } | { status: "loading"; progress: number };
 
 export default function ShopPage() {
@@ -69,6 +79,14 @@ export default function ShopPage() {
   const [arriving, setArriving] = useState<Set<string>>(new Set());
   const [syncError, setSyncError] = useState<string | null>(null);
   const [officer, setOfficer] = useState<OfficerState>({ status: "off" });
+  const [numbers, setNumbers] = useState<Numbers | null>(null);
+  const saveNumbers = useCallback((patch: Partial<Numbers>) => {
+    setNumbers((n) => {
+      const next = { ...(n ?? {}), ...patch } as Numbers;
+      void set("shop:numbers", next);
+      return next;
+    });
+  }, []);
 
   const startOfficer = useCallback(() => {
     if (!officerSupported()) return setOfficer({ status: "unsupported" });
@@ -98,6 +116,7 @@ export default function ShopPage() {
       setName(await loadName());
       setSnap((await loadSnapshot()) ?? null);
       setRisk(await loadRisk());
+      setNumbers((await get<Numbers>("shop:numbers")) ?? null);
       await reloadQueue();
     })();
   }, [reloadQueue]);
@@ -159,6 +178,7 @@ export default function ShopPage() {
     };
     const opinion = await askOfficer(facts);
     setCheck((c) => (c?.code === code ? { ...c, officer: opinion ? { s: "done", opinion } : { s: "failed" } } : c));
+    if (opinion) saveNumbers({ aiMs: opinion.ms });
   }
 
   async function accept() {
@@ -174,8 +194,9 @@ export default function ShopPage() {
     setSettleError(null);
     // ?tx=v0 forces the one-voucher-per-v0-transaction fallback, for testing it.
     const forceV0 = new URLSearchParams(window.location.search).get("tx") === "v0";
+    const started = performance.now(); // the moment the shop is back online and presses Settle
     try {
-      await settleAll(
+      const results = await settleAll(
         async (r) => {
           setBatches((b) => [...b, r]);
           await reloadQueue();
@@ -187,6 +208,20 @@ export default function ShopPage() {
         },
         { forceV0 },
       );
+      const sents = results.flatMap((r) => r.sents);
+      const vouchers = results.reduce((n, r) => n + r.codes.length - r.failed.length, 0);
+      if (sents.length > 0) {
+        const last = sents[sents.length - 1];
+        saveNumbers({
+          vouchers,
+          txs: sents.length,
+          confirmedS: (performance.now() - started) / 1000,
+          finalizedS: "waiting",
+          cu: sents.reduce((a, x) => a + (x.computeUnits ?? 0n), 0n),
+          feeLamports: sents.reduce((a, x) => a + (x.feeLamports ?? 0n), 0n),
+        });
+        secondsToFinalized(last.signature, started).then((f) => saveNumbers({ finalizedS: f }));
+      }
       await sync();
     } catch (e) {
       setSettleError(explainError(e).message);
@@ -355,6 +390,7 @@ export default function ShopPage() {
         <RiskCircuit risk={risk} pending={pending} lastTrip={lastTrip} onChange={async (r) => (setRisk(r), await saveRisk(r))} />
         <OfficerPanel state={officer} onStart={startOfficer} onStop={async () => (await set("shop:officer-on", false), setOfficer({ status: "off" }))} />
         <StudioPanel shop={shop} online={online} />
+        <NumbersPanel n={numbers} />
         <section aria-label="Tab list" className="flex flex-col gap-2">
           <h2 className="text-xl">Tab list</h2>
           <p className="text-sm">
@@ -445,6 +481,31 @@ function Sticker({ shop, name, online }: { shop: KeyPairSigner; name: string; on
         )}
         {faucet && <span className="text-muted">{faucet.length > 60 ? <TxLink signature={faucet}>Sent ✓ Explorer</TxLink> : faucet}</span>}
       </div>
+    </section>
+  );
+}
+
+function NumbersPanel({ n }: { n: Numbers | null }) {
+  const per = (v: bigint | undefined) => (v !== undefined && n?.vouchers ? v / BigInt(n.vouchers) : undefined);
+  const rows: [string, React.ReactNode][] = [
+    ["Back online → confirmed", n?.confirmedS !== undefined ? `${n.confirmedS.toFixed(1)} s (${n.vouchers} voucher${n.vouchers === 1 ? "" : "s"}, ${n.txs} tx)` : "—"],
+    ["Back online → finalized", n?.finalizedS === "waiting" ? "waiting for finality…" : typeof n?.finalizedS === "number" ? `${n.finalizedS.toFixed(1)} s` : n?.finalizedS === null ? "not seen within 60 s" : "—"],
+    ["Compute", n?.cu !== undefined ? `${n.cu.toLocaleString("en-US")} CU · ${per(n.cu)?.toLocaleString("en-US")} per voucher` : "—"],
+    ["Fee", n?.feeLamports !== undefined ? `${lamportsToSol(n.feeLamports)} · ${lamportsToSol(per(n.feeLamports) ?? 0n)} per voucher` : "—"],
+    ["AI decision, offline", n?.aiMs !== undefined ? `${(n.aiMs / 1000).toFixed(1)} s` : "—"],
+  ];
+  return (
+    <section aria-label="Measured on this device" className="flex flex-col gap-2">
+      <h2 className="text-xl">Measured here</h2>
+      <p className="text-sm text-muted">Real numbers from your last settlement on devnet and the last AI decision. Nothing estimated.</p>
+      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
+        {rows.map(([k, v]) => (
+          <div key={k} className="contents">
+            <dt className="text-muted">{k}</dt>
+            <dd className="mono">{v}</dd>
+          </div>
+        ))}
+      </dl>
     </section>
   );
 }

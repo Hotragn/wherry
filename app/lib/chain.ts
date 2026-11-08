@@ -142,7 +142,7 @@ export async function fetchSettlements(tab: Address, limit = 20): Promise<Settle
   return out;
 }
 
-export type Sent = { signature: Signature; seconds: number; feeLamports: bigint | null };
+export type Sent = { signature: Signature; seconds: number; feeLamports: bigint | null; computeUnits?: bigint | null };
 
 /** Calls `after` once the signer has signed, so confirm time excludes the time a person spends in their wallet. */
 function afterSigning(s: TransactionSigner, after: () => void): TransactionSigner {
@@ -177,13 +177,25 @@ export async function send(
   const seconds = (performance.now() - (signedAt || started)) / 1000;
   const signature = result.context.signature as Signature;
   let feeLamports: bigint | null = null;
+  let computeUnits: bigint | null = null;
   try {
     const tx = await rpc
       .getTransaction(signature, { maxSupportedTransactionVersion: 1, encoding: "json", commitment: "confirmed" })
       .send();
     feeLamports = tx?.meta ? BigInt(tx.meta.fee) : null;
+    computeUnits = tx?.meta?.computeUnitsConsumed !== undefined ? BigInt(tx.meta.computeUnitsConsumed) : null;
   } catch {
     // The fee is a nice-to-have; the confirmation already happened.
   }
-  return { signature, seconds, feeLamports };
+  return { signature, seconds, feeLamports, computeUnits };
+}
+
+/** Seconds from `startedMs` (performance.now) until the signature is finalized, or null after `timeoutMs`. */
+export async function secondsToFinalized(signature: Signature, startedMs: number, timeoutMs = 60_000): Promise<number | null> {
+  while (performance.now() - startedMs < timeoutMs) {
+    const { value } = await rpc.getSignatureStatuses([signature]).send().catch(() => ({ value: [null] }));
+    if (value[0]?.confirmationStatus === "finalized") return (performance.now() - startedMs) / 1000;
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  return null;
 }
