@@ -28,6 +28,7 @@ pnpm codama:js      # regenerate app/generated/wherry from the IDL
 pnpm test           # LiteSVM tests for every instruction, including failure cases
 pnpm dev
 ```
+Try it on a real phone without publishing anything: `pnpm build && pnpm lan` serves the production build over HTTPS on your Wi-Fi address only (self-signed certificate, stops with Ctrl+C). Phones need HTTPS for the camera and WebCrypto.
 Pinned versions and the reasons behind them: [VERSIONS.md](VERSIONS.md).
 
 ## Security notes
