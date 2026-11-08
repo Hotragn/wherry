@@ -129,8 +129,9 @@ export default function Landing() {
               <p className="text-sm text-on-night-muted">Source: Banco de España, Financial Stability Report, autumn 2025.</p>
             </div>
             <div className="flex flex-col justify-end gap-4">
-              <p className="flex flex-col">
-                <span className="mono whitespace-nowrap text-4xl sm:text-5xl">2.2 billion</span>
+              <p className="@container flex flex-col">
+                {/* Sized to its column (11 mono characters), so it never runs off the night band. */}
+                <span className="mono whitespace-nowrap text-[clamp(2rem,13cqw,3.5rem)] leading-tight">2.2 billion</span>
                 <span className="text-on-night-muted">people were offline in 2025 (ITU).</span>
               </p>
               <p className="text-on-night-muted">

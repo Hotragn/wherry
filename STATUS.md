@@ -119,3 +119,10 @@ Game PDA: `DtnGwjM1qHsQ7E4GugU1w4CnE31W7X3MAxnixVviwZ3N` (studio = the shop key 
 - Bug found and fixed in testing: each play/listen leaked a ggwave instance; after a few the decoder heard nothing. Instances are now freed.
 - 10 tries, production build, two pages in one tab (phone → shop). The in-app browser blocks the mic, so the phone's recorded waveform was fed to Listen as a fake mic stream (digital loopback, not through the air): 10/10 decoded with valid signatures, 5 clean + 5 with white noise at RMS ≈ 0.020 vs signal RMS 0.061; decode time 12.6 s from Listen tap each (0.8 s lead-in + 12.0 s sound). Mic refused → "No microphone access. Scan the QR or paste the code." (verified).
 - Not verified: over the air between two devices (needs a real mic; try it on the LAN HTTPS phone setup).
+
+## Final main: redesign merged, smoke test (09:10 ET)
+- `git merge redesign` (6982b92) into main: no conflicts; README, STATUS, app/lib and the program untouched by it.
+- Fix: landing night band "2.2 billion" ran off the right edge at 1440 px. Now sized to its column with container units (`clamp(2rem, 13cqw, 3.5rem)`); measured text/column width 305/358 px at 390, 261/307 at 1024, 323/379 at 1440, no page overflow. Screenshots in the shared notes folder `build-night-band/`.
+- Tests 38/38 (the redesign added 2 ASCII-frame tests), build clean (one known font-fallback warning), lint 0 errors.
+- Devnet smoke from the production build of main: open $5 tab `2itEoTek65pLbkDRAKxrn3xx5D2gVTwpdKH63LF6ThEcQosdpDGJ4kvUduAwTpyqNR6MBvHcLx1R7M31iNSWFsCa` (0.8 s); ticket No. 0001 $1.00 checked offline (<1 ms, AI officer 1.6 s); collected in `4ZerZGrGE96QsePQdRvtqBogMy84ov4br3J2gFbG3fx4cT4vCEjrgrdKodzPAeuxYym5RubmpkcyuhrZjessTvym` (0.8 s confirmed, 1.0 s finalized, 25,261 CU, 0.00001 SOL).
+- Not run here: the local faucet (no `.env.local` in this worktree; the test wallet already had dollars).

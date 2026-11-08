@@ -44,14 +44,14 @@ Other offline payment projects on Solana sign a whole transaction offline and br
 
 Laptop only, one browser, two windows. Everything runs on devnet.
 
-1. **Window A:** open https://wherry-pay.vercel.app/app and go to **1 Owner**. Click "No wallet? Use a test wallet in this browser (devnet only)", then **Get $50 test dollars**. That is the faucet: a fixed $50 of devnet test dollars, up to 3 times per address.
+1. **Window A:** open https://wherry-pay.vercel.app/app and go to **Owner**. Click "No wallet? Use a test wallet in this browser (devnet only)", then **Get $50 test dollars**. That is the faucet: a fixed $50 of devnet test dollars, up to 3 times per address.
 2. **Window B:** open https://wherry-pay.vercel.app/app/phone. It says "Pair this phone". Click **Copy code**.
-3. **Window A (Owner):** paste the code under "Pair your phone", enter 40, and click **Lock $40.00 in a tab**. Wait for the Explorer link.
-4. **Window A:** go to **3 Shop**. Under the shop's sticker, click **Copy code**.
-5. **Window B (Phone):** once it shows your $40 tab, you can turn off Wi-Fi; paying needs no network. Paste the shop code under "Pay a shop", enter 3, and click **Pay**. The phone shows a ticket. Click **Copy voucher code**.
-6. **Window A (Shop):** paste the voucher under "Accept a voucher". You will see "Signature valid · checked offline". Click **Accept $3.00**. Turn Wi-Fi back on and click **Settle 1 voucher**. The ticket crosses to the far bank with its confirm time and an Explorer link.
+3. **Window A (Owner):** paste the code under "Pair your phone", enter 40, and click **Lock $40.00 in a tab**. Wait for "Confirmed in … s" and the Explorer link.
+4. **Window A:** go to **Shop**. Under the shop's sticker, click **Copy code**.
+5. **Window B (Phone):** click **Refresh** until it shows your $40 tab. From here you can turn off Wi-Fi; paying needs no network. Under "Pay with a ferry ticket", paste the shop code, enter 3, and click **Sign a $3.00 ticket for Amara's kiosk**. The phone prints a ticket. Click **Copy ticket code**.
+6. **Window A (Shop):** under "Check a ferry ticket", paste the ticket code. You will see "Signature valid · checked offline in <1 ms". Click **Accept $3.00**. Turn Wi-Fi back on and click **Collect $3.00**. The ticket crosses to the far bank ("Collected: paid onchain") with its confirm time and an Explorer link.
 
-Optional: paste the same voucher again. The shop declines it, and the program would reject it too.
+Optional: paste the same ticket code again. The shop declines it, and the program would reject it too.
 
 ## Methodology
 
@@ -68,7 +68,7 @@ Then I looked at prior offline projects. Every Solana one I found (anon0mesh, Me
 
 **Build.** One Anchor program, a Next.js app with three roles (Owner, Phone, Shop), and a typed client generated from the program with Codama. A service worker keeps the phone and shop screens working offline after the first visit.
 
-**Testing.** 36 TypeScript tests run the real program in LiteSVM (a fast local Solana VM), including seeded property tests that try random overspends and replays. Then I ran every milestone on devnet from the real UI and recorded the signatures and timings below.
+**Testing.** 38 TypeScript tests. The program tests run the real program in LiteSVM (a fast local Solana VM), including seeded property tests that try random overspends and replays. Then I ran every milestone on devnet from the real UI and recorded the signatures and timings below.
 
 ### Decisions and why
 
@@ -123,10 +123,11 @@ Each voucher needs its own 284-byte Ed25519 instruction, so three vouchers make 
 
 ## Proof it works
 
-**Tests: 36/36 pass** (`pnpm test`). They cover:
+**Tests: 38/38 pass** (`pnpm test`). They cover:
 - the program on LiteSVM: the rejection paths, replays, shortfalls and the courier rules;
 - seeded property tests: 25 random worlds with no overpay, no double pay, only the named shop paid, and shortfalls that add up; and for the courier, vault + shop + courier = deposit;
-- the offline logic: codes, risk limits, the AI tighten-only rule and the sound encoding.
+- the offline logic: codes, risk limits, the AI tighten-only rule and the sound encoding;
+- the landing page's ASCII animation frames.
 
 ### Devnet transactions
 
@@ -143,6 +144,8 @@ Each voucher needs its own 284-byte Ed25519 instruction, so three vouchers make 
 | Program upgrade adding the courier | [`2D55e11N…zMvHYtN`](https://explorer.solana.com/tx/2D55e11NCiTcw75HkYpjjASUQRUvXR1CafGLzSuQoKZuGuu4cos5KQeYLze5iNVLLcAbmoHk4Mo3Xc4aLzMvHYtN?cluster=devnet) |
 | Old flow after the upgrade: settle (0.9 s) | [`2bQZpqp8…YJcoDpxWJR`](https://explorer.solana.com/tx/2bQZpqp8PjpivrmMopiweRAo7LpDanEYjwHuiG9jZxhd3nQDzsVEyPz9yXtBFyyWioany8YS4z84tYYJcoDpxWJR?cluster=devnet) |
 | Courier settles a $3.00 voucher and earns $0.03, from the Courier view (0.8 s) | [`45frTaVC…H27s5A5N`](https://explorer.solana.com/tx/45frTaVCUpKMwJfzrasuw8oNCdY6nXDd9dhhwJcqdG4KNg7JZiwEUjBP5PQWS3TDDsUBoWnBcMWKYfxHH27s5A5N?cluster=devnet) |
+| Smoke test of the final build: open a $5 tab (0.8 s) | [`2itEoTek…NSWFsCa`](https://explorer.solana.com/tx/2itEoTek65pLbkDRAKxrn3xx5D2gVTwpdKH63LF6ThEcQosdpDGJ4kvUduAwTpyqNR6MBvHcLx1R7M31iNSWFsCa?cluster=devnet) |
+| Smoke test of the final build: shop collects a $1.00 ticket (0.8 s, 25,261 CU) | [`4ZerZGrG…jessTvym`](https://explorer.solana.com/tx/4ZerZGrGE96QsePQdRvtqBogMy84ov4br3J2gFbG3fx4cT4vCEjrgrdKodzPAeuxYym5RubmpkcyuhrZjessTvym?cluster=devnet) |
 
 A replayed voucher fails with `VoucherAlreadySettled`. I checked this on devnet after the first deploy and again after the upgrade.
 
@@ -152,7 +155,7 @@ A replayed voucher fails with `VoucherAlreadySettled`. I checked this on devnet 
 |---|---|
 | Back online → confirmed, 3-voucher batch | 0.8–0.93 s |
 | Back online → finalized, 1 voucher | 1.0 s |
-| Compute per voucher | 23,688 CU alone; about 22,200 each in a batch of 5 (110,940 CU) |
+| Compute per voucher | 25,261 CU alone on the current program (23,688 before the courier upgrade); about 22,200 each in a batch of 5 before the upgrade (110,940 CU) |
 | Fee per voucher | 5,000 lamports per signature check plus 5,000 per transaction: 6,000 lamports each in a batch of 5 |
 | Signature check at the shop, offline | under 1 ms |
 | AI risk officer decision, offline | 1.2–1.7 s (Qwen2.5 1.5B on WebGPU, Apple M-series laptop) |
@@ -209,7 +212,7 @@ With a microgrant, I would:
 ```bash
 pnpm install
 pnpm anchor-build   # builds the program; the tests load it
-pnpm test           # 36 tests on LiteSVM
+pnpm test           # 38 tests, the program ones on LiteSVM
 pnpm dev            # http://localhost:3000
 ```
 
