@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { BuiltWith } from "./components/built-with";
+import { BuiltWith, BuiltWithTiles } from "./components/built-with";
+import { Doggett } from "./components/doggett";
 import { Logo } from "./components/logo";
-import { HeroStage } from "./components/hero-stage";
+import { ProductCrux } from "./components/product-crux";
 import { RiverHero } from "./components/river-hero";
 import { Ticket } from "./components/ticket";
 import { Addr, WhatsThis } from "./components/ui";
@@ -14,13 +15,13 @@ const STEPS = [
     title: "Lock money in a tab",
     text: "Before the signal goes, the customer locks test dollars on Solana and pairs their phone with it. Nobody can spend that money twice.",
     term: "Escrow",
-    tech: "Money held by a Solana program, not by either side. Only signed tickets for that tab can draw on it.",
+    tech: "Money held by a Solana program, not by either side. Only signed payments for that tab can draw on it.",
   },
   {
     n: "02",
     when: "No signal",
-    title: "Pay with a ferry ticket",
-    text: "The phone signs a ticket for one shop and one amount. The shop checks it in milliseconds, with no network at all.",
+    title: "Pay a shop offline",
+    text: "The phone signs a payment for one shop and one amount. The shop checks it in milliseconds, with no network at all.",
     term: "Voucher",
     tech: "An IOU your phone signs with an Ed25519 key that never leaves it. It names the shop, the amount and a serial number.",
   },
@@ -28,98 +29,92 @@ const STEPS = [
     n: "03",
     when: "Back online",
     title: "The shop collects",
-    text: "When the network returns, the shop hands in its tickets in one transaction. Solana checks every signature again and pays out of the tab.",
+    text: "When the network returns, the shop hands in its payments in one transaction. Solana checks every signature again and pays out of the tab.",
     term: "Settle",
-    tech: "One onchain transaction that verifies each ticket and moves the money from the tab to the shop, in about a second.",
+    tech: "One onchain transaction that verifies each payment and moves the money from the tab to the shop, in about a second.",
   },
 ];
 
 const SAFETY = [
-  ["The money exists first", "Every ticket draws on dollars already locked onchain. A phone can't promise more than its tab holds."],
+  ["The money exists first", "Every payment draws on dollars already locked onchain. A phone can't promise more than its tab holds."],
   ["Checked twice", "The shop checks the signature offline. Solana checks it again onchain, through its Ed25519 precompile."],
-  ["Each ticket pays once", "Every ticket has a serial. The tab keeps an onchain record of the 1,024 serials it can pay, and each one pays once."],
-  ["The shop sees its worst case", "Before saying yes, the shop sees what's left in the tab after its other uncollected tickets, and how fresh that number is."],
-  ["Shortfalls go on the record", "If tickets ever outrun the tab, the late shop gets what's left and the gap goes on the payer's public record."],
+  ["Each payment counts once", "Every payment has a serial. The tab keeps an onchain record of the 1,024 serials it can pay, and each one pays once."],
+  ["The shop sees its worst case", "Before saying yes, the shop sees what's left in the tab after its other uncollected payments, and how fresh that number is."],
+  ["Shortfalls go on the record", "If payments ever outrun the tab, the late shop gets what's left and the gap goes on the payer's public record."],
   ["Limits the shop sets", "Each shop caps what it holds uncollected, per customer and in total. A small AI on the shop's own device can also say no."],
 ];
 
 export default function Landing() {
   return (
     <div className="min-h-dvh overflow-x-clip">
-      <header className="relative z-10 mx-auto flex max-w-page items-center justify-between gap-3 px-4 py-5 md:px-8">
-        <Logo size={44} className="text-3xl" />
-        <nav aria-label="Page" className="flex items-center gap-1 rounded-full border border-line bg-surface p-1 text-sm shadow-1">
-          <a href="#how" className="rounded-full px-3 py-1.5 font-medium hover:bg-sunk">
-            How it works
-          </a>
-          <a href="#safe" className="hidden rounded-full px-3 py-1.5 font-medium hover:bg-sunk sm:inline">
-            Is it safe
-          </a>
-          <Link href="/app" className="rounded-full bg-accent px-3 py-1.5 font-medium text-on-accent">
-            Open app
-          </Link>
-        </nav>
-      </header>
+      <div className="relative isolate overflow-hidden">
+        {/* Painted hero (generated in Canva): a river at dusk, town lights out, one lantern-lit ferry still crossing. */}
+        <img src="/hero-river.jpg" alt="" className="absolute inset-0 -z-20 h-full w-full object-cover" />
+        <div aria-hidden className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--w-navy)_45%,transparent)_0%,color-mix(in_srgb,var(--w-navy)_30%,transparent)_40%,color-mix(in_srgb,var(--w-navy)_55%,transparent)_75%,var(--w-navy)_100%)]" />
+        <header className="relative z-10 mx-auto flex max-w-page items-center justify-between gap-3 px-4 py-5 md:px-8">
+          <Logo size={44} className="text-3xl" />
+          <nav aria-label="Page" className="flex items-center gap-2 text-sm">
+            <a href="#how" className="hidden rounded-full px-3 py-1.5 font-medium hover:bg-surface sm:inline">
+              How it works
+            </a>
+            <a href="#safe" className="hidden rounded-full px-3 py-1.5 font-medium hover:bg-surface sm:inline">
+              Is it safe
+            </a>
+            <Link href="/app" className="btn-gold rounded-full px-4 py-2 font-semibold">
+              Open the app ↗
+            </Link>
+          </nav>
+        </header>
 
-      <main>
-        <div className="relative isolate -mt-24 pt-24">
-          <div aria-hidden className="w-beams -z-10" />
-          <section className="relative mx-auto grid max-w-page items-center gap-10 px-4 pb-14 pt-6 md:px-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:pt-12">
-            <div className="flex flex-col gap-7">
-              <p className="label">Offline · Signed · Settled on Solana</p>
-              <div className="relative">
-                <svg aria-hidden viewBox="0 0 600 300" className="pointer-events-none absolute -left-16 top-24 -z-10 hidden w-[760px] text-ink/20 lg:block">
-                  <path d="M10 290 C 160 330, 520 300, 590 120" fill="none" stroke="currentColor" strokeWidth="1" />
-                </svg>
-                <h1 className="headline-fade max-w-[720px] text-[clamp(56px,8.4vw,120px)]">
-                  Pay with <em className="font-normal italic">no signal.</em> Get paid when it&apos;s back.
-                </h1>
-                <span aria-hidden className="absolute bottom-6 right-0 hidden text-3xl text-ink lg:block">✦</span>
-              </div>
-              <p className="max-w-[540px] text-xl text-muted">
-                Your phone pays a shop with a signed ferry ticket, even in airplane mode. The money was locked on Solana first, so the ticket is always good.
+        <main>
+          <section className="mx-auto flex max-w-[960px] flex-col items-center gap-8 px-4 pb-24 pt-16 text-center md:pt-24">
+            <BuiltWithTiles />
+            <p className="label text-ink">Offline payments on Solana · devnet</p>
+            <h1 className="text-[clamp(52px,8vw,112px)] [text-shadow:0_2px_30px_color-mix(in_srgb,var(--w-navy)_80%,transparent)]">
+              Pay with <em className="italic text-accent">no signal.</em>
+            </h1>
+            <Link href="/app" className="btn-gold rounded-full px-10 py-4 text-lg font-semibold">
+              Start the demo
+            </Link>
+            <div className="flex max-w-[680px] flex-col gap-5 text-left text-lg md:text-xl [text-shadow:0_1px_12px_color-mix(in_srgb,var(--w-navy)_90%,transparent)]">
+              <p>When the network goes down, card payments stop. Wherry keeps the market open.</p>
+              <p>
+                Your phone pays the shop with a <strong>signed offline payment</strong>, even in airplane mode. The money was <strong>locked on Solana first</strong>, so the
+                payment is always good.
               </p>
-              <div className="flex flex-wrap items-center gap-4">
-                <Link href="/app/owner" className="btn btn-sail">
-                  Start the demo
-                </Link>
-                <a href="#how" className="btn btn-quiet">
-                  How it works
-                </a>
-              </div>
-              <nav aria-label="Demo in three steps" className="flex flex-col gap-2">
-                <span className="label">Judges: the whole demo is 3 pages</span>
-                <ol className="flex flex-wrap items-center gap-2 text-sm">
-                  {[
-                    ["/app/owner", "1", "Owner", "lock $40"],
-                    ["/app/phone", "2", "Phone", "pay offline"],
-                    ["/app/shop", "3", "Shop", "check + collect"],
-                  ].map(([href, n, role, what], i) => (
-                    <li key={href} className="flex items-center gap-2">
-                      {i > 0 && (
-                        <span aria-hidden className="text-muted">
-                          →
-                        </span>
-                      )}
-                      <Link href={href} className="flex items-center gap-2 rounded-full border border-line px-3 py-1.5 hover:border-ink">
-                        <span className="mono grid h-5 w-5 place-items-center rounded-full bg-accent text-xs text-on-accent">{n}</span>
-                        <span className="font-semibold">{role}</span>
-                        <span className="text-muted">{what}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ol>
-              </nav>
+              <p>
+                The shop checks it in milliseconds with no network, and <strong>collects every payment in one transaction</strong> when the signal comes back.
+              </p>
             </div>
-            <HeroStage />
-            <div aria-hidden className="absolute right-0 top-10 hidden flex-col items-center gap-3 xl:flex">
-              <span className="mono text-xs text-ink">01</span>
-              <span className="h-24 w-px bg-line" />
-              <span className="mono text-xs text-muted">02</span>
-              <span className="mono text-xs text-muted">03</span>
-            </div>
+            <nav aria-label="Demo in three steps" className="flex flex-col items-center gap-2">
+              <span className="label text-ink">Judges: the whole demo is 3 pages</span>
+              <ol className="flex flex-wrap items-center justify-center gap-2 text-sm">
+                {[
+                  ["/app/owner", "1", "Owner", "lock $40"],
+                  ["/app/phone", "2", "Phone", "pay offline"],
+                  ["/app/shop", "3", "Shop", "check + collect"],
+                ].map(([href, n, role, what], i) => (
+                  <li key={href} className="flex items-center gap-2">
+                    {i > 0 && (
+                      <span aria-hidden className="text-muted max-sm:hidden">
+                        →
+                      </span>
+                    )}
+                    <Link href={href} className="flex items-center gap-2 rounded-full border border-line bg-base/60 px-3 py-1.5 backdrop-blur hover:border-ink">
+                      <span className="mono grid h-5 w-5 place-items-center rounded-full bg-accent text-xs text-on-accent">{n}</span>
+                      <span className="font-semibold">{role}</span>
+                      <span className="text-muted">{what}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            </nav>
           </section>
-        </div>
+        </main>
+      </div>
+
+      <div>
+        <ProductCrux />
 
         <BuiltWith />
 
@@ -161,18 +156,71 @@ export default function Landing() {
             <div className="flex flex-col gap-5">
               <p className="text-sm text-on-night-muted">April 28, 2025 · Spain and Portugal</p>
               <p className="display text-[clamp(36px,5vw,64px)]">The power went out. In-store card payments fell 55%.</p>
-              <p className="text-sm text-on-night-muted">Banco de España, Financial Stability Report, autumn 2025.</p>
+              <p className="text-sm text-on-night-muted">
+                Source:{" "}
+                <a className="link" href="https://www.bde.es/f/webbe/GAP/Secciones/Publicaciones/InformesBoletinesRevistas/RevistaEstabilidadFinanciera/25/3_FSR49_Apagon.pdf" target="_blank" rel="noreferrer">
+                  Banco de España, Financial Stability Report, autumn 2025
+                </a>
+                .
+              </p>
             </div>
             <div className="flex flex-col justify-end gap-4">
-              <p className="@container flex flex-col">
-                {/* Sized to its column (11 mono characters), so it never runs off the night band. */}
-                <span className="mono whitespace-nowrap text-[clamp(2rem,13cqw,3.5rem)] leading-tight">2.2 billion</span>
-                <span className="text-on-night-muted">people were offline in 2025 (ITU).</span>
+              <p className="flex flex-col">
+                <span className="mono whitespace-nowrap text-4xl sm:text-5xl">2.2 billion</span>
+                <span className="text-on-night-muted">
+                  people were offline in 2025 (
+                  <a className="link" href="https://www.itu.int/en/mediacentre/Pages/PR-2025-11-17-Facts-and-Figures.aspx" target="_blank" rel="noreferrer">
+                    ITU
+                  </a>
+                  ).
+                </span>
               </p>
               <p className="text-on-night-muted">
                 When the network drops, card payments stop and the shop eats the loss. Wherry hands the shop money that was locked before the signal went.
               </p>
             </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="why-title" className="mx-auto max-w-page px-4 pb-20 md:px-8">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,9fr)]">
+            <h2 id="why-title" className="label pt-3 text-ink">
+              Why I built this
+            </h2>
+            <figure className="flex flex-col gap-8">
+              <blockquote className="flex flex-col gap-6">
+                <p className="display text-[clamp(28px,3.4vw,44px)] leading-[1.15]">
+                  <span aria-hidden className="mr-1 text-accent">&ldquo;</span>A year ago, a landslide cut off the remote area I was in. There was no network, my fuel was running low, and I had no cash. I had money in
+                  my account and couldn&apos;t spend a cent of it, because every way I knew to pay needed a signal.
+                </p>
+                <p className="max-w-[62ch] text-lg text-muted">
+                  I looked online for something that worked offline and found very little a shop could actually trust. Later I learned how common this is:{" "}
+                  <a className="link text-ink" href="https://www.itu.int/en/mediacentre/Pages/PR-2025-11-17-Facts-and-Figures.aspx" target="_blank" rel="noreferrer">
+                    2.2 billion people are still offline (ITU, 2025)
+                  </a>
+                  , and when the power went out across Spain and Portugal in April 2025,{" "}
+                  <a
+                    className="link text-ink"
+                    href="https://www.bde.es/f/webbe/GAP/Secciones/Publicaciones/InformesBoletinesRevistas/RevistaEstabilidadFinanciera/25/3_FSR49_Apagon.pdf"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    in-store card payments fell 55%
+                  </a>
+                  .
+                </p>
+                <p className="display text-[clamp(24px,2.6vw,34px)] italic text-accent">
+                  Wherry is what I wish I&apos;d had that day. I don&apos;t want anyone else to be stuck the way I was.
+                </p>
+              </blockquote>
+              <figcaption className="flex items-center gap-4 border-t border-line pt-5">
+                <Doggett pose="welcome" size={48} decorative glow={false} />
+                <span className="flex flex-col">
+                  <span className="text-lg font-semibold">&mdash; Hotragn, solo builder</span>
+                  <span className="text-sm text-muted">Built for the MLH Solana Hackathon, November 2026</span>
+                </span>
+              </figcaption>
+            </figure>
           </div>
         </section>
 
@@ -198,7 +246,7 @@ export default function Landing() {
             <div className="flex flex-col gap-2">
               <h2 className="text-4xl">Try it with two windows.</h2>
               <p className="max-w-[56ch] text-muted">
-                One window is the customer&apos;s phone, one is the shop. Lock test dollars, switch off the network, pay with a ticket, then collect when you&apos;re back.
+                One window is the customer&apos;s phone, one is the shop. Lock test dollars, switch off the network, pay with a payment, then collect when you&apos;re back.
               </p>
             </div>
             <Link href="/app" className="btn btn-quiet shrink-0">
@@ -206,7 +254,7 @@ export default function Landing() {
             </Link>
           </div>
         </section>
-      </main>
+      </div>
 
       <footer className="bg-night text-on-night">
         <div className="mx-auto flex max-w-page flex-col gap-3 px-4 py-10 text-sm md:px-8">
@@ -223,7 +271,7 @@ export default function Landing() {
             <a className="link" href="https://www.rareui.com" target="_blank" rel="noreferrer">
               Rare UI
             </a>
-            . Type: Cormorant Garamond, Geist and Paper Mono (OFL).
+            . Type: Newsreader, Geist and Paper Mono (OFL).
           </span>
         </div>
       </footer>

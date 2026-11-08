@@ -73,7 +73,7 @@ void main() {
   float anchor = smoothstep(0.0, 0.3, uv.y);
   float shade = clamp(g + (f - 0.5) * 0.8 * anchor, 0.0, 1.0);
 
-  vec3 white = vec3(0.957, 0.851, 0.627); // Wherry: champagne #F4D9A0 instead of white, to stay on palette
+  vec3 white = vec3(0.953, 0.933, 0.890); // Wherry: paper mist #F3EEE3 instead of white, to stay on palette
   vec3 light = mix(white, u_color, 0.5);
   vec3 dark = u_color;
 

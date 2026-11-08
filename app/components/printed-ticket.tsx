@@ -29,7 +29,7 @@ export function PrintedTicket({
         duration={(text.length / CPS) * 1000 + 350}
         fps={30}
         onDone={() => setDone(true)}
-        label={`Printing ferry ticket ${serial} for ${amount} to ${shop}`}
+        label={`Printing offline payment ${serial} for ${amount} to ${shop}`}
       />
     </div>
   );

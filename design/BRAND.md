@@ -23,14 +23,15 @@ Design translation:
 - serial-numbered tickets for vouchers;
 - one red sail for the one primary action.
 
-## Palette, type and buttons (redesign v3, 2026-11-08): owner combo 3 ONLY, "Mocha · Champagne Gold · Burnt Amber"
-Chosen from the owner's reference sites (a dark mocha page with a champagne serif headline and amber light on folded paper). Folded paper is Wherry's paper ticket and paper-boat hat.
-- Only three colours: mocha #5B4632 (page), champagne #F4D9A0 (text, primary button, tickets, QR ground), burnt amber #C8792C (light, glow, decoration). Every other value is one of these mixed into another (`design/tokens.css`).
-- Contrast: champagne on mocha 6.46 · mocha on champagne 6.46 · muted 5.35. Amber on mocha is 2.63, so amber is never text or a focus ring.
-- Type: Cormorant Garamond for display (editorial serif, as in the references), Geist for UI, Paper Mono for numbers and tiny tracked labels.
-- Buttons: primary is a champagne pill with mocha text and a round arrow chip. Secondary is an outlined champagne pill, like the references' "Explore →".
-- Hero: amber light rays, a liquid amber orb (Rare UI), and Doggett holding a ticket.
-- Superseded the same day: v2 ivory/emerald/vermilion and v1 fog/aubergine/saffron. Before that: palette A "Admiralty chart".
+## Palette, type and hero (v5, 2026-11-08): "Night crossing"
+The owner asked for a new 3-colour combo, in the style of their combos, that resembles the product (paying with no network).
+- **River Night #13294B** (page): the dark river when the network's gone.
+- **Lantern Gold #E8B04B** (the one action, glow, the ferry): the light that still works.
+- **Paper Mist #F3EEE3** (text, tickets, QR ground): the paper ferry ticket.
+- Contrast: mist/navy 12.55 · navy on gold 7.43 · gold on navy 7.43 · muted 8.56. Every other value is a mix of these three.
+- Type: Newsreader (sturdy editorial serif, as in the owner's "The First 1,000" reference), Geist for UI, Paper Mono for numbers and tracked labels.
+- Hero: a Canva-generated painting (`public/hero-river.jpg`; Canva design "Wherry website hero canvas") of a river at dusk with the town lights out and one lantern-lit ferry crossing, under a navy veil. Centred serif headline and a gold-leaf pill, like the reference. Below it, "The whole product in one look": phone → shop → Solana, built from the real components.
+- Superseded the same day: v3 mocha/champagne/amber, v2 ivory/emerald/vermilion, v1 fog/aubergine/saffron.
 
 ## ASCII animation
 Pure text frames in Paper Mono (`app/components/ascii.tsx`, frames in `ascii-frames.ts`, tested). They run on requestAnimationFrame at 10–30 fps, pause off-screen, render one static frame under reduced motion, and are aria-hidden with a text alternative.

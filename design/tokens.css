@@ -1,47 +1,47 @@
-/* Wherry design tokens, redesign v3 (2026-11-08): ONLY the owner's combo 3, chosen from the owner's
-   reference ("Inner Peace": dark mocha, champagne serif, amber light on folded paper).
-   Mocha #5B4632 · Champagne Gold #F4D9A0 · Burnt Amber #C8792C. No other hue anywhere:
-   every other value is one of these three, or one mixed into another.
-   Contrast (WCAG): champagne/mocha 6.46 · champagne/surface 5.51 · muted (champagne 88%)/mocha 5.35, /surface 4.62 ·
-   mocha on champagne 6.46 (buttons, tickets) · hero gradient end (champagne 50% amber)/mocha 4.21, large text only.
-   Amber on mocha is 2.63:1, so amber is light, glow and decoration only: never text, never a focus ring. */
+/* Wherry design tokens, v5 (2026-11-08): "Night crossing", a 3-colour combo picked to tell the product story,
+   in the same form as the owner's combos:
+     River Night #13294B — the dark river when the network's gone (page)
+     Lantern Gold #E8B04B — the light that still works: the one action, the glow, the ferry
+     Paper Mist  #F3EEE3 — the paper ferry ticket and all text
+   Every other value is one of these mixed into another. Contrast (WCAG): mist/navy 12.55 · navy on gold 7.43 ·
+   gold on navy 7.43 · muted (mist 80%)/navy 8.56 · navy on mist 12.55 (tickets).
+   Superseded the same day: v3 mocha/champagne/amber, v2 ivory/emerald/vermilion, v1 fog/aubergine/saffron. */
 
 :root {
-  --w-mocha: #5B4632;
-  --w-champagne: #F4D9A0;
-  --w-amber: #C8792C;
-
+  --w-navy: #13294B;
+  --w-gold: #E8B04B;
+  --w-mist: #F3EEE3;
   /* roles: all built from the three */
-  --w-base: var(--w-mocha);
-  --w-surface: color-mix(in srgb, var(--w-champagne) 7%, var(--w-mocha));
-  --w-sunk: color-mix(in srgb, var(--w-champagne) 14%, var(--w-mocha));
-  --w-line: color-mix(in srgb, var(--w-champagne) 24%, var(--w-mocha));
-  --w-ink: var(--w-champagne);
-  --w-muted: color-mix(in srgb, var(--w-champagne) 88%, var(--w-mocha));
-  --w-brand: var(--w-amber);
-  --w-on-brand: var(--w-mocha);           /* only on large amber shapes, never small text */
-  --w-accent: var(--w-champagne);          /* the ONE primary action: a champagne pill with mocha text */
-  --w-accent-hover: color-mix(in srgb, var(--w-amber) 22%, var(--w-champagne));
-  --w-on-accent: var(--w-mocha);
-  --w-spark: var(--w-amber);
-  --w-paper: var(--w-champagne);           /* tickets, QR ground */
-  --w-on-paper: var(--w-mocha);
-  --w-ok: var(--w-champagne);
-  --w-err: var(--w-champagne);
-  --w-err-mark: var(--w-amber);
-  --w-warn: var(--w-champagne);
-  --w-night: color-mix(in srgb, var(--w-amber) 18%, var(--w-mocha));
-  --w-on-night: var(--w-champagne);
-  --w-on-night-muted: color-mix(in srgb, var(--w-champagne) 88%, var(--w-mocha));
-  --w-focus: var(--w-champagne);
+  --w-base: var(--w-navy);
+  --w-surface: color-mix(in srgb, var(--w-mist) 7%, var(--w-navy));
+  --w-sunk: color-mix(in srgb, var(--w-mist) 14%, var(--w-navy));
+  --w-line: color-mix(in srgb, var(--w-mist) 24%, var(--w-navy));
+  --w-ink: var(--w-mist);
+  --w-muted: color-mix(in srgb, var(--w-mist) 80%, var(--w-navy));
+  --w-brand: var(--w-gold);
+  --w-on-brand: var(--w-navy);           /* navy on gold passes 7.43 */
+  --w-accent: var(--w-gold);             /* the ONE primary action: a lantern-gold pill with navy text */
+  --w-accent-hover: color-mix(in srgb, var(--w-mist) 25%, var(--w-gold));
+  --w-on-accent: var(--w-navy);
+  --w-spark: var(--w-gold);
+  --w-paper: var(--w-mist);           /* tickets, QR ground */
+  --w-on-paper: var(--w-navy);
+  --w-ok: var(--w-gold);
+  --w-err: var(--w-mist);
+  --w-err-mark: var(--w-gold);
+  --w-warn: var(--w-mist);
+  --w-night: color-mix(in srgb, var(--w-mist) 7%, var(--w-navy));
+  --w-on-night: var(--w-mist);
+  --w-on-night-muted: color-mix(in srgb, var(--w-mist) 88%, var(--w-navy));
+  --w-focus: var(--w-gold);
 
   /* mascot shading, from the same three */
-  --w-fur: color-mix(in srgb, var(--w-amber) 14%, var(--w-champagne));
-  --w-fur-shade: color-mix(in srgb, var(--w-amber) 45%, var(--w-champagne));
-  --w-face: var(--w-champagne);
+  --w-fur: color-mix(in srgb, var(--w-gold) 12%, var(--w-mist));
+  --w-fur-shade: color-mix(in srgb, var(--w-gold) 40%, var(--w-mist));
+  --w-face: var(--w-mist);
 
   /* type: an editorial serif for display (as in the owner's references), Geist for UI, Paper Mono for numbers */
-  --w-font-display: "Cormorant", "Cormorant Garamond", Georgia, serif;
+  --w-font-display: "Newsreader", Georgia, serif;
   --w-font-text: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
   --w-font-mono: "Paper Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --w-text-xs: 12px;  --w-text-sm: 14px;  --w-text-md: 16px;  --w-text-lg: 18px;
@@ -58,10 +58,10 @@
   --w-radius-lg: 24px;
   --w-radius-pill: 999px;
 
-  /* shadows: mocha deepened (a shade, not a new hue), plus an amber glow for lit paper (from the reference's light rays) */
-  --w-shadow-1: 0 1px 2px color-mix(in srgb, var(--w-mocha) 60%, black 40%);
-  --w-shadow-2: 0 20px 40px -20px color-mix(in srgb, var(--w-mocha) 40%, black 60%);
-  --w-shadow-lift: 0 30px 60px -24px color-mix(in srgb, var(--w-mocha) 30%, black 70%), 0 0 60px -20px color-mix(in srgb, var(--w-amber) 60%, transparent);
+  /* shadows: navy deepened (a shade, not a new hue), plus a lantern-gold glow */
+  --w-shadow-1: 0 1px 2px color-mix(in srgb, var(--w-navy) 60%, black 40%);
+  --w-shadow-2: 0 20px 40px -20px color-mix(in srgb, var(--w-navy) 40%, black 60%);
+  --w-shadow-lift: 0 30px 60px -24px color-mix(in srgb, var(--w-navy) 30%, black 70%), 0 0 60px -20px color-mix(in srgb, var(--w-gold) 60%, transparent);
 
   --w-ease: cubic-bezier(.22, 1, .36, 1);
   --w-dur-fast: 140ms; --w-dur: 240ms; --w-dur-slow: 480ms;

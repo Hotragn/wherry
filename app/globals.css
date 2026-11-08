@@ -97,7 +97,7 @@
   }
   body {
     background:
-      radial-gradient(60rem 40rem at 85% -10%, color-mix(in srgb, var(--w-amber) 28%, transparent), transparent 70%),
+      radial-gradient(60rem 40rem at 85% -10%, color-mix(in srgb, var(--w-gold) 28%, transparent), transparent 70%),
       var(--w-base);
     background-attachment: fixed;
   }
@@ -132,7 +132,7 @@
   }
   /* The one gradient allowed: hero heading text only, ink to muted, left to right. */
   .headline-fade {
-    background: linear-gradient(100deg, var(--w-champagne) 0%, var(--w-champagne) 40%, color-mix(in srgb, var(--w-champagne) 50%, var(--w-amber)) 100%);
+    background: linear-gradient(100deg, var(--w-mist) 0%, var(--w-mist) 40%, color-mix(in srgb, var(--w-mist) 50%, var(--w-gold)) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -203,11 +203,11 @@
   .btn-quiet {
     background: transparent;
     color: var(--w-ink);
-    border-color: color-mix(in srgb, var(--w-champagne) 55%, transparent);
+    border-color: color-mix(in srgb, var(--w-mist) 55%, transparent);
   }
   .btn-quiet:hover:not(:disabled) {
-    border-color: var(--w-champagne);
-    background: color-mix(in srgb, var(--w-champagne) 8%, transparent);
+    border-color: var(--w-mist);
+    background: color-mix(in srgb, var(--w-mist) 8%, transparent);
   }
   .btn-night {
     background: var(--w-on-night);
@@ -239,8 +239,8 @@
   }
   .field:focus-visible {
     outline: none;
-    border-color: var(--w-champagne);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--w-amber) 30%, transparent);
+    border-color: var(--w-mist);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--w-gold) 30%, transparent);
   }
 
   /* Ferry ticket: emerald card stock like a banknote, two punched notches where the stub tears off. */
@@ -446,17 +446,17 @@
 }
 .w-beams::before {
   background:
-    radial-gradient(30% 36% at 74% 30%, color-mix(in srgb, var(--w-champagne) 70%, transparent), transparent 72%),
-    radial-gradient(22% 22% at 88% 4%, color-mix(in srgb, var(--w-champagne) 80%, transparent), transparent 70%),
-    linear-gradient(122deg, transparent 34%, color-mix(in srgb, var(--w-champagne) 34%, transparent) 40%, transparent 45%),
-    linear-gradient(122deg, transparent 48%, color-mix(in srgb, var(--w-amber) 50%, transparent) 53%, transparent 58%),
-    linear-gradient(122deg, transparent 62%, color-mix(in srgb, var(--w-champagne) 28%, transparent) 66%, transparent 70%);
+    radial-gradient(30% 36% at 74% 30%, color-mix(in srgb, var(--w-mist) 70%, transparent), transparent 72%),
+    radial-gradient(22% 22% at 88% 4%, color-mix(in srgb, var(--w-mist) 80%, transparent), transparent 70%),
+    linear-gradient(122deg, transparent 34%, color-mix(in srgb, var(--w-mist) 34%, transparent) 40%, transparent 45%),
+    linear-gradient(122deg, transparent 48%, color-mix(in srgb, var(--w-gold) 50%, transparent) 53%, transparent 58%),
+    linear-gradient(122deg, transparent 62%, color-mix(in srgb, var(--w-mist) 28%, transparent) 66%, transparent 70%);
   animation: w-beam 10s ease-in-out infinite alternate;
 }
 .w-beams::after {
   background:
-    linear-gradient(118deg, transparent 52%, color-mix(in srgb, var(--w-champagne) 26%, transparent) 55%, transparent 58%),
-    linear-gradient(126deg, transparent 70%, color-mix(in srgb, var(--w-amber) 36%, transparent) 74%, transparent 79%);
+    linear-gradient(118deg, transparent 52%, color-mix(in srgb, var(--w-mist) 26%, transparent) 55%, transparent 58%),
+    linear-gradient(126deg, transparent 70%, color-mix(in srgb, var(--w-gold) 36%, transparent) 74%, transparent 79%);
   filter: blur(8px);
   animation: w-beam 14s ease-in-out infinite alternate-reverse;
 }
@@ -472,6 +472,30 @@
 }
 /* Warm rim light on the hero figure. */
 .w-lit {
-  filter: drop-shadow(0 0 28px color-mix(in srgb, var(--w-amber) 70%, transparent))
-    drop-shadow(0 22px 26px color-mix(in srgb, var(--w-mocha) 60%, black));
+  filter: drop-shadow(0 0 28px color-mix(in srgb, var(--w-gold) 70%, transparent))
+    drop-shadow(0 22px 26px color-mix(in srgb, var(--w-navy) 60%, black));
+}
+
+/* Gold lantern pill, as in the owner's hero reference: gold leaf with a soft top highlight and navy text (7.43:1). */
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--w-navy);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--w-mist) 35%, var(--w-gold)) 0%, var(--w-gold) 55%, color-mix(in srgb, var(--w-navy) 12%, var(--w-gold)) 100%);
+  border: 1px solid color-mix(in srgb, var(--w-mist) 40%, var(--w-gold));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--w-mist) 60%, transparent),
+    0 10px 30px -10px color-mix(in srgb, var(--w-gold) 70%, transparent);
+  transition:
+    transform var(--w-dur-fast) var(--w-ease),
+    box-shadow var(--w-dur) var(--w-ease);
+}
+.btn-gold:hover {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--w-mist) 60%, transparent),
+    0 14px 40px -10px color-mix(in srgb, var(--w-gold) 90%, transparent);
+}
+.btn-gold:active {
+  transform: scale(0.98);
 }

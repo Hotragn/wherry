@@ -264,19 +264,19 @@ export default function ShopPage() {
         {!online && (
           <p role="status" className="flex items-center gap-3 rounded-2xl bg-night px-5 py-4 text-lg font-semibold text-on-night">
             <span aria-hidden className="mono">[....]</span>
-            No signal. That&apos;s fine. Tickets still check offline.
+            No signal. That&apos;s fine. Payments still check offline.
           </p>
         )}
-        <section aria-label="Check a ferry ticket" className="flex flex-col gap-4">
+        <section aria-label="Check an offline payment" className="flex flex-col gap-4">
           <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-            <h1 className="text-5xl md:text-6xl">Check a ferry ticket</h1>
+            <h1 className="text-5xl md:text-6xl">Check an offline payment</h1>
             <span className="mono text-sm">{name}</span>
           </div>
           {!check ? (
             <div className="paper p-5">
               <Scanner
-                title="Scan the customer's ferry ticket"
-                pasteHint="No camera? Paste the ticket code (it starts with WV1.)"
+                title="Scan the customer's offline payment"
+                pasteHint="No camera? Paste the payment code (it starts with WV1.)"
                 accept={(t) => (decodeVoucher(t) ? null : "That isn't a Wherry voucher.")}
                 onResult={(c) => (setHeard(null), onVoucher(c))}
               />
@@ -340,10 +340,10 @@ export default function ShopPage() {
           )}
         </section>
 
-        <section aria-label="Tickets to collect" className="flex flex-col gap-5 border-t border-line pt-8">
+        <section aria-label="Payments to collect" className="flex flex-col gap-5 border-t border-line pt-8">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <h2 className="text-4xl">Tickets to collect</h2>
+              <h2 className="text-4xl">Payments to collect</h2>
               <p className="text-lg">
                 {pending.length === 0 ? "Nothing waiting to collect." : (
                   <>
@@ -351,7 +351,7 @@ export default function ShopPage() {
                   </>
                 )}
               </p>
-              <WhatsThis term="Settle">Collecting sends your tickets to Solana in one transaction. It checks every signature again and pays you from each customer&apos;s locked tab.</WhatsThis>
+              <WhatsThis term="Settle">Collecting sends your payments to Solana in one transaction. It checks every signature again and pays you from each customer&apos;s locked tab.</WhatsThis>
             </div>
             {pending.length > 0 && (
               <button type="button" className={`btn ${settlePrimary ? "btn-sail" : "btn-quiet"}`} disabled={!online || settling} onClick={settle}>
@@ -359,10 +359,10 @@ export default function ShopPage() {
               </button>
             )}
           </div>
-          {!online && pending.length > 0 && <p className="text-sm text-warn">Tickets wait safely here. Collect when the network is back.</p>}
+          {!online && pending.length > 0 && <p className="text-sm text-warn">Payments wait safely here. Collect when the network is back.</p>}
           {queue.length === 0 ? (
             <div className="flex items-center gap-4">
-              <p className="text-muted">No tickets yet. Accepted tickets wait on the near bank and cross when you collect.</p>
+              <p className="text-muted">No payments yet. Accepted payments wait here until you collect them.</p>
             </div>
           ) : (
             <Crossing boats={boats} />
@@ -383,7 +383,7 @@ export default function ShopPage() {
                   <li key={i} className="flex flex-col gap-1">
                     {landed.length > 0 && (
                       <span className="text-ok">
-                        ✓ Collected {plural(landed.length, "ticket")} · {b.sents.length === 1 ? "one transaction" : `${b.sents.length} transactions`} ·{" "}
+                        ✓ Collected {plural(landed.length, "payment")} · {b.sents.length === 1 ? "one transaction" : `${b.sents.length} transactions`} ·{" "}
                         <span className="mono whitespace-nowrap">{seconds.toFixed(1)} s</span>. {formatUsd(sumOf(queue, landed))} is in your account.{" "}
                         <span className="text-muted">
                           Fee <span className="mono">{lamportsToSol(fee)}</span> ·{" "}
@@ -463,7 +463,7 @@ function Setup({ onDone }: { onDone: (name: string) => void }) {
     >
       <FirstRun role="shop" />
       <h1 className="text-5xl">Set up your shop</h1>
-      <p className="text-lg">Your shop gets its own key in this browser. Customers scan your sticker to pay you, and you collect their ferry tickets with this key later.</p>
+      <p className="text-lg">Your shop gets its own key in this browser. Customers scan your sticker to pay you, and you collect their offline payments with this key later.</p>
       <label className="flex flex-col gap-1">
         <span className="label">Shop name</span>
         <input className="field" value={value} maxLength={40} onChange={(e) => setValue(e.target.value)} placeholder="Amara's kiosk" />
@@ -528,14 +528,14 @@ function CourierPanel({ pending }: { pending: number }) {
     <section aria-label="Hand to a courier" className="flex flex-col gap-2">
       <h2 className="text-2xl">Hand to a courier</h2>
       <p className="text-sm text-muted">
-        No signal here? Anyone who finds one can collect your tickets for you. You sign a note allowing a fee of 1%, at most $0.05 a ticket, valid for 48 hours. The money
+        No signal here? Anyone who finds one can collect your payments for you. You sign a note allowing a fee of 1%, at most $0.05 a payment, valid for 48 hours. The money
         still comes to you.
       </p>
       {pending === 0 ? (
-        <p className="text-sm text-muted">No tickets waiting.</p>
+        <p className="text-sm text-muted">No payments waiting.</p>
       ) : (
         <button type="button" className="link self-start text-sm" onClick={async () => setBundle((await courierBundle()).text)}>
-          Make a courier bundle for {pending} ticket{pending === 1 ? "" : "s"}
+          Make a courier bundle for {pending} payment{pending === 1 ? "" : "s"}
         </button>
       )}
       {bundle && (

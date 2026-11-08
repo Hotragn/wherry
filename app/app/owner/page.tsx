@@ -119,7 +119,7 @@ function Owner() {
           A tab is money locked on Solana for one phone. Once it&apos;s open, your paired phone can pay offline, up to what&apos;s locked. Shops get paid from it when they&apos;re back online, and
           you get the rest back after the settlement window.
         </p>
-        <WhatsThis term="Escrow">Money held by a Solana program, not by you or the shop. Only tickets signed by your paired phone can draw on it.</WhatsThis>
+        <WhatsThis term="Escrow">Money held by a Solana program, not by you or the shop. Only payments signed by your paired phone can draw on it.</WhatsThis>
         <p className="text-sm text-muted">This is the only part of Wherry that needs a wallet. Use devnet: these are test dollars, not money.</p>
         {connectors.length === 0 ? (
           <p className="text-warn">No Solana wallet found in this browser. Install Phantom, Solflare or Backpack, switch it to devnet, then reload.</p>

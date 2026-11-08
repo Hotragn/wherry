@@ -133,7 +133,7 @@ export default function PhonePage() {
           <FirstRun role="phone" />
           <h1 className="text-5xl">Pair this phone</h1>
           <p className="text-lg">
-            This phone now holds a key that signs ferry tickets. The private
+            This phone now holds a key that signs offline payments. The private
             half never leaves this browser, even offline.
           </p>
           <ol className="flex list-decimal flex-col gap-2 pl-6 text-lg marker:font-bold">
@@ -225,7 +225,7 @@ export default function PhonePage() {
           <span aria-hidden className="mono">
             [....]
           </span>
-          No signal. That&apos;s fine. Tickets still work.
+          No signal. That&apos;s fine. Payments still work.
         </p>
       )}
       <section
@@ -307,7 +307,7 @@ export default function PhonePage() {
             />
           </PrintedTicket>
           <PlaySound code={showing.code} />
-          <CopyButton text={showing.code} label="Copy ticket code" />
+          <CopyButton text={showing.code} label="Copy payment code" />
           <button
             type="button"
             className="btn btn-sail"
@@ -323,9 +323,9 @@ export default function PhonePage() {
             className="flex max-w-xl flex-col gap-5"
           >
             <div className="flex flex-col gap-1">
-              <h1 className="text-5xl">Pay with a ferry ticket</h1>
+              <h1 className="text-5xl">Pay a shop offline</h1>
               <WhatsThis term="Voucher">
-                A ferry ticket is an IOU your phone signs for one shop and one
+                An offline payment is an IOU your phone signs for one shop and one
                 amount. The shop can check it with no network.
               </WhatsThis>
             </div>
@@ -423,8 +423,8 @@ export default function PhonePage() {
                   disabled={busy || !amount || !!amountProblem}
                 >
                   {amount && !amountProblem
-                    ? `Sign a ${formatUsd(amount)} ticket for ${shop.name}`
-                    : "Sign the ticket"}
+                    ? `Sign a ${formatUsd(amount)} payment to ${shop.name}`
+                    : "Sign the payment"}
                 </button>
               </form>
             )}
@@ -441,11 +441,11 @@ export default function PhonePage() {
 
       {!showing && (
         <section aria-label="Your vouchers" className="flex flex-col gap-3">
-          <h2 className="text-3xl">Your tickets</h2>
+          <h2 className="text-3xl">Your payments</h2>
           {mine.length === 0 ? (
             <div className="flex items-center gap-4">
               <p className="text-muted">
-                No tickets yet. Your first payment shows up here, even offline.
+                No payments yet. Your first payment shows up here, even offline.
               </p>
             </div>
           ) : (
