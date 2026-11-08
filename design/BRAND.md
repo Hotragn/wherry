@@ -23,14 +23,14 @@ Design translation:
 - serial-numbered tickets for vouchers;
 - one red sail for the one primary action.
 
-## Palette, type and buttons (redesign v2, 2026-11-08): owner combo 4, "Ivory · Emerald · Vermilion"
-Full reasoning, the references and the persona brief: `design/persona-brief.md`. Swatch page with all four owner combos: `design/swatches.html`.
-- Core: warm ivory #F9EBD7 · emerald #046A38 · vermilion #E34222. Derived: ivory-50 #FDF7EE (cards), ivory-200/300 (wells, hairlines), ink #0E2A1D, action vermilion #C8361A (ivory text 4.89:1), err #9A2B12.
-- Type: Geist (one family) + Paper Mono for numbers and ASCII. Sentence case.
-- Buttons: a vermilion pill with an arrow chip (one per screen). Secondary is an ivory pill with a hairline.
-- Surfaces: flat ivory cards, 24 px radius, hairline all the way round, soft tactile shadow. The only gradient is on the hero heading text.
-- Tickets: emerald card stock like a banknote, with a vermilion COLLECTED stamp.
-- Superseded the same day: v1 fog/aubergine/saffron with Bricolage and Atkinson. Before that: palette A "Admiralty chart".
+## Palette, type and buttons (redesign v3, 2026-11-08): owner combo 3 ONLY, "Mocha · Champagne Gold · Burnt Amber"
+Chosen from the owner's reference sites (a dark mocha page with a champagne serif headline and amber light on folded paper). Folded paper is Wherry's paper ticket and paper-boat hat.
+- Only three colours: mocha #5B4632 (page), champagne #F4D9A0 (text, primary button, tickets, QR ground), burnt amber #C8792C (light, glow, decoration). Every other value is one of these mixed into another (`design/tokens.css`).
+- Contrast: champagne on mocha 6.46 · mocha on champagne 6.46 · muted 5.35. Amber on mocha is 2.63, so amber is never text or a focus ring.
+- Type: Cormorant Garamond for display (editorial serif, as in the references), Geist for UI, Paper Mono for numbers and tiny tracked labels.
+- Buttons: primary is a champagne pill with mocha text and a round arrow chip. Secondary is an outlined champagne pill, like the references' "Explore →".
+- Hero: amber light rays, a liquid amber orb (Rare UI), and Doggett holding a ticket.
+- Superseded the same day: v2 ivory/emerald/vermilion and v1 fog/aubergine/saffron. Before that: palette A "Admiralty chart".
 
 ## ASCII animation
 Pure text frames in Paper Mono (`app/components/ascii.tsx`, frames in `ascii-frames.ts`, tested). They run on requestAnimationFrame at 10–30 fps, pause off-screen, render one static frame under reduced motion, and are aria-hidden with a text alternative.
@@ -45,7 +45,7 @@ Pure text frames in Paper Mono (`app/components/ascii.tsx`, frames in `ascii-fra
 - Motion: a boat on calm water. 120/200/320 ms, ease `cubic-bezier(.2,.8,.2,1)`, no bounce. The only loop is Doggett's three waiting dots (1.2 s). Everything goes static under `prefers-reduced-motion`.
 
 ## Mascot: Doggett
-- **Who:** Doggett v2: a soft cream plush ferryman (fur texture, smooth face patch, dot eyes, vermilion blush) sitting in a little emerald wherry with a vermilion pennant. Inspired by the Meta Muse plush style the owner shared; hand-built SVG.
+- **Who:** Doggett v3: a soft champagne plush ferryman (fur texture, face patch, dot eyes, amber blush) in a folded amber paper-boat hat, holding the product, a ferry ticket, the way the Meta Muse plush holds its brand mark. Hand-built SVG, only the three brand colours.
 - **Name:** from *Doggett's Coat and Badge*, the race for young Thames watermen rowed every year since 1715, the oldest rowing race in the world.
 - **Personality:** unflappable, cheerful, a little proud of always getting across. Doggett never panics in the dark; it just keeps rowing.
 - **Why it fits:** the product's job is getting money safely across a gap (the outage). A tiny, sturdy ferry that keeps going when the lights are out is the promise in one picture. It's simple enough to read at 32 px: hull, sail, two eyes.

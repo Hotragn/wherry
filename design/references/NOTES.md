@@ -19,3 +19,6 @@ How it shows up in Wherry:
 - Figma "Web design trends 2026": we took 3D/WebGL, bold type, motion and tactile soft UI. We left out neo-brutalism (v1's hard shadows), neon retrofuturism and collage.
 - Rare UI fluid-orb is vendored as `app/components/fluid-orb.tsx` and credited in the footer.
 - elaya `figma-designer` rules applied: see `design/persona-brief.md`.
+
+## v3 (owner's colour references)
+The owner shared two landing pages built on their own combos. One is dark mocha with a huge lavender serif ("CHOREO CLASS") and a chrome liquid shape. The other is dark mocha with a champagne-to-amber serif ("INNER PEACE"), amber light rays on an origami figure, tiny tracked caps labels and an outlined "Explore →" pill. We follow the second: combo 3, a serif display, tracked mono labels, an outlined secondary pill, amber light rays, and a liquid orb tinted amber. Figma trend captures: `figma-trend-*.jpg`.

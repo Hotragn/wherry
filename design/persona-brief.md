@@ -12,17 +12,18 @@ The owner's feedback on v1: the buttons and the overall feel weren't modern or p
 | Figma, web design trends 2026 | Taken: 3D and WebGL (orb), bold typography (72-96 px Geist hero), motion (float, ticket print, stamp), tactile soft UI for fintech (soft shadows on ivory cards), gamified feel (Play). Rejected for money: neo-brutalism (v1's hard offsets, now gone), retrofuturism neon, collage. |
 | Meta Muse mascot (owner image) | Doggett v2: a soft cream plush body with fur texture, a smooth face patch, dot eyes with highlights, a blush, simple limbs. He sits in a little emerald wherry with a vermilion pennant. |
 
-## Palette: owner combo 4, Warm Ivory #F9EBD7 · Emerald #046A38 · Vermilion #E34222
-- **[Brand designer]:** emerald says money and safe (a banknote), ivory says calm and premium and matches the plush mascot, vermilion is the one call to action. Of the four combos, this is the only one with a natural money colour and a natural action colour that don't fight.
-- Contrast: ink #0E2A1D on ivory 13.08:1. Emerald on ivory 5.73:1, both ways. Vermilion #E34222 with ivory text is only 3.53:1, so per the elaya rule the button uses the deeper vermilion #C8361A (4.89:1). The bright #E34222 is kept for stamps, the pennant and blush.
-- Rejected: combo 1 (mocha, platinum, lavender): lavender on platinum is 1.01:1, so there's no visible action. Combo 2 (ice silver, aubergine, marigold) was v1; the owner found it ineffective, and marigold fails as text (1.58:1). Combo 3 (mocha #5B4632, champagne gold #F4D9A0, burnt amber #C8792C): luxurious, but amber on champagne is 2.45:1 and brown reads as coffee, not money.
+## Palette (v3): owner combo 3 only, Mocha #5B4632 · Champagne Gold #F4D9A0 · Burnt Amber #C8792C
+- **[Brand designer]:** the owner asked for one of the given combos and nothing else, and shared two reference sites built on exactly these combos (dark mocha with champagne/amber, and mocha with lavender). Combo 3 matches the "Inner Peace" reference, which is lit folded paper, and folded paper is Wherry's ticket and paper-boat hat.
+- No other hue anywhere. Shadows are mocha deepened. The orb shader's white was replaced with champagne.
+- Contrast: champagne/mocha 6.46 both ways. Amber/mocha 2.63, so amber is decoration only.
+- v2 (ivory, emerald, vermilion) is superseded.
 
 ## Type
-**[Brand designer]** Geist for everything (a single family, as elaya asks), Paper Mono for numbers. Headlines are Geist 600 at -0.035em, 48-96 px. Body is 16-20 px. Sentence case everywhere: v1's shouty uppercase mono labels are gone.
+**[Brand designer]** Cormorant Garamond for display, as in the owner's references (the owner's references win over elaya's one-typeface rule). Geist for UI text, Paper Mono for numbers and tiny tracked caps labels (also from the references). Headlines are 56-120 px.
 
 ## Buttons ([UI designer])
-- Primary: a vermilion pill, 48 px, Geist 600 16 px, with a round ivory arrow chip that slides 3 px on hover. Hover darkens and lifts. Press scales to 98%. Disabled is 45% opacity. Focus is a 2 px emerald ring. One per screen.
-- Secondary: an ivory pill with a hairline border and a soft shadow.
+- Primary: a champagne pill with mocha text (6.46:1), 48 px, Geist 600 16 px, with a round mocha arrow chip that slides 3 px on hover. Hover darkens and lifts. Press scales to 98%. Disabled is 45% opacity. Focus is a 2 px emerald ring. One per screen.
+- Secondary: an outlined champagne pill on mocha, like the references' "Explore →".
 - Text links: a 1 px underline at 40% that goes solid on hover.
 
 ## Every screen answers three questions ([UX writer], [First-time user])
