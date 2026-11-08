@@ -28,6 +28,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
+    "@mlc-ai/web-llm": "0.2.87",
     "@solana-program/compute-budget": "0.20.0",
     "@solana-program/system": "0.16.0",
     "@solana-program/token": "0.18.0",
