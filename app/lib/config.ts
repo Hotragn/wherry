@@ -39,6 +39,15 @@ export const serialLabel = (serial: number) => `No. ${String(serial).padStart(4,
 /** Unix seconds now. For event handlers; render code uses useNow(). */
 export const unixNow = () => Math.floor(Date.now() / 1000);
 
+/** "under a minute", "12 min", "2 h", "3 days" */
+export function duration(ms: number): string {
+  const m = Math.floor(Math.max(0, ms) / 60_000);
+  if (m < 1) return "under a minute";
+  if (m < 60) return `${m} min`;
+  const h = Math.floor(m / 60);
+  return h < 48 ? `${h} h` : `${Math.floor(h / 24)} days`;
+}
+
 export function ago(ms: number): string {
   const s = Math.max(0, Math.round(ms / 1000));
   if (s < 60) return "just now";

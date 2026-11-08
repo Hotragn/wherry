@@ -45,11 +45,13 @@ async function reserveSerial(tab: TabSnapshot): Promise<number> {
   return serial;
 }
 
-/** Sign a voucher for `amount` to a shop. Works offline. */
-export async function payShop(tab: TabSnapshot, shop: { merchant: Address; name: string }, amount: bigint): Promise<IssuedVoucher> {
+/** Sign a voucher for `amount` to a shop. Works offline.
+ *  Game vouchers pass `round`: nonce bytes 0–3 carry the studio's seed round (u32 LE), the rest stays random. */
+export async function payShop(tab: TabSnapshot, shop: { merchant: Address; name: string }, amount: bigint, round?: number): Promise<IssuedVoucher> {
   const { pair, pk } = await deviceKey();
   const serial = await reserveSerial(tab);
   const nonce = crypto.getRandomValues(new Uint8Array(16));
+  if (round !== undefined) new DataView(nonce.buffer).setUint32(0, round, true);
   const fields = {
     tab: tab.address,
     mint: tab.mint,

@@ -95,13 +95,49 @@ export function describe(f: OfficerFacts): string {
 
 /** The one line the shopkeeper sees: the model's call, explained only with facts computed in code. */
 export function officerLine(f: OfficerFacts, decision: Opinion["decision"]): string {
+  const history =
+    f.tabsOpened === undefined
+      ? null
+      : f.tabsOpened <= 1
+        ? "first tab from this customer"
+        : `${f.tabsClosedClean} clean tab${f.tabsClosedClean === 1 ? "" : "s"} before`;
   const facts = [
     f.coverageLeft !== undefined && `${pct(f.amount, f.coverageLeft)}% of this tab`,
-    f.tabsClosedClean !== undefined && `${f.tabsClosedClean} clean tab${f.tabsClosedClean === 1 ? "" : "s"} before`,
+    history,
     f.shortfalls ? `${f.shortfalls} shortfall${f.shortfalls === 1 ? "" : "s"}` : null,
   ].filter(Boolean);
-  return decision === "accept" ? `Accept: ${facts.join(", ")}.` : `Decline: ${warningSigns(f).join("; ")}.`;
+  return decision === "accept" ? `Looks fine: ${facts.join(", ")}.` : `Caution: ${warningSigns(f).join("; ")}.`;
 }
+
+/** Tighten-only, in one place: the rules decide first; the officer can only turn an accept into a decline.
+ *  No answer from the officer (junk, error or timeout) means the rules decide. */
+export function finalDecision(
+  rules: "accept" | "decline",
+  officer: { decision: "accept" | "decline" } | null | undefined,
+): { decision: "accept" | "decline"; by: "rules" | "officer" } {
+  if (rules === "decline") return { decision: "decline", by: "rules" };
+  if (officer?.decision === "decline") return { decision: "decline", by: "officer" };
+  return { decision: "accept", by: officer ? "officer" : "rules" };
+}
+
+/** The model's raw reply as an opinion, or null if it isn't a reason from the list (then the rules decide). */
+export function parseOpinion(content: string | null | undefined, f: OfficerFacts): Omit<Opinion, "ms"> | null {
+  let reason: unknown;
+  try {
+    reason = (JSON.parse(content ?? "") as { reason?: unknown })?.reason;
+  } catch {
+    return null;
+  }
+  if (typeof reason !== "string" || !(reason in REASONS)) return null;
+  const decision = verdict(f, reason as Reason);
+  return { decision, reason: reason as Reason, line: officerLine(f, decision) };
+}
+
+export const OFFICER_TIMEOUT_MS = 8_000;
+
+/** Resolve with null if `p` takes longer than `ms`. */
+export const withTimeout = <T>(p: Promise<T>, ms: number): Promise<T | null> =>
+  Promise.race([p, new Promise<null>((resolve) => setTimeout(() => resolve(null), ms))]);
 
 // Worked examples: small models follow examples far better than written rules.
 const base: OfficerFacts = { amount: 3_000_000n, coverageLeft: 40_000_000n, tabsOpened: 6, tabsClosedClean: 5, shortfalls: 0, vouchersSettled: 30, waitingFromTab: 0, syncAgeMin: 10 };
@@ -120,23 +156,19 @@ const SHOTS = EXAMPLES.flatMap(([f, reason]) => [
   { role: "assistant" as const, content: JSON.stringify({ reason }) },
 ]);
 
-export async function askOfficer(f: OfficerFacts): Promise<Opinion> {
-  const e = await loadOfficer();
-  const started = performance.now();
-  const reply = await e.chat.completions.create({
-    messages: [{ role: "system", content: SYSTEM }, ...SHOTS, { role: "user", content: describe(f) }],
-    temperature: 0,
-    max_tokens: 40,
-    response_format: { type: "json_object", schema: SCHEMA },
-  });
-  const ms = performance.now() - started;
-  let parsed: { reason?: string } = {};
-  try {
-    parsed = JSON.parse(reply.choices[0]?.message?.content ?? "{}");
-  } catch {
-    // Unparseable output counts as no opinion: the rules' accept stands.
-  }
-  const reason = (parsed.reason && parsed.reason in REASONS ? parsed.reason : "clean_history") as Reason;
-  const decision = verdict(f, reason);
-  return { decision, reason, line: officerLine(f, decision), ms };
+/** The officer's opinion, or null when it can't give one (not loaded, junk reply, error, or over the time limit). */
+export async function askOfficer(f: OfficerFacts): Promise<Opinion | null> {
+  const run = async () => {
+    const e = await loadOfficer();
+    const started = performance.now();
+    const reply = await e.chat.completions.create({
+      messages: [{ role: "system", content: SYSTEM }, ...SHOTS, { role: "user", content: describe(f) }],
+      temperature: 0,
+      max_tokens: 40,
+      response_format: { type: "json_object", schema: SCHEMA },
+    });
+    const opinion = parseOpinion(reply.choices[0]?.message?.content, f);
+    return opinion && { ...opinion, ms: performance.now() - started };
+  };
+  return withTimeout(run().catch(() => null), OFFICER_TIMEOUT_MS);
 }

@@ -15,7 +15,7 @@ import { assess, type Assessment, type Pending, type RiskSettings } from "../../
 import { fetchSolBalance } from "../../lib/chain.ts";
 import { decodeVoucher, stickerCode, type SignedVoucher } from "../../lib/codes.ts";
 import { PROGRAM_ID, ago, formatUsd, parseUsd, serialLabel } from "../../lib/config.ts";
-import { OFFICER_MODEL, askOfficer, loadOfficer, officerSupported, type OfficerFacts, type Opinion } from "../../lib/officer.ts";
+import { OFFICER_MODEL, askOfficer, finalDecision, loadOfficer, officerSupported, type OfficerFacts, type Opinion } from "../../lib/officer.ts";
 import {
   enqueue,
   loadName,
@@ -81,6 +81,10 @@ export default function ShopPage() {
 
   // Once turned on, the officer loads from this browser's cache on every visit, with or without a network.
   useEffect(() => {
+    if (!officerSupported()) {
+      Promise.resolve().then(() => setOfficer({ status: "unsupported" }));
+      return;
+    }
     get<boolean>("shop:officer-on").then((on) => on && startOfficer());
   }, [startOfficer]);
   const now = useNow();
@@ -152,13 +156,12 @@ export default function ShopPage() {
       waitingFromTab: pending.filter((p) => p.tab === v.tab).length,
       syncAgeMin: snap ? Math.round((Date.now() - snap.at) / 60_000) : undefined,
     };
-    const opinion = await askOfficer(facts).catch(() => null);
+    const opinion = await askOfficer(facts);
     setCheck((c) => (c?.code === code ? { ...c, officer: opinion ? { s: "done", opinion } : { s: "failed" } } : c));
   }
 
   async function accept() {
-    if (!check || check.result.decision !== "accept" || check.officer?.s === "thinking") return;
-    if (check.officer?.s === "done" && check.officer.opinion.decision === "decline") return;
+    if (!check || !acceptable || check.officer?.s === "thinking") return;
     await enqueue({ code: check.code, v: check.v, acceptedAt: Date.now(), verifyMs: check.verifyMs, status: "pending" });
     setCheck(null);
     await reloadQueue();
@@ -203,8 +206,8 @@ export default function ShopPage() {
   const pendingTotal = pending.reduce((a, p) => a + p.amount, 0n);
   const payer = check ? snap?.payers[snap.tabs[check.v.tab]?.owner ?? ""] : undefined;
   const settlePrimary = !check && pending.length > 0;
-  const acceptable =
-    !!check && check.result.decision === "accept" && !(check.officer?.s === "done" && check.officer.opinion.decision === "decline");
+  // Tighten-only: the rules decide first, the officer can only turn an accept into a decline.
+  const acceptable = !!check && finalDecision(check.result.decision, check.officer?.s === "done" ? check.officer.opinion : null).decision === "accept";
   const lastSigs = new Set([...batches].reverse().find((b) => b.sents.length > 0)?.sents.map((x) => x.signature) ?? []);
   const lastSettled = queue.filter((q) => q.sent && lastSigs.has(q.sent.signature));
 
@@ -248,13 +251,14 @@ export default function ShopPage() {
                 {check.officer?.s === "thinking" && <p className="text-sm text-muted">AI officer is reading this voucher on this device…</p>}
                 {check.officer?.s === "done" && (
                   <Signal tone={check.officer.opinion.decision === "accept" ? "ok" : "err"}>
-                    AI officer: {check.officer.opinion.line}{" "}
+                    <span className="label mr-2 text-ink">AI officer</span>
+                    {check.officer.opinion.line}{" "}
                     <span className="text-sm text-muted">
                       (<span className="mono">{(check.officer.opinion.ms / 1000).toFixed(1)} s</span>, on this device)
                     </span>
                   </Signal>
                 )}
-                {check.officer?.s === "failed" && <p className="text-sm text-muted">The AI officer couldn&apos;t answer; the rules&apos; decision stands.</p>}
+                {check.officer?.s === "failed" && <p className="text-sm text-muted">The AI officer didn&apos;t answer in time, so your rules decide.</p>}
                 <div className="mt-2 flex flex-wrap gap-3">
                   {acceptable ? (
                     <button type="button" className="btn btn-sail" onClick={accept} disabled={check.officer?.s === "thinking"}>
@@ -499,8 +503,8 @@ function OfficerPanel({ state, onStart, onStop }: { state: OfficerState; onStart
         turn it down. It can never accept one the rules decline.
       </p>
       {state.status === "off" && (
-        <button type="button" className="link self-start text-sm" onClick={onStart}>
-          Turn on (one 1 GB download, then it works offline)
+        <button type="button" className="btn btn-quiet self-start text-sm" onClick={onStart}>
+          Download once (about 1 GB), then it works offline
         </button>
       )}
       {state.status === "loading" && (
@@ -513,13 +517,17 @@ function OfficerPanel({ state, onStart, onStop }: { state: OfficerState; onStart
       )}
       {state.status === "ready" && (
         <p className="flex flex-wrap gap-x-3 text-sm">
-          <span className="text-ok">✓ Ready. Runs on this device, no network needed.</span>
+          <span className="text-ok">✓ Ready. It runs on this device and needs no network.</span>
           <button type="button" className="link" onClick={onStop}>
             Turn off
           </button>
         </p>
       )}
-      {state.status === "unsupported" && <p className="text-sm text-warn">This browser has no WebGPU, so the officer can&apos;t run here. Your rules still apply.</p>}
+      {state.status === "unsupported" && (
+        <p className="text-sm">
+          <strong>Rules only on this device.</strong> <span className="text-muted">This browser has no WebGPU, so the AI officer can&apos;t run here. Your coverage checks and risk limits still apply.</span>
+        </p>
+      )}
       {state.status === "error" && (
         <p className="text-sm text-err">
           The officer didn&apos;t load (it needs about 1.6 GB of graphics memory).{" "}

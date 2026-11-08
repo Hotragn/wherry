@@ -8,7 +8,7 @@ import { Ticket } from "../components/ticket";
 import { CopyButton, QrCode, Signal } from "../components/ui";
 import type { TabSnapshot } from "../lib/assess.ts";
 import { parseSticker } from "../lib/codes.ts";
-import { ago, formatUsd, serialLabel, shortAddress } from "../lib/config.ts";
+import { ago, duration, formatUsd, serialLabel, shortAddress } from "../lib/config.ts";
 import { hex, rollDrop, seedMatches, type Drop } from "../lib/fair.ts";
 import {
   POWER_UP,
@@ -18,6 +18,7 @@ import {
   loadPurchases,
   loadStudio,
   revealedSeed,
+  roundOf,
   saveCrossings,
   saveStudio,
   syncCommitment,
@@ -123,7 +124,7 @@ export default function PlayPage() {
     );
   }
 
-  const canBuy = !!studio && spendable >= POWER_UP.price && !busy;
+  const canBuy = !!studio && !!commitment && spendable >= POWER_UP.price && !busy;
 
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
@@ -172,7 +173,7 @@ export default function PlayPage() {
           ) : (
             <ul className="flex flex-col divide-y-[1.5px] divide-line border-y-[1.5px] border-line">
               {purchases.map((p) => (
-                <DropRow key={p.code} p={p} proof={proofs[p.code]} />
+                <DropRow key={p.code} p={p} proof={proofs[p.code]} now={now} />
               ))}
             </ul>
           )}
@@ -225,10 +226,10 @@ export default function PlayPage() {
                 {commitment ? (
                   <p className="text-sm text-muted">
                     Studio seed for round <span className="mono">{commitment.epoch}</span> committed (<span className="mono">{hex(commitment.hash).slice(0, 12)}…</span>), seen{" "}
-                    {ago(now - commitment.seenAt)}. Your drop will be checked against it.
+                    {ago(now - commitment.seenAt)}. Your voucher carries round <span className="mono">{commitment.epoch}</span>, and your drop is checked against that seed.
                   </p>
                 ) : (
-                  <p className="text-sm text-warn">No studio seed seen yet. Go online once before buying, or your drop can&apos;t be proven fair.</p>
+                  <p className="text-sm text-warn">No studio seed seen yet. Go online once so the game can see it; you can buy after that, even offline.</p>
                 )}
                 <button type="button" className={`btn ${sail ? "btn-quiet" : "btn-sail"}`} disabled={!canBuy} onClick={buy}>
                   Buy {POWER_UP.name} · {formatUsd(POWER_UP.price)}
@@ -246,7 +247,20 @@ export default function PlayPage() {
   );
 }
 
-function DropRow({ p, proof }: { p: Purchase; proof?: Proof | "sealed" }) {
+function ProofRow({ label, value }: { label: string; value: string }) {
+  return (
+    <>
+      <dt className="text-muted">{label}</dt>
+      <dd className="flex flex-wrap items-baseline gap-x-2 [overflow-wrap:anywhere]">
+        <span>{value}</span>
+        <CopyButton text={value} />
+      </dd>
+    </>
+  );
+}
+
+function DropRow({ p, proof, now }: { p: Purchase; proof?: Proof | "sealed"; now: number }) {
+  const round = roundOf(p.nonce);
   return (
     <li className="flex flex-col gap-2 py-3">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -255,29 +269,29 @@ function DropRow({ p, proof }: { p: Purchase; proof?: Proof | "sealed" }) {
         {!p.commitment ? (
           <span className="text-sm text-warn">Can&apos;t be proven: no studio seed was seen before this purchase.</span>
         ) : !proof || proof === "sealed" ? (
-          <span className="text-sm text-muted">Sealed until the studio reveals round {p.commitment.epoch}.</span>
-        ) : proof.matches ? (
+          <span className="text-sm text-muted">
+            Sealed. Round <span className="mono">{p.commitment.epoch}</span> not revealed for {duration(now - p.createdAt)}.
+          </span>
+        ) : proof.matches && round === p.commitment.epoch ? (
           <span className="font-semibold text-ok">
             ✓ {proof.drop.item} <span className="font-normal text-muted">({proof.drop.rarity})</span>
           </span>
         ) : (
-          <span className="font-semibold text-err">✕ The revealed seed doesn&apos;t match the commitment. This drop isn&apos;t fair.</span>
+          <span className="font-semibold text-err">✕ The proof doesn&apos;t check out. Open it to see which part fails.</span>
         )}
       </div>
       {p.commitment && proof && proof !== "sealed" && (
         <details className="text-sm">
           <summary className="link cursor-pointer">Fairness proof</summary>
-          <dl className="mono mt-2 grid gap-x-4 gap-y-1 break-all text-xs sm:grid-cols-[auto_1fr]">
-            <dt className="text-muted">Commitment (seen before buying)</dt>
-            <dd>{hex(p.commitment.hash)}</dd>
-            <dt className="text-muted">Revealed seed</dt>
-            <dd>{hex(proof.seed)}</dd>
+          <dl className="mono mt-2 grid min-w-0 gap-x-4 gap-y-1 text-xs sm:grid-cols-[auto_minmax(0,1fr)]">
+            <ProofRow label={`Commitment, round ${p.commitment.epoch} (seen before buying)`} value={hex(p.commitment.hash)} />
+            <ProofRow label="Revealed seed" value={hex(proof.seed)} />
             <dt className="text-muted">sha256(seed) matches</dt>
             <dd>{proof.matches ? "yes" : "no"}</dd>
-            <dt className="text-muted">Your seed (voucher nonce)</dt>
-            <dd>{hex(p.nonce)}</dd>
-            <dt className="text-muted">sha256(seed ‖ nonce ‖ serial)</dt>
-            <dd>{hex(proof.hash)}</dd>
+            <ProofRow label="Your seed (voucher nonce)" value={hex(p.nonce)} />
+            <dt className="text-muted">Round inside your voucher (nonce bytes 0–3)</dt>
+            <dd>{round === p.commitment.epoch ? round : `${round}: doesn't match round ${p.commitment.epoch}`}</dd>
+            <ProofRow label="sha256(seed ‖ nonce ‖ serial)" value={hex(proof.hash)} />
             <dt className="text-muted">Roll (first byte)</dt>
             <dd>
               {proof.roll} → {proof.drop.item} (0–149 common, 150–219 uncommon, 220–249 rare, 250–255 legendary)

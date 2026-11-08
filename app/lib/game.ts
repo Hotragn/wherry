@@ -46,16 +46,22 @@ export async function syncCommitment(studio: Address): Promise<Commitment | null
   return commitment;
 }
 
-/** Buy the power-up with a voucher. Signed and unlocked on this device, no network needed. */
+/** The seed round a game voucher was bought under (nonce bytes 0–3). */
+export const roundOf = (nonce: Uint8Array) => new DataView(nonce.buffer, nonce.byteOffset, 4).getUint32(0, true);
+
+/** Buy the power-up with a voucher. Signed and unlocked on this device, no network needed.
+ *  Needs the studio's commitment, seen online beforehand: the voucher carries that round. */
 export async function buyPowerUp(tab: TabSnapshot, studio: Studio): Promise<{ purchase: Purchase; voucher: IssuedVoucher }> {
-  const voucher = await payShop(tab, studio, POWER_UP.price);
+  const commitment = await loadCommitment();
+  if (!commitment) throw new Error("Go online once so the game can see the studio's seed commitment, then buy.");
+  const voucher = await payShop(tab, studio, POWER_UP.price, commitment.epoch);
   const purchase: Purchase = {
     code: voucher.code,
     serial: voucher.serial,
     nonce: decodeVoucher(voucher.code)!.nonce,
     tab: tab.address,
     studio: studio.merchant,
-    commitment: (await loadCommitment()) ?? undefined,
+    commitment,
     createdAt: Date.now(),
   };
   await update<Purchase[]>("play:purchases", (p) => [purchase, ...(p ?? [])]);

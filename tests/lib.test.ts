@@ -123,10 +123,29 @@ test("the AI officer can only decline when the code found a warning sign", async
   const clean = { amount: 3_500_000n, coverageLeft: 40_000_000n, tabsOpened: 1, tabsClosedClean: 0, shortfalls: 0, vouchersSettled: 0, waitingFromTab: 0, syncAgeMin: 2 };
   assert.deepEqual(warningSigns(clean), []);
   assert.equal(verdict(clean, "new_payer"), "accept"); // a wrong model answer can't decline a clean voucher
-  assert.equal(officerLine(clean, "accept"), "Accept: 8% of this tab, 0 clean tabs before.");
+  assert.equal(officerLine(clean, "accept"), "Looks fine: 8% of this tab, first tab from this customer.");
+  assert.equal(officerLine({ ...clean, tabsOpened: 38, tabsClosedClean: 37 }, "accept"), "Looks fine: 8% of this tab, 37 clean tabs before.");
   const risky = { ...clean, amount: 30_000_000n };
   assert.match(warningSigns(risky).join("; "), /75% of the tab in one sale/);
   assert.equal(verdict(risky, "large_share"), "decline");
   assert.equal(verdict(risky, "clean_history"), "accept");
-  assert.match(officerLine(risky, "decline"), /^Decline: 75% of the tab in one sale/);
+  assert.match(officerLine(risky, "decline"), /^Caution: 75% of the tab in one sale/);
+});
+
+test("tighten-only: the officer never overrides a rules decline, and no answer means the rules decide", async () => {
+  const { finalDecision, parseOpinion, withTimeout } = await import("../app/lib/officer.ts");
+  const facts = { amount: 30_000_000n, coverageLeft: 40_000_000n, tabsOpened: 1, tabsClosedClean: 0, shortfalls: 0, vouchersSettled: 0, waitingFromTab: 0, syncAgeMin: 2 };
+  // (a) rules decline + model says accept -> decline
+  assert.deepEqual(finalDecision("decline", { decision: "accept" }), { decision: "decline", by: "rules" });
+  // the officer can turn an accept into a decline
+  assert.deepEqual(finalDecision("accept", { decision: "decline" }), { decision: "decline", by: "officer" });
+  // (b) junk, an unknown reason, or no answer at all -> the rules decide
+  assert.equal(parseOpinion("not json at all", facts), null);
+  assert.equal(parseOpinion('{"reason":"trust_me"}', facts), null);
+  assert.equal(parseOpinion(undefined, facts), null);
+  assert.deepEqual(finalDecision("accept", null), { decision: "accept", by: "rules" });
+  assert.equal(parseOpinion('{"reason":"large_share"}', facts)?.decision, "decline");
+  // a model that never answers times out to null
+  assert.equal(await withTimeout(new Promise(() => {}), 20), null);
+  assert.equal(await withTimeout(Promise.resolve("ok"), 20), "ok");
 });
