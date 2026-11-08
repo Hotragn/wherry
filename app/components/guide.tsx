@@ -8,18 +8,33 @@ import { STEPS } from "../lib/steps.ts";
 
 const stepFor = (path: string) => STEPS.findIndex((s) => s.href === path);
 
-/** "Step 2 of 3 · Phone: pays with no signal" under the header, on step pages only. */
+/** Under the header on step pages: all 3 steps at a glance, where you are, and a one-click "Next" (the 3-second answer for judges). */
 export function StepLine() {
   const i = stepFor(usePathname());
   if (i < 0) return null;
-  const s = STEPS[i];
+  const next = STEPS[i + 1];
   return (
-    <p className="mx-auto max-w-page px-4 pb-3 text-sm text-muted">
-      <span className="label text-ink">
-        Step {s.n} of 3
-      </span>{" "}
-      · <strong className="text-ink">{s.role}:</strong> {s.line}
-    </p>
+    <nav aria-label="Demo steps" className="mx-auto flex max-w-page flex-wrap items-center gap-x-3 gap-y-2 px-4 pb-3 text-sm">
+      <ol className="flex flex-wrap items-center gap-1.5">
+        {STEPS.map((s, j) => (
+          <li key={s.href} className="flex items-center gap-1.5">
+            {j > 0 && <span aria-hidden className="text-muted">→</span>}
+            <Link
+              href={s.href}
+              aria-current={j === i ? "step" : undefined}
+              className={`flex items-center gap-2 rounded-full border px-2.5 py-1 ${j === i ? "border-ink bg-ink/10 font-semibold" : "border-line text-muted hover:text-ink"}`}
+            >
+              <span className={`mono grid h-5 w-5 place-items-center rounded-full text-xs ${j <= i ? "bg-accent text-on-accent" : "border border-line"}`}>{j < i ? "✓" : s.n}</span>
+              {s.role}
+              <span className="hidden text-muted md:inline">· {s.line}</span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+      <Link href={next?.href ?? "/play"} className="ml-auto inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1.5 font-semibold text-on-accent">
+        Next: {next ? next.role : "Play"} →
+      </Link>
+    </nav>
   );
 }
 
