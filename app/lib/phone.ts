@@ -4,7 +4,7 @@ import { get, set, update } from "idb-keyval";
 import type { TabSnapshot } from "./assess.ts";
 import { encodeVoucher } from "./codes.ts";
 import { PROGRAM_ID } from "./config.ts";
-import { voucherBytes } from "./voucher.ts";
+import { chainLink, voucherBytes } from "./voucher.ts";
 
 export type IssuedVoucher = {
   code: string;
@@ -52,6 +52,8 @@ export async function payShop(tab: TabSnapshot, shop: { merchant: Address; name:
   const serial = await reserveSerial(tab);
   const nonce = crypto.getRandomValues(new Uint8Array(16));
   if (round !== undefined) new DataView(nonce.buffer).setUint32(0, round, true);
+  // Chain link to the previous voucher from this phone on this tab (bytes 12–15 stay random).
+  nonce.set((await get<Uint8Array>(`phone:link:${tab.address}`)) ?? new Uint8Array(8), 4);
   const fields = {
     tab: tab.address,
     mint: tab.mint,
@@ -62,6 +64,7 @@ export async function payShop(tab: TabSnapshot, shop: { merchant: Address; name:
   };
   const message = voucherBytes({ ...fields, programId: PROGRAM_ID, merchant: shop.merchant });
   const signature = new Uint8Array(await signBytes(pair.privateKey, message));
+  await set(`phone:link:${tab.address}`, await chainLink(message));
   const issued: IssuedVoucher = {
     code: encodeVoucher({ ...fields, devicePk: pk, signature }),
     tab: tab.address,

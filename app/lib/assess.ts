@@ -3,6 +3,7 @@ import type { Address } from "@solana/kit";
 import type { PayerRecord, Tab } from "../generated/wherry/index.ts";
 import type { SignedVoucher } from "./codes.ts";
 import { formatUsd, serialLabel } from "./config.ts";
+import { isChainStart, linkOf } from "./voucher.ts";
 
 export type TabSnapshot = Tab & { address: Address };
 export type PayerSnapshot = PayerRecord;
@@ -34,7 +35,7 @@ export function assess(input: {
   tab?: TabSnapshot;
   pending: Pending[];
   /** Every voucher this shop has taken, settled or not: replays are caught even before the next sync. */
-  seen?: { tab: Address; serial: number }[];
+  seen?: { tab: Address; serial: number; nonce?: Uint8Array }[];
   risk: RiskSettings;
   nowSec: bigint;
   syncedAtMs?: number;
@@ -52,6 +53,11 @@ export function assess(input: {
   if (tab && usedBit(tab.used, v.serial)) return decline(`Already settled onchain: ${serialLabel(v.serial)}.`);
   if (input.seen?.some((p) => p.tab === v.tab && p.serial === v.serial)) {
     return decline(`Replay: ${serialLabel(v.serial)} was already taken here.`);
+  }
+  const link = linkOf(v.nonce);
+  const fork = isChainStart(link) ? undefined : input.seen?.find((p) => p.tab === v.tab && p.nonce && sameKey(linkOf(p.nonce), link));
+  if (fork) {
+    return decline(`Fork: this phone signed ${serialLabel(fork.serial)} and ${serialLabel(v.serial)} after the same voucher. Keep both as proof.`);
   }
   if (input.nowSec > v.voucherExpiresAt) return decline("This voucher has expired.");
 

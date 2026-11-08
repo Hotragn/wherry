@@ -153,7 +153,7 @@ export default function ShopPage() {
       signatureOk,
       tab: snap?.tabs[v.tab],
       pending,
-      seen: queue.filter((q) => q.status !== "failed").map((q) => ({ tab: q.v.tab, serial: q.v.serial })),
+      seen: queue.filter((q) => q.status !== "failed").map((q) => ({ tab: q.v.tab, serial: q.v.serial, nonce: q.v.nonce })),
       risk: risk!,
       nowSec: BigInt(Math.floor(Date.now() / 1000)),
       syncedAtMs: snap?.at,

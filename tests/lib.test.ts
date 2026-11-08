@@ -158,3 +158,26 @@ test("the phone key can't leave the device: exporting the private key fails", as
   await assert.rejects(crypto.subtle.exportKey("jwk", pair.privateKey));
   assert.equal((await crypto.subtle.exportKey("raw", pair.publicKey)).byteLength, 32); // the public half is shareable
 });
+
+test("hash-chained vouchers: a fork after the same voucher is rejected, a proper chain is fine", async () => {
+  const { chainLink } = await import("../app/lib/voucher.ts");
+  const { v, tab } = await setup();
+  const withLink = (link: Uint8Array, serial: number) => {
+    const nonce = crypto.getRandomValues(new Uint8Array(16));
+    nonce.set(link, 4);
+    return { ...v, serial, nonce };
+  };
+  const first = withLink(new Uint8Array(8), 1); // start of the chain
+  const link1 = await chainLink(voucherBytes({ ...first, programId: PROGRAM_ID, merchant: first.tab }));
+  const second = withLink(link1, 2);
+  const forked = withLink(link1, 3); // a second voucher signed after the same predecessor
+  const seenAfter = (xs: SignedVoucher[]) => xs.map((x) => ({ tab: x.tab, serial: x.serial, nonce: x.nonce }));
+  const check = (x: SignedVoucher, held: SignedVoucher[]) =>
+    assess({ v: x, signatureOk: true, tab, pending: [], seen: seenAfter(held), risk: DEFAULT_RISK, nowSec: NOW, nowMs: 0 });
+  assert.equal(check(second, [first]).decision, "accept");
+  const verdict = check(forked, [first, second]);
+  assert.equal(verdict.decision, "decline");
+  assert.match(verdict.headline, /^Fork: this phone signed No\. 0002 and No\. 0003/);
+  // two chain starts (e.g. a reinstalled app) are not called a fork
+  assert.equal(check(withLink(new Uint8Array(8), 4), [first]).decision, "accept");
+});

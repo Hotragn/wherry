@@ -86,3 +86,11 @@ export async function verifyVoucherSignature(
     return false;
   }
 }
+
+/** Hash chain: nonce bytes 4–11 carry the first 8 bytes of sha256(previous voucher bytes) from the same phone.
+ *  All zeroes marks the start of a chain. Two vouchers with the same link are a fork, provable from their signatures. */
+export const linkOf = (nonce: Uint8Array) => nonce.slice(4, 12);
+export const isChainStart = (link: Uint8Array) => link.every((b) => b === 0);
+export async function chainLink(previousVoucherBytes: Uint8Array): Promise<Uint8Array> {
+  return new Uint8Array(await crypto.subtle.digest("SHA-256", previousVoucherBytes as BufferSource)).slice(0, 8);
+}
