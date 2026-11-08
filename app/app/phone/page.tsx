@@ -132,8 +132,8 @@ export default function PhonePage() {
           <FirstRun role="phone" />
           <h1 className="text-5xl">Pair this phone</h1>
           <p className="text-lg">
-            This phone now holds a key that signs ferry tickets. The private half
-            never leaves this browser, even offline.
+            This phone now holds a key that signs ferry tickets. The private
+            half never leaves this browser, even offline.
           </p>
           <ol className="flex list-decimal flex-col gap-2 pl-6 text-lg marker:font-bold">
             <li>On a laptop, open Wherry and go to Owner.</li>
@@ -217,8 +217,13 @@ export default function PhonePage() {
     <div className="mx-auto flex w-full max-w-[440px] flex-col gap-8">
       {!showing && <FirstRun role="phone" />}
       {!online && (
-        <p role="status" className="flex items-center gap-3 rounded-sm border-2 border-ink bg-accent px-4 py-3 text-lg font-bold">
-          <span aria-hidden className="mono">[....]</span>
+        <p
+          role="status"
+          className="flex items-center gap-3 rounded-sm border-2 border-ink bg-accent px-4 py-3 text-lg font-bold"
+        >
+          <span aria-hidden className="mono">
+            [....]
+          </span>
           No signal. That&apos;s fine. Tickets still work.
         </p>
       )}
@@ -227,11 +232,22 @@ export default function PhonePage() {
         className="paper flex flex-col gap-3 p-5"
       >
         <div className="flex flex-col gap-1">
-          <span className="label text-ink">Your locked tab · you can spend</span>
-          <Money units={spendable > 0n ? spendable : 0n} className="text-[clamp(40px,12vw,56px)] leading-none" />
+          <span className="label text-ink">
+            Your locked tab · you can spend
+          </span>
+          <Money
+            units={spendable > 0n ? spendable : 0n}
+            className="text-[clamp(40px,12vw,56px)] leading-none"
+          />
         </div>
-        <HullGauge left={spendable > 0n ? spendable : 0n} total={tab.deposited} />
-        <WhatsThis term="Escrow">Money held by a Solana program for this phone. Nobody else can spend it, and the phone can&apos;t promise more than it holds.</WhatsThis>
+        <HullGauge
+          left={spendable > 0n ? spendable : 0n}
+          total={tab.deposited}
+        />
+        <WhatsThis term="Escrow">
+          Money held by a Solana program for this phone. Nobody else can spend
+          it, and the phone can&apos;t promise more than it holds.
+        </WhatsThis>
         <div className="flex flex-col text-sm">
           <span>
             <Money units={tab.deposited} /> locked in tab · expires in{" "}
@@ -261,26 +277,33 @@ export default function PhonePage() {
           aria-label="Your voucher"
           className="flex flex-col items-center gap-4"
         >
-          <h1 className="text-center text-4xl">Show this to {showing.shopName}</h1>
+          <h1 className="text-center text-4xl">
+            Show this to {showing.shopName}
+          </h1>
           <p className="max-w-text text-center text-lg">
             They check it without a network. You can close this once
             they&apos;ve scanned it.
           </p>
-          <PrintedTicket key={showing.code} serial={serialLabel(showing.serial)} shop={showing.shopName} amount={formatUsd(showing.amount)}>
-          <Ticket
-            serial={showing.serial}
-            shopName={showing.shopName}
-            amount={showing.amount}
-            tab={showing.tab}
-            qr={
-              <QrCode
-                text={showing.code}
-                size={260}
-                label={`Voucher ${serialLabel(showing.serial)} QR code`}
-              />
-            }
-            stamp={isSettled(tab, showing.serial) ? "onchain" : undefined}
-          />
+          <PrintedTicket
+            key={showing.code}
+            serial={serialLabel(showing.serial)}
+            shop={showing.shopName}
+            amount={formatUsd(showing.amount)}
+          >
+            <Ticket
+              serial={showing.serial}
+              shopName={showing.shopName}
+              amount={showing.amount}
+              tab={showing.tab}
+              qr={
+                <QrCode
+                  text={showing.code}
+                  size={260}
+                  label={`Voucher ${serialLabel(showing.serial)} QR code`}
+                />
+              }
+              stamp={isSettled(tab, showing.serial) ? "onchain" : undefined}
+            />
           </PrintedTicket>
           <CopyButton text={showing.code} label="Copy voucher code" />
           <button
@@ -299,7 +322,10 @@ export default function PhonePage() {
           >
             <div className="flex flex-col gap-1">
               <h1 className="text-5xl">Pay with a ferry ticket</h1>
-              <WhatsThis term="Voucher">A ferry ticket is an IOU your phone signs for one shop and one amount. The shop can check it with no network.</WhatsThis>
+              <WhatsThis term="Voucher">
+                A ferry ticket is an IOU your phone signs for one shop and one
+                amount. The shop can check it with no network.
+              </WhatsThis>
             </div>
             {!shop ? (
               <div className="paper p-5">

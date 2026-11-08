@@ -18,7 +18,8 @@ export function RiverHero() {
     el.appendChild(probe);
     const fit = () => {
       const ch = probe.getBoundingClientRect().width / 20;
-      if (ch > 0) setCols(Math.max(44, Math.min(140, Math.floor(el.clientWidth / ch))));
+      if (ch > 0)
+        setCols(Math.max(44, Math.min(140, Math.floor(el.clientWidth / ch))));
     };
     fit();
     const ro = new ResizeObserver(fit);
@@ -28,7 +29,10 @@ export function RiverHero() {
   return (
     <figure className="flex flex-col gap-2">
       <div className="rounded-lg border-2 border-ink bg-night px-3 py-5 text-on-night shadow-2 sm:px-6 sm:py-7">
-        <div ref={box} className="relative overflow-hidden text-[clamp(8px,2.3vw,17px)]">
+        <div
+          ref={box}
+          className="relative overflow-hidden text-[clamp(8px,2.3vw,17px)]"
+        >
           <AsciiAnim
             render={(ms) => riverFrame(ms, cols)}
             staticAt={4200}
@@ -37,7 +41,9 @@ export function RiverHero() {
           />
         </div>
       </div>
-      <figcaption className="text-sm text-muted">The signal drops halfway across. The ticket still lands.</figcaption>
+      <figcaption className="text-sm text-muted">
+        The signal drops halfway across. The ticket still lands.
+      </figcaption>
     </figure>
   );
 }

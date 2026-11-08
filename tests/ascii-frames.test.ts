@@ -1,7 +1,11 @@
 // The ASCII frames keep a fixed grid, so Paper Mono columns never jump while they animate.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { riverFrame, ticketLines, typed } from "../app/components/ascii-frames.ts";
+import {
+  riverFrame,
+  ticketLines,
+  typed,
+} from "../app/components/ascii-frames.ts";
 
 test("river frames keep a fixed grid and lose the signal mid-crossing", () => {
   for (let ms = 0; ms < 9000; ms += 250) {

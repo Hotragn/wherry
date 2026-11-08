@@ -35,7 +35,9 @@ export function AsciiAnim({
   useEffect(() => {
     const el = pre.current;
     if (!el) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
     if (reduced) {
       el.textContent = renderRef.current(duration ?? staticAt);
       doneRef.current?.();
@@ -77,4 +79,3 @@ export function AsciiAnim({
     </div>
   );
 }
-

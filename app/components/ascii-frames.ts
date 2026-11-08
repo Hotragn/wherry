@@ -1,7 +1,14 @@
 // Pure text frames for the ASCII animations (Paper Mono). Tested in tests/ascii-frames.test.ts.
 
-const pad = (s: string, n: number) => (s.length >= n ? s.slice(0, n) : s + " ".repeat(n - s.length));
-const put = (row: string, x: number, s: string) => (x >= row.length ? row : row.slice(0, Math.max(0, x)) + s.slice(Math.max(0, -x)) + row.slice(x + s.length)).slice(0, row.length);
+const pad = (s: string, n: number) =>
+  s.length >= n ? s.slice(0, n) : s + " ".repeat(n - s.length);
+const put = (row: string, x: number, s: string) =>
+  (x >= row.length
+    ? row
+    : row.slice(0, Math.max(0, x)) +
+      s.slice(Math.max(0, -x)) +
+      row.slice(x + s.length)
+  ).slice(0, row.length);
 const WAVE = "~ ~~  ~~~ ~  ~~ ~~~  ~ ~~";
 
 const BOAT = ["    |\\    ", "    | \\   ", "    |__\\  ", " \\_o__o_/ "];
@@ -11,8 +18,22 @@ export function riverFrame(ms: number, cols = 62) {
   const cycle = 9000;
   const p = (ms % cycle) / cycle;
   const travel = Math.min(1, Math.max(0, (p - 0.08) / 0.78));
-  const bars = travel < 0.15 ? "[||||] 4G" : travel < 0.28 ? "[|||.]" : travel < 0.38 ? "[||..]" : travel < 0.46 ? "[|...]" : "[....] NO SIGNAL";
-  const status = travel < 0.46 ? "" : travel < 1 ? "  that's fine. tickets still work." : "  ticket landed. collect later.";
+  const bars =
+    travel < 0.15
+      ? "[||||] 4G"
+      : travel < 0.28
+        ? "[|||.]"
+        : travel < 0.38
+          ? "[||..]"
+          : travel < 0.46
+            ? "[|...]"
+            : "[....] NO SIGNAL";
+  const status =
+    travel < 0.46
+      ? ""
+      : travel < 1
+        ? "  that's fine. tickets still work."
+        : "  ticket landed. collect later.";
   const rows = Array.from({ length: 10 }, () => " ".repeat(cols));
   rows[0] = pad(` signal ${bars}${status}`, cols);
   rows[4] = put(put(rows[4], 1, "PHONE"), cols - 6, "SHOP");
@@ -29,7 +50,11 @@ export function riverFrame(ms: number, cols = 62) {
   ] as const) {
     let w = "";
     for (let c = 0; c < cols; c++) {
-      const ch = WAVE[(((c + dir * shift * (sparse ? 2 : 1)) % WAVE.length) + WAVE.length) % WAVE.length];
+      const ch =
+        WAVE[
+          (((c + dir * shift * (sparse ? 2 : 1)) % WAVE.length) + WAVE.length) %
+            WAVE.length
+        ];
       w += sparse && c % 3 ? " " : ch;
     }
     rows[r] = sparse ? w : put(put(w, 0, "######"), cols - 7, "#######");
