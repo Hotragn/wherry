@@ -103,3 +103,12 @@ pub struct SeedRevealed {
     pub epoch: u32,
     pub seed: [u8; 32],
 }
+
+#[event]
+pub struct CourierSettled {
+    pub tab: Pubkey,
+    pub courier: Pubkey,
+    pub merchant: Pubkey,
+    pub serial: u32,
+    pub fee: u64,
+}

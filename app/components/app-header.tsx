@@ -10,6 +10,7 @@ const ROLES = [
   { href: "/app/phone", label: "Phone", n: 2 },
   { href: "/app/shop", label: "Shop", n: 3 },
   { href: "/play", label: "Play", n: 0 },
+  { href: "/app/courier", label: "Courier", n: 0 },
 ];
 
 export function AppHeader() {

@@ -1,8 +1,8 @@
 // Wherry service worker: after the first visit, /app and /play keep working with no network.
 // Pages: network first, cached copy offline. Hashed build assets: cache first.
 // Solana RPC and the faucet are never cached.
-const CACHE = "wherry-v2"; // bump on each release so the new pages are precached
-const SHELL = ["/", "/app", "/app/phone", "/app/shop", "/app/owner", "/play"];
+const CACHE = "wherry-v3"; // bump on each release so the new pages are precached
+const SHELL = ["/", "/app", "/app/phone", "/app/shop", "/app/owner", "/app/courier", "/play"];
 
 async function precache() {
   const cache = await caches.open(CACHE);

@@ -53,8 +53,20 @@ export const WHERRY_ERROR__INVALID_TAB_ID = 0x1780; // 6016
 export const WHERRY_ERROR__SEED_ALREADY_COMMITTED = 0x1781; // 6017
 /** NoSeedCommitted: No seed is committed */
 export const WHERRY_ERROR__NO_SEED_COMMITTED = 0x1782; // 6018
+/** CourierAuthWrongKey: The courier authorization was not signed by this shop */
+export const WHERRY_ERROR__COURIER_AUTH_WRONG_KEY = 0x1783; // 6019
+/** CourierAuthMismatch: The signed courier authorization does not match this settlement */
+export const WHERRY_ERROR__COURIER_AUTH_MISMATCH = 0x1784; // 6020
+/** CourierAuthExpired: The courier authorization has expired */
+export const WHERRY_ERROR__COURIER_AUTH_EXPIRED = 0x1785; // 6021
+/** CourierFeeOverCap: The courier fee is over what the shop allowed */
+export const WHERRY_ERROR__COURIER_FEE_OVER_CAP = 0x1786; // 6022
 
 export type WherryError =
+  | typeof WHERRY_ERROR__COURIER_AUTH_EXPIRED
+  | typeof WHERRY_ERROR__COURIER_AUTH_MISMATCH
+  | typeof WHERRY_ERROR__COURIER_AUTH_WRONG_KEY
+  | typeof WHERRY_ERROR__COURIER_FEE_OVER_CAP
   | typeof WHERRY_ERROR__DEVICE_KEY_MISMATCH
   | typeof WHERRY_ERROR__INVALID_AMOUNT
   | typeof WHERRY_ERROR__INVALID_EXPIRY
@@ -78,6 +90,10 @@ export type WherryError =
 let wherryErrorMessages: Record<WherryError, string> | undefined;
 if (process.env["NODE_ENV"] !== "production") {
   wherryErrorMessages = {
+    [WHERRY_ERROR__COURIER_AUTH_EXPIRED]: `The courier authorization has expired`,
+    [WHERRY_ERROR__COURIER_AUTH_MISMATCH]: `The signed courier authorization does not match this settlement`,
+    [WHERRY_ERROR__COURIER_AUTH_WRONG_KEY]: `The courier authorization was not signed by this shop`,
+    [WHERRY_ERROR__COURIER_FEE_OVER_CAP]: `The courier fee is over what the shop allowed`,
     [WHERRY_ERROR__DEVICE_KEY_MISMATCH]: `The voucher was not signed by this tab's phone key`,
     [WHERRY_ERROR__INVALID_AMOUNT]: `Amount must be more than zero`,
     [WHERRY_ERROR__INVALID_EXPIRY]: `Expiry must be in the future and at most 30 days away`,

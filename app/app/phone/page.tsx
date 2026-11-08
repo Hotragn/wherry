@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Doggett } from "../../components/doggett";
 import { Scanner } from "../../components/scanner";
 import { Ticket } from "../../components/ticket";
+import { PlaySound } from "../../components/sound";
 import { CopyButton, Money, QrCode } from "../../components/ui";
 import type { TabSnapshot } from "../../lib/assess.ts";
 import { findTabForDevice } from "../../lib/chain.ts";
@@ -305,6 +306,7 @@ export default function PhonePage() {
               stamp={isSettled(tab, showing.serial) ? "onchain" : undefined}
             />
           </PrintedTicket>
+          <PlaySound code={showing.code} />
           <CopyButton text={showing.code} label="Copy voucher code" />
           <button
             type="button"

@@ -6,6 +6,7 @@
  * @see https://github.com/codama-idl/codama
  */
 
+export * from "./courierSettled.ts";
 export * from "./seedCommitted.ts";
 export * from "./seedRevealed.ts";
 export * from "./shortfall.ts";

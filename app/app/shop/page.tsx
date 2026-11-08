@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Crossing, type Boat } from "../../components/crossing";
 import { Doggett } from "../../components/doggett";
 import { FirstRun } from "../../components/guide";
+import { ListenButton } from "../../components/sound";
 import { Scanner } from "../../components/scanner";
 import { Ticket } from "../../components/ticket";
 import { TxStatus, lamportsToSol, type TxState } from "../../components/tx-status";
@@ -29,6 +30,7 @@ import {
   shopSigner,
   syncSnapshot,
   explainError,
+  courierBundle,
   type BatchResult,
   type Queued,
   type Snapshot,
@@ -73,6 +75,7 @@ export default function ShopPage() {
   const [queue, setQueue] = useState<Queued[]>([]);
   const [risk, setRisk] = useState<RiskSettings | null>(null);
   const [check, setCheck] = useState<Check | null>(null);
+  const [heard, setHeard] = useState<number | null>(null); // seconds, when the voucher came by sound
   const [lastTrip, setLastTrip] = useState<string | null>(null);
   const [settling, setSettling] = useState(false);
   const [batches, setBatches] = useState<BatchResult[]>([]);
@@ -275,8 +278,11 @@ export default function ShopPage() {
                 title="Scan the customer's ferry ticket"
                 pasteHint="No camera? Paste the ticket code (it starts with WV1.)"
                 accept={(t) => (decodeVoucher(t) ? null : "That isn't a Wherry voucher.")}
-                onResult={onVoucher}
+                onResult={(c) => (setHeard(null), onVoucher(c))}
               />
+              <div className="mt-4 border-t-2 border-ink pt-4">
+                <ListenButton onCode={(c, s) => (setHeard(s), onVoucher(c))} />
+              </div>
             </div>
           ) : (
             <div className="paper grid gap-6 p-5 md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
@@ -284,6 +290,12 @@ export default function ShopPage() {
                 <Ticket serial={check.v.serial} shopName={name} amount={check.v.amount} tab={check.v.tab} onPaper />
               </div>
               <div className="flex flex-col gap-3">
+                {heard !== null && (
+                  <span className="flex items-center gap-2 text-sm">
+                    <Doggett pose="success" size={36} />
+                    Heard by sound in <span className="mono">{heard.toFixed(1)} s</span>
+                  </span>
+                )}
                 {check.signatureOk ? (
                   <Signal tone="ok">
                     Signature valid · checked offline in <span className="mono">{check.verifyMs < 1 ? "<1" : Math.round(check.verifyMs)} ms</span>
@@ -415,6 +427,7 @@ export default function ShopPage() {
         <OfficerPanel state={officer} onStart={startOfficer} onStop={async () => (await set("shop:officer-on", false), setOfficer({ status: "off" }))} />
         <StudioPanel shop={shop} online={online} />
         <NumbersPanel n={numbers} />
+        <CourierPanel pending={pending.length} />
         <section aria-label="Tab list" className="flex flex-col gap-2">
           <h2 className="text-2xl">Tab list</h2>
           <p className="text-sm">
@@ -505,6 +518,35 @@ function Sticker({ shop, name, online }: { shop: KeyPairSigner; name: string; on
         )}
         {faucet && <span className="text-muted">{faucet.length > 60 ? <TxLink signature={faucet}>Sent ✓ Explorer</TxLink> : faucet}</span>}
       </div>
+    </section>
+  );
+}
+
+/** Hand vouchers to whoever finds a signal first, with this shop's signed consent to a capped fee. */
+function CourierPanel({ pending }: { pending: number }) {
+  const [bundle, setBundle] = useState<string | null>(null);
+  return (
+    <section aria-label="Hand to a courier" className="flex flex-col gap-2">
+      <h2 className="text-xl">Hand to a courier</h2>
+      <p className="text-sm text-muted">
+        No signal here? Anyone who finds one can settle your vouchers for you. You sign a note allowing a fee of 1%, at most $0.05 a voucher, valid for 48 hours. The money
+        still comes to you.
+      </p>
+      {pending === 0 ? (
+        <p className="text-sm text-muted">No vouchers waiting.</p>
+      ) : (
+        <button type="button" className="link self-start text-sm" onClick={async () => setBundle((await courierBundle()).text)}>
+          Make a courier bundle for {pending} voucher{pending === 1 ? "" : "s"}
+        </button>
+      )}
+      {bundle && (
+        <div className="flex flex-col gap-1">
+          <textarea className="field mono min-h-24 text-xs" readOnly value={bundle} aria-label="Courier bundle" />
+          <button type="button" className="link self-start text-sm" onClick={() => navigator.clipboard.writeText(bundle)}>
+            Copy bundle
+          </button>
+        </div>
+      )}
     </section>
   );
 }

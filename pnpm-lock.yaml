@@ -44,6 +44,9 @@ importers:
       '@wallet-standard/features':
         specifier: ^1.1.0
         version: 1.1.1
+      ggwave:
+        specifier: ^0.4.0
+        version: 0.4.0
       idb-keyval:
         specifier: 6.2.2
         version: 6.2.2
@@ -1755,6 +1758,9 @@ packages:
 
   get-tsconfig@4.14.3:
     resolution: {integrity: sha512-++QEw4DIY7WGoukz+/+A/8dGYPT9l9yIadnmSgZ8Rjr3YVSVDipQSO9CdnJo9ePqFqUUqh+wk9uIaoiAwsiPkA==}
+
+  ggwave@0.4.0:
+    resolution: {integrity: sha512-+sKq0aIEVJ7zHj4Vw+Sj/RPa91xp76ihaG5gsOKZ8ojM5+uUu3NFzAspozwBx/zeaThxP5VeIkA2bbsfWpUd2g==}
 
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
@@ -4539,6 +4545,8 @@ snapshots:
   get-tsconfig@4.14.3:
     dependencies:
       resolve-pkg-maps: 1.0.0
+
+  ggwave@0.4.0: {}
 
   glob-parent@5.1.2:
     dependencies:

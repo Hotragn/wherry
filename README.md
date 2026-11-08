@@ -51,12 +51,17 @@ Tab ids run 0, 1, 2… per owner (`tab_id` must equal `tabs_opened`), so a close
 | `open_tab(tab_id, device_key, amount, expires_at)` | owner | creates the tab and vault, moves the deposit in, starts the payer record. Expiry at most 30 days out |
 | `top_up(amount)` | owner | adds to an open tab before it expires |
 | `settle(serial, amount, voucher_expires_at, nonce)` | shop | pays one voucher (details below) |
+| `settle_via_courier(…, fee_bps, max_fee_bps, max_fee_abs, auth_expires_at, auth_nonce)` | anyone (the courier) | pays one voucher to the shop with the shop's signed consent; the courier keeps a capped fee (details below) |
 | `close_tab()` | owner | after the settle deadline: refunds what's left, closes the vault and the tab, counts a clean close if there was no shortfall |
 | `commit_seed(seed_hash)` / `reveal_seed(seed, next_hash)` | game studio | commit/reveal for provably fair bonus drops |
 
 **Voucher bytes (172), signed by the phone key:** `"WHERRY01"` ‖ program id ‖ tab ‖ merchant ‖ mint ‖ amount u64 LE ‖ serial u32 LE ‖ voucher_expires_at i64 LE ‖ nonce [u8; 16].
 
 **`settle` requires** the instruction right before it to be the Ed25519 precompile with exactly one signature, all instruction indexes `u16::MAX` (key, signature and message inline). The key must be the tab's phone key, and the message must equal the voucher bytes rebuilt from the instruction's own arguments, with merchant = the signer. Then: serial < 1024 and not already settled, voucher expiry ≤ tab expiry, now ≤ settle deadline, amount > 0. It pays `min(amount, vault)`. Any gap becomes a recorded shortfall, not a failed transaction. A batch is several (Ed25519, settle) pairs in one transaction. Three vouchers come to 1,536 bytes, so batches use v1 transactions (4,096-byte limit, live on devnet). If a v1 batch can't go through, the shop falls back to one v0 transaction per voucher, sent in parallel.
+
+**Courier authorization (138 bytes), signed by the shop's key:** `"WHERRYC1"` ‖ program id ‖ merchant ‖ tab ‖ max_fee_bps u16 LE ‖ max_fee_abs u64 LE ‖ auth_expires_at i64 LE ‖ auth_nonce [u8; 16].
+
+**`settle_via_courier` requires** two inline Ed25519 checks right before it: the voucher by the tab's phone key (two back) and the authorization by the merchant's key (one back), both rebuilt from the instruction's own arguments. Then now ≤ auth_expires_at and fee_bps ≤ max_fee_bps ≤ 10,000, plus every `settle` rule. It pays `min(amount, vault)`; the fee is `min(paid × fee_bps / 10,000, max_fee_abs)`, taken from what was paid, so on a shortfall the shop's loss doesn't grow. The courier gets the fee, the shop's token account the rest (both created if needed, at the courier's cost). It sets the same settled bit, so a voucher settles once whichever way it goes. Emits `CourierSettled`.
 
 ## Real devnet transactions
 | What | Signature |
@@ -68,6 +73,9 @@ Tab ids run 0, 1, 2… per owner (`tab_id` must equal `tabs_opened`), so a close
 | v0 fallback: 2 vouchers, 2 parallel transactions (0.7 s) | [`5ePGD7q6…MJ4VPvB5`](https://explorer.solana.com/tx/5ePGD7q692rXgfcDNKsfQEaGUJj1dzzyXu2z1qkydTEx5RDkmAP1GPTWhkCTwSGmfoBwRGo5bgocswWyMJ4VPvB5?cluster=devnet), [`4cFQHx9M…w1qJ3wvL`](https://explorer.solana.com/tx/4cFQHx9MoiE9jYr7GE7fvA23a6hPJqx6Vmb1HuMgNo1mZVyYAoMxZ8cMVjFGoAPd4qj7uAsmw3DwvRPKw1qJ3wvL?cluster=devnet) |
 | Game studio commits its seed | [`2r7CnF68…JGnf7QTt`](https://explorer.solana.com/tx/2r7CnF68pXz2RU3pqXiWnzcK8afsQwmBcdnB3XUDjYA3fg3m3AF98gMRMsenBggQSvs1M5y47M17FDpNJGnf7QTt?cluster=devnet) |
 | Power-up voucher settled with a sale | [`BVMGtkkQ…g8QSeiL`](https://explorer.solana.com/tx/BVMGtkkQqApsF9GKKj242tdWe5KYfha1RLHUmZMo22eqF4rFiQKvLmZAV4utLeRfVSXfajAB9a2xCZjqg8QSeiL?cluster=devnet) |
+| Courier settles a shop's $3.00 voucher, earns $0.03 (scripted, 1.1 s) | [`k8HDhMBz…z73cKBh`](https://explorer.solana.com/tx/k8HDhMBzV2pM3ZxXdXnZuB8BqXsyU2wHgBJieqGjHeUVo2ZgeBt1wxusiWnthYDnkbignP6QppGcNbt4z73cKBh?cluster=devnet) |
+| Same, from the Courier view (0.8 s) | [`45frTaVC…H27s5A5N`](https://explorer.solana.com/tx/45frTaVCUpKMwJfzrasuw8oNCdY6nXDd9dhhwJcqdG4KNg7JZiwEUjBP5PQWS3TDDsUBoWnBcMWKYfxHH27s5A5N?cluster=devnet) |
+| Program upgrade adding the courier | [`2D55e11N…zMvHYtN`](https://explorer.solana.com/tx/2D55e11NCiTcw75HkYpjjASUQRUvXR1CafGLzSuQoKZuGuu4cos5KQeYLze5iNVLLcAbmoHk4Mo3Xc4aLzMvHYtN?cluster=devnet) |
 | Studio reveals the seed and commits the next | [`2nrbnoD4…uikLULe`](https://explorer.solana.com/tx/2nrbnoD4RgKxZDFgVZfiuC8YFYZHR59YPxXaLkgvPMeTiUvhd9Lk6PjqfXB7ZypqXkxDhDi4c22E9zCk4uikLULe?cluster=devnet) |
 
 A replayed voucher fails in simulation with `VoucherAlreadySettled`. Test-USD mint: `DQRut6HQcdzu1bpKFzYRCPYfW1u7MCHso2EVGK6tuFs`.
@@ -122,7 +130,7 @@ The officer is a small language model, **Qwen2.5-1.5B-Instruct (q4f16), run by W
 | Fake QR sticker pasted over the shop's | The phone shows the shop's name and short key before signing, and the shop shows its key on screen. A voucher made out to a fake key fails the real shop's check at the counter ("This voucher is for another shop"), so the swap shows up before the goods leave. |
 | Stolen phone | The thief can spend at most what's left in the tab, and only at shops that accept it. The key can't be copied off the phone (non-extractable; a test proves export fails). The owner tops up nothing more and closes the tab after the settle window. |
 | Cloned or tampered phone app signing two different next vouchers | Vouchers are hash-chained (nonce bytes 4–11 link to the previous voucher). A shop holding both declines the second as a fork and keeps both signed vouchers as proof; the links are public in settlement events. |
-| Malicious courier (someone else submits the settlement) | Today only the named shop can settle (the program requires merchant = signer), so a courier can't redirect money. See "Anyone-settles courier" below for the design we didn't ship. |
+| Malicious courier (someone else submits the settlement) | The voucher binds the shop and the shop's signed authorization binds the tab, the fee caps and an expiry, so a courier can't redirect money, raise its fee, use an expired note or settle twice (the settled bit). Tests cover no authorization, a wrong key, a fee over the cap, an expired note, a mismatched note, replays both ways, a shortfall, and a seeded property: vault + shop + courier = deposit, fee ≤ caps. |
 | Faucet abuse | Devnet only, a fixed $50 per request, at most 3 per address and 10 per IP per hour (in-memory limits). |
 
 **Known limit: an unrevealed round.** The studio sees the nonces in game vouchers when it collects them. It could then decide never to reveal that round's seed, so the player paid and gets no drop. Today game vouchers carry their round in nonce bytes 0–3, and the Play page shows how long a round has gone unrevealed ("Round 0 not revealed for 2 h"). **Next step** (needs a program upgrade): settling a game voucher requires that round's seed to be revealed first, so a studio that withholds a reveal can't collect.
@@ -140,12 +148,14 @@ The same mechanics fit **aid groups** that pre-fund tabs for families before sto
 
 **Budget planner (phone, offline, advice only).** It uses the same on-device model as the shop's officer (Qwen2.5 1.5B via WebLLM). The model proposes the split; code does the arithmetic; a junk answer or a phone without WebGPU falls back to a labelled simple plan. The person confirms every payment, and the escrow rules stay onchain. Measured: 1.2–1.3 s per plan, offline after a hard reload.
 
-**Anyone-settles courier (design, not shipped).** The idea: the first device with a signal settles everyone's vouchers and earns a small, capped fee. It needs a program change: the settlement signer would no longer have to be the shop (the voucher already binds the shop, so the money can't be redirected), and the fee needs a cap the shop agreed to, ideally signed into the voucher format. We left it out rather than take a fee from shops that never agreed to one. Today a shop can still hand its vouchers to a friend who settles them with the shop's own key later.
+**Pay by sound (offline, no camera needed).** The phone plays its voucher as chirps with [ggwave](https://github.com/ggerganov/ggwave) (WASM, audible FSK with Reed-Solomon error correction); the shop taps "Listen for a voucher" and its mic decodes it, with a level meter and the mascot for success or failure. The mic is asked for only on that tap. A voucher is 196 bytes and ggwave carries at most 140 per message, so the phone leaves out the mint (the shop knows it) and sends the other 164 bytes as two messages, 12.0 s of sound. The shop then runs the same offline signature and coverage checks as for a QR. QR stays the default (sound is labelled "works best in a quiet room"), and paste still works. Measured in the in-app browser, which blocks the microphone, so the phone's exact waveform was fed into the shop's Listen as a mic stream: 10 of 10 decoded with valid signatures (5 clean, 5 with white noise at about a third of the signal level), each 12.6 s from the tap including a 0.8 s lead-in. Not yet measured: phone to laptop through the air.
+
+**Anyone-settles courier (shipped).** The first device with a signal settles everyone's vouchers and earns a small, capped fee. The shop opts in: "Hand to a courier" signs one note per tab (1%, at most $0.05 a voucher, valid 48 hours) and gives a text bundle of vouchers and notes. Anyone pastes it into the Courier view and settles; the money still lands in the shop's account. When the shop next settles, vouchers a courier already settled show as "settled by a courier". Measured on devnet: a $3.00 voucher settled by a courier in 0.8 s from the Courier view, courier earned $0.03.
 
 ## Run it
 ```bash
 pnpm install
-pnpm test          # 28 TypeScript tests: program tests and seeded property tests on LiteSVM, plus the offline logic
+pnpm test          # 35 TypeScript tests: program tests and seeded property tests on LiteSVM, plus the offline logic
 pnpm dev           # http://localhost:3000
 ```
 - `.env.local` needs `FAUCET_SECRET_KEY`, the test-USD mint authority as a 64-byte JSON array, for the faucet. See `.env.example`. Everything else talks to the deployed program.

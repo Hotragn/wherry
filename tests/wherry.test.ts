@@ -45,10 +45,11 @@ import {
   getPayerRecordDecoder,
   getRevealSeedInstruction,
   getSettleInstructionAsync,
+  getSettleViaCourierInstructionAsync,
   getTabDecoder,
   getTopUpInstructionAsync,
 } from "../app/generated/wherry/index.ts";
-import { ED25519_PROGRAM_ADDRESS, ed25519Instruction, voucherBytes, type Voucher } from "../app/lib/voucher.ts";
+import { ED25519_PROGRAM_ADDRESS, courierAuthBytes, ed25519Instruction, voucherBytes, type Voucher } from "../app/lib/voucher.ts";
 
 const SO = new URL("../anchor/target/deploy/wherry.so", import.meta.url).pathname;
 const NOW = 1_800_000_000n;
@@ -479,5 +480,141 @@ describe("settle properties (seeded random runs)", () => {
         assert.equal(tab.shortfall, owedShort, `seed ${seed}: shortfall = owed minus paid`);
       }
     }
+  });
+});
+
+describe("settle_via_courier (anyone settles, with the shop's signed consent)", () => {
+  type Auth = { maxFeeBps: number; maxFeeAbs: bigint; authExpiresAt: bigint; authNonce: Uint8Array; msg: Uint8Array; sig: Uint8Array; pk: Uint8Array };
+
+  async function authorize(w: World, o: { signer?: KeyPairSigner; merchant?: Address; maxFeeBps?: number; maxFeeAbs?: bigint; authExpiresAt?: bigint } = {}): Promise<Auth> {
+    const signer = o.signer ?? w.merchant;
+    const a = {
+      programId: WHERRY_PROGRAM_ADDRESS,
+      merchant: o.merchant ?? w.merchant.address,
+      tab: w.tab,
+      maxFeeBps: o.maxFeeBps ?? 100,
+      maxFeeAbs: o.maxFeeAbs ?? 50_000n, // $0.05
+      authExpiresAt: o.authExpiresAt ?? NOW + 2n * DAY,
+      authNonce: crypto.getRandomValues(new Uint8Array(16)),
+    };
+    const msg = courierAuthBytes(a);
+    const sig = new Uint8Array(await signBytes(signer.keyPair.privateKey, msg));
+    return { ...a, msg, sig, pk: new Uint8Array(getAddressEncoder().encode(signer.address)) };
+  }
+
+  async function courierIxs(w: World, s: Signed, a: Auth | null, courier: KeyPairSigner, feeBps: number) {
+    const ix = await getSettleViaCourierInstructionAsync({
+      courier,
+      merchant: w.merchant.address,
+      tab: w.tab,
+      payerRecord: w.payer,
+      mint: w.mint,
+      serial: s.v.serial,
+      amount: s.v.amount,
+      voucherExpiresAt: s.v.voucherExpiresAt,
+      nonce: s.v.nonce,
+      feeBps,
+      maxFeeBps: a?.maxFeeBps ?? 100,
+      maxFeeAbs: a?.maxFeeAbs ?? 50_000n,
+      authExpiresAt: a?.authExpiresAt ?? NOW + DAY,
+      authNonce: a?.authNonce ?? new Uint8Array(16),
+    });
+    return [ed25519Instruction(s.pk, s.sig, s.msg), ...(a ? [ed25519Instruction(a.pk, a.sig, a.msg)] : []), ix];
+  }
+
+  async function courierWorld(deposit?: bigint) {
+    const w = await world(deposit);
+    const courier = await generateKeyPairSigner();
+    w.svm.airdrop(courier.address, lamports(10_000_000_000n));
+    return { w, courier };
+  }
+
+  test("pays the shop and a capped fee to the courier", async () => {
+    const { w, courier } = await courierWorld();
+    const s = await voucher(w, { serial: 1, amount: 3_500_000n });
+    const r = ok(await send(w.svm, courier, await courierIxs(w, s, await authorize(w), courier, 100)));
+    assert.equal(await tokenBalance(w, courier.address), 35_000n); // 1% of $3.50
+    assert.equal(await tokenBalance(w, w.merchant.address), 3_465_000n);
+    assert.ok(r.logs().some((l) => l.startsWith("Program data:")));
+    // the absolute cap: 1% of $10 would be $0.10, the shop allowed $0.05
+    const big = await voucher(w, { serial: 2, amount: 10n * USD });
+    ok(await send(w.svm, courier, await courierIxs(w, big, await authorize(w), courier, 100)));
+    assert.equal(await tokenBalance(w, courier.address), 85_000n);
+    assert.equal(read(w.svm, w.payer, (d) => getPayerRecordDecoder().decode(d)).volumeSettled, 13_500_000n);
+  });
+
+  test("rejects a settlement with no shop authorization", async () => {
+    const { w, courier } = await courierWorld();
+    const s = await voucher(w, { serial: 1, amount: USD });
+    fails(await send(w.svm, courier, await courierIxs(w, s, null, courier, 100)), "MissingEd25519Instruction");
+  });
+
+  test("rejects an authorization signed by another key", async () => {
+    const { w, courier } = await courierWorld();
+    const s = await voucher(w, { serial: 1, amount: USD });
+    const forged = await authorize(w, { signer: w.merchant2 }); // right bytes, wrong signer
+    fails(await send(w.svm, courier, await courierIxs(w, s, forged, courier, 100)), "CourierAuthWrongKey");
+    const courierSelf = await authorize(w, { signer: courier, merchant: w.merchant.address });
+    fails(await send(w.svm, courier, await courierIxs(w, s, courierSelf, courier, 100)), "CourierAuthWrongKey");
+  });
+
+  test("rejects a fee over the shop's cap and an expired authorization", async () => {
+    const { w, courier } = await courierWorld();
+    const s = await voucher(w, { serial: 1, amount: USD });
+    fails(await send(w.svm, courier, await courierIxs(w, s, await authorize(w), courier, 101)), "CourierFeeOverCap");
+    fails(await send(w.svm, courier, await courierIxs(w, s, await authorize(w, { authExpiresAt: NOW - 1n }), courier, 50)), "CourierAuthExpired");
+    // a changed cap no longer matches what the shop signed
+    const a = await authorize(w);
+    fails(await send(w.svm, courier, await courierIxs(w, s, { ...a, maxFeeBps: 5_000 }, courier, 4_000)), "CourierAuthMismatch");
+  });
+
+  test("a courier can't replay a serial, and the shop can't settle it again", async () => {
+    const { w, courier } = await courierWorld();
+    const s = await voucher(w, { serial: 7, amount: USD });
+    ok(await send(w.svm, courier, await courierIxs(w, s, await authorize(w), courier, 100)));
+    fails(await send(w.svm, courier, await courierIxs(w, s, await authorize(w), courier, 100)), "VoucherAlreadySettled");
+    fails(await send(w.svm, w.merchant, await settleIxs(w, s)), "VoucherAlreadySettled");
+  });
+
+  test("property: vault + shop payouts + courier fees = deposit; fees stay under both caps", async () => {
+    const rng = (seed: number) => () => ((seed = (seed * 1_103_515_245 + 12_345) >>> 0) / 2 ** 32);
+    for (let seed = 1; seed <= 15; seed++) {
+      const r = rng(seed);
+      const deposit = BigInt(1 + Math.floor(r() * 20)) * USD;
+      const { w, courier } = await courierWorld(deposit);
+      const settled = new Set<number>();
+      for (let k = 0; k < 8; k++) {
+        const serial = 1 + Math.floor(r() * 5);
+        const amount = BigInt(1 + Math.floor(r() * 800)) * 10_000n;
+        const s = await voucher(w, { serial, amount });
+        const viaCourier = r() < 0.6;
+        const feeBps = Math.floor(r() * 101);
+        const courierBefore = await tokenBalance(w, courier.address);
+        const vaultBefore = await tokenBalance(w, w.tab);
+        const { result } = viaCourier
+          ? await send(w.svm, courier, await courierIxs(w, s, await authorize(w), courier, feeBps))
+          : await send(w.svm, w.merchant, await settleIxs(w, s));
+        if (!(result instanceof FailedTransactionMetadata)) {
+          assert.ok(!settled.has(serial), `seed ${seed}: serial ${serial} paid twice`);
+          settled.add(serial);
+          const fee = (await tokenBalance(w, courier.address)) - courierBefore;
+          const paid = amount < vaultBefore ? amount : vaultBefore;
+          assert.ok(fee <= 50_000n && fee <= (paid * BigInt(feeBps)) / 10_000n, `seed ${seed}: fee over cap`);
+          if (!viaCourier) assert.equal(fee, 0n);
+        }
+        const out = (await tokenBalance(w, w.merchant.address)) + (await tokenBalance(w, courier.address));
+        assert.equal((await tokenBalance(w, w.tab)) + out, deposit, `seed ${seed}: vault + payouts = deposit`);
+        assert.equal(read(w.svm, w.tab, (d) => getTabDecoder().decode(d)).settled, out, `seed ${seed}: tab.settled = payouts`);
+      }
+    }
+  });
+
+  test("on a shortfall the fee comes out of what is actually paid", async () => {
+    const { w, courier } = await courierWorld(USD);
+    const s = await voucher(w, { serial: 1, amount: 2n * USD });
+    ok(await send(w.svm, courier, await courierIxs(w, s, await authorize(w, { maxFeeAbs: USD }), courier, 100)));
+    assert.equal(await tokenBalance(w, courier.address), 10_000n); // 1% of the $1 paid
+    assert.equal(await tokenBalance(w, w.merchant.address), 990_000n);
+    assert.equal(read(w.svm, w.tab, (d) => getTabDecoder().decode(d)).shortfall, USD);
   });
 });
