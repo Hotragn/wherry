@@ -1,61 +1,73 @@
-/* Wherry design tokens. Owner's combo 2 "Fog · Aubergine · Saffron" (picked 2026-11-08 by the redesign session).
-   Every colour in the app comes from here. No ad-hoc hex values in components.
-   Superseded: palette A "Admiralty chart" (paper #F3EBDD / ink #11313A / sail #B0432A), see BRAND.md.
-   Contrast (WCAG): ink/base 12.50, ink/surface 14.27, muted/base 6.28, ok/base 5.36, err/base 5.77,
-   ink/accent 7.90, accent/night 7.90, on-night/night 12.50, on-night-muted/night 7.23. */
+/* Wherry design tokens, redesign v2 (2026-11-08): owner's palette "Ivory · Emerald · Vermilion".
+   Two layers, as the elaya figma-designer skill asks: core colours, then roles. Components use roles only.
+   Superseded: v1 fog/aubergine/saffron (same day) and palette A "Admiralty chart".
+   Contrast (WCAG): ink/ivory 13.08 · muted/ivory 6.06 · emerald/ivory 5.73 · ivory on emerald 5.73 ·
+   ivory on action-vermilion 4.89 · err/ivory 6.56 · on-night-muted/night 8.76. */
 
 :root {
-  /* colour: the three owner colours, plus derived tints of them, one deep text colour and one ok/err pair */
-  --w-fog: #DDE3E8;           /* owner colour 1 */
-  --w-aubergine: #3A0F34;     /* owner colour 2 */
-  --w-saffron: #EAAA00;       /* owner colour 3 */
+  /* core: the owner's three colours */
+  --w-ivory: #F9EBD7;
+  --w-emerald: #046A38;
+  --w-vermilion: #E34222;
+  /* core: derived shades of those three (allowed: one deep text colour, one ok/err pair) */
+  --w-ivory-50: #FDF7EE;      /* lifted ivory: cards */
+  --w-ivory-200: #F1DFC5;     /* sunk ivory: wells, meters */
+  --w-ivory-300: #E6D2B4;     /* hairlines */
+  --w-emerald-900: #0E2A1D;   /* deep text (ink) and night bands */
+  --w-emerald-700: #035A2F;   /* emerald hover */
+  --w-vermilion-700: #C8361A; /* action: ivory text passes 4.89:1 */
+  --w-vermilion-800: #A92C14; /* action hover */
 
-  --w-base: var(--w-fog);     /* page */
-  --w-surface: #EEF1F4;       /* fog, lifted: panels, QR ground */
-  --w-sunk: #CDD5DC;          /* fog, deepened: wells, meters */
-  --w-ink: var(--w-aubergine);/* text, hull, rules */
-  --w-muted: #5C4A5A;         /* aubergine, faded: secondary text, input borders (6.28:1) */
-  --w-line: #A7B0BB;          /* decorative rules only */
-  --w-accent: var(--w-saffron);  /* ONE primary action per screen; ticket card stock */
-  --w-on-accent: var(--w-aubergine);
-  --w-ok: #1C6641;            /* collected / covered / confirmed */
-  --w-err: #A3231C;           /* declined / shortfall / failed */
-  --w-warn: var(--w-aubergine); /* warnings are ink with a "!" mark, never a fourth hue */
-  --w-night: var(--w-aubergine); /* dark bands */
-  --w-on-night: var(--w-fog);
-  --w-on-night-muted: #B8A9B5;
-  --w-focus: var(--w-aubergine);
-  /* Saffron on aubergine passes (7.9:1), so night bands may carry the saffron button.
-     Saffron as text on fog fails (1.58:1): saffron is only ever a fill. */
+  /* roles */
+  --w-base: var(--w-ivory);
+  --w-surface: var(--w-ivory-50);
+  --w-sunk: var(--w-ivory-200);
+  --w-line: var(--w-ivory-300);
+  --w-ink: var(--w-emerald-900);
+  --w-muted: #4F5B53;         /* 6.06:1 on ivory */
+  --w-brand: var(--w-emerald);
+  --w-on-brand: var(--w-ivory);
+  --w-accent: var(--w-vermilion-700);   /* the ONE primary action per screen */
+  --w-accent-hover: var(--w-vermilion-800);
+  --w-on-accent: var(--w-ivory-50);
+  --w-spark: var(--w-vermilion);        /* decoration only: stamps, punches, sail */
+  --w-ok: var(--w-emerald);
+  --w-err: #9A2B12;           /* 6.56:1 */
+  --w-warn: var(--w-ink);     /* warnings are ink plus a "!" mark */
+  --w-night: var(--w-emerald-900);
+  --w-on-night: var(--w-ivory);
+  --w-on-night-muted: #B6C8BC;
+  --w-focus: var(--w-emerald);
 
-  /* type */
-  --w-font-display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
-  --w-font-text: "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* type: one typeface (Geist) plus Paper Mono for numbers, serials and ASCII */
+  --w-font-display: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --w-font-text: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
   --w-font-mono: "Paper Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --w-text-xs: 13px;  --w-text-sm: 15px;  --w-text-md: 17px;  --w-text-lg: 19px;
-  --w-text-xl: 23px;  --w-text-2xl: 30px; --w-text-3xl: 40px; --w-text-4xl: 56px; --w-text-5xl: 88px;
-  --w-leading-tight: 0.95; --w-leading-body: 1.5;
-  --w-tracking-label: .12em;
+  /* Tailwind type scale only */
+  --w-text-xs: 12px;  --w-text-sm: 14px;  --w-text-md: 16px;  --w-text-lg: 18px;
+  --w-text-xl: 20px;  --w-text-2xl: 24px; --w-text-3xl: 30px; --w-text-4xl: 48px; --w-text-5xl: 72px;
+  --w-leading-tight: 1.02; --w-leading-body: 1.55;
+  --w-tracking-label: 0;
 
-  /* spacing (4 px base) */
+  /* spacing (Tailwind steps) */
   --w-space-1: 4px;  --w-space-2: 8px;  --w-space-3: 12px; --w-space-4: 16px; --w-space-5: 20px;
   --w-space-6: 24px; --w-space-8: 32px; --w-space-10: 40px; --w-space-14: 56px; --w-space-18: 72px;
   --w-max-text: 64ch; --w-max-page: 1240px;
 
-  /* radii: printed card stock, barely rounded */
-  --w-radius-sm: 3px;
-  --w-radius-md: 6px;
-  --w-radius-lg: 8px;
-  --w-radius-pill: 4px;
+  /* radii (Tailwind steps; nested rule: inner = outer - gap) */
+  --w-radius-sm: 8px;
+  --w-radius-md: 16px;
+  --w-radius-lg: 24px;
+  --w-radius-pill: 999px;
 
-  /* shadows: a hard ink offset, like a ticket lying on a counter. Never blurred, never a glow. */
-  --w-shadow-1: 2px 2px 0 var(--w-aubergine);
-  --w-shadow-2: 4px 4px 0 var(--w-aubergine);
-  --w-shadow-lift: 6px 6px 0 var(--w-aubergine);
+  /* shadows: soft and tactile (fintech neumorphism, light touch). Never a glow. */
+  --w-shadow-1: 0 1px 2px rgba(14, 42, 29, .06), 0 1px 1px rgba(14, 42, 29, .04);
+  --w-shadow-2: 0 1px 2px rgba(14, 42, 29, .05), 0 12px 32px -12px rgba(14, 42, 29, .18);
+  --w-shadow-lift: 0 2px 4px rgba(14, 42, 29, .06), 0 24px 48px -16px rgba(14, 42, 29, .26);
 
-  /* motion */
-  --w-ease: cubic-bezier(.2, .8, .2, 1);
-  --w-dur-fast: 120ms; --w-dur: 200ms; --w-dur-slow: 360ms;
+  /* motion: smooth for a premium feel */
+  --w-ease: cubic-bezier(.22, 1, .36, 1);
+  --w-dur-fast: 140ms; --w-dur: 240ms; --w-dur-slow: 480ms;
   --w-dur-row: 1200ms;
 }
 

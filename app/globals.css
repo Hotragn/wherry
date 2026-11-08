@@ -11,6 +11,10 @@
   --color-muted: var(--w-muted);
   --color-line: var(--w-line);
   --color-accent: var(--w-accent);
+  --color-accent-hover: var(--w-accent-hover);
+  --color-brand: var(--w-brand);
+  --color-on-brand: var(--w-on-brand);
+  --color-spark: var(--w-spark);
   --color-on-accent: var(--w-on-accent);
   --color-ok: var(--w-ok);
   --color-err: var(--w-err);
@@ -39,6 +43,9 @@
   --radius-md: var(--w-radius-md);
   --radius-lg: var(--w-radius-lg);
   --radius-full: var(--w-radius-pill);
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 28px;
 
   --shadow-*: initial;
   --shadow-1: var(--w-shadow-1);
@@ -52,7 +59,7 @@
 
 /* Bind the token font stacks to the self-hosted fonts from the root layout. */
 :root {
-  --w-font-display: var(--nf-display), "Arial Narrow", system-ui, sans-serif;
+  --w-font-display: var(--nf-text), system-ui, sans-serif;
   --w-font-text: var(--nf-text), system-ui, -apple-system, "Segoe UI", sans-serif;
   --w-font-mono: var(--nf-mono), ui-monospace, "SF Mono", Menlo, monospace;
 }
@@ -68,56 +75,61 @@
     font-size: var(--w-text-md);
     line-height: var(--w-leading-body);
     -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "cv11";
   }
   h1,
   h2,
   h3 {
     font-family: var(--w-font-display);
     line-height: var(--w-leading-tight);
-    font-weight: 800;
-    font-stretch: 78%;
-    letter-spacing: -0.015em;
+    font-weight: 600;
+    letter-spacing: -0.035em;
     text-wrap: balance;
   }
   :focus-visible {
-    outline: 3px solid var(--w-focus);
+    outline: 2px solid var(--w-focus);
     outline-offset: 3px;
   }
   .bg-night :focus-visible {
-    outline-color: var(--w-accent);
+    outline-color: var(--w-on-night);
   }
   ::selection {
-    background: var(--w-accent);
-    color: var(--w-ink);
+    background: var(--w-brand);
+    color: var(--w-on-brand);
   }
 }
 
 @layer components {
+  /* Small field label: sentence case, quiet. No shouty uppercase eyebrows. */
   .label {
-    font-family: var(--w-font-mono);
-    font-size: var(--w-text-xs);
-    letter-spacing: var(--w-tracking-label);
-    text-transform: uppercase;
-    font-weight: 600;
+    font-size: var(--w-text-sm);
+    font-weight: 500;
     color: var(--w-muted);
+    letter-spacing: 0;
   }
   .mono {
     font-family: var(--w-font-mono);
     font-weight: 500;
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
   .display {
     font-family: var(--w-font-display);
-    font-weight: 800;
-    font-stretch: 78%;
+    font-weight: 600;
     line-height: var(--w-leading-tight);
-    letter-spacing: -0.015em;
+    letter-spacing: -0.035em;
   }
-  /* A panel: lifted fog card stock with an ink rule and a hard offset shadow. */
+  /* The one gradient allowed: hero heading text only, ink to muted, left to right. */
+  .headline-fade {
+    background: linear-gradient(90deg, var(--w-ink) 0%, var(--w-ink) 45%, var(--w-muted) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Panel: lifted ivory, hairline all the way round, soft tactile shadow. */
   .paper {
     background: var(--w-surface);
-    border: 2px solid var(--w-ink);
+    border: 1px solid var(--w-line);
     border-radius: var(--w-radius-lg);
     box-shadow: var(--w-shadow-2);
   }
@@ -126,58 +138,79 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--w-space-2);
-    min-height: 52px;
-    padding: var(--w-space-3) var(--w-space-6);
-    border: 2px solid var(--w-ink);
+    gap: var(--w-space-3);
+    min-height: 48px;
+    padding: 0 var(--w-space-6);
+    border: 1px solid transparent;
     border-radius: var(--w-radius-pill);
-    font: 700 var(--w-text-lg) / 1.15 var(--w-font-text);
+    font: 600 var(--w-text-md) / 1 var(--w-font-text);
+    letter-spacing: -0.01em;
     cursor: pointer;
+    text-align: center;
+    text-wrap: balance;
+    padding-block: 10px;
     transition:
       transform var(--w-dur-fast) var(--w-ease),
-      box-shadow var(--w-dur-fast) var(--w-ease),
-      background-color var(--w-dur) var(--w-ease);
+      box-shadow var(--w-dur) var(--w-ease),
+      background-color var(--w-dur) var(--w-ease),
+      border-color var(--w-dur) var(--w-ease);
   }
   .btn:active:not(:disabled) {
-    transform: translate(3px, 3px);
-    box-shadow: 1px 1px 0 var(--w-ink);
+    transform: scale(0.98);
   }
   .btn:disabled {
     cursor: not-allowed;
-    opacity: 0.5;
+    opacity: 0.45;
   }
-  /* The one saffron action per screen. */
+  /* The one vermilion action per screen, with a round arrow chip that slides on hover. */
   .btn-sail {
     background: var(--w-accent);
     color: var(--w-on-accent);
-    box-shadow: var(--w-shadow-1);
+    padding-right: 6px;
+    box-shadow:
+      inset 0 1px 0 rgba(253, 247, 238, 0.18),
+      var(--w-shadow-2);
+  }
+  .btn-sail::after {
+    content: "→";
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--w-radius-pill);
+    background: var(--w-on-accent);
+    color: var(--w-accent);
+    font-size: 18px;
+    transition: transform var(--w-dur) var(--w-ease);
   }
   .btn-sail:hover:not(:disabled) {
-    transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0 var(--w-ink);
+    background: var(--w-accent-hover);
+    box-shadow: var(--w-shadow-lift);
+  }
+  .btn-sail:hover:not(:disabled)::after {
+    transform: translateX(3px);
   }
   .btn-quiet {
-    background: transparent;
+    background: var(--w-surface);
     color: var(--w-ink);
-    border-color: var(--w-ink);
+    border-color: var(--w-line);
+    box-shadow: var(--w-shadow-1);
   }
   .btn-quiet:hover:not(:disabled) {
-    background: var(--w-surface);
+    border-color: var(--w-muted);
   }
-  /* On aubergine bands the saffron button keeps its fill and gets a fog shadow. */
   .btn-night {
-    background: var(--w-accent);
-    color: var(--w-on-accent);
-    border-color: var(--w-accent);
-    box-shadow: 3px 3px 0 var(--w-on-night);
+    background: var(--w-on-night);
+    color: var(--w-ink);
   }
   .link {
     color: inherit;
-    font-weight: 700;
+    font-weight: 500;
     text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-decoration-color: var(--w-accent);
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
     text-underline-offset: 4px;
+    transition: text-decoration-color var(--w-dur) var(--w-ease);
   }
   .link:hover {
     text-decoration-color: currentColor;
@@ -185,29 +218,29 @@
 
   .field {
     width: 100%;
-    min-height: 52px;
-    padding: var(--w-space-2) var(--w-space-3);
+    min-height: 48px;
+    padding: var(--w-space-2) var(--w-space-4);
     background: var(--w-surface);
     color: var(--w-ink);
-    border: 2px solid var(--w-muted);
-    border-radius: var(--w-radius-sm);
-    font: 400 var(--w-text-lg) var(--w-font-text);
+    border: 1px solid var(--w-muted);
+    border-radius: 12px;
+    font: 400 var(--w-text-md) var(--w-font-text);
+    transition: box-shadow var(--w-dur) var(--w-ease);
   }
   .field:focus-visible {
-    outline-offset: 0;
-    border-color: var(--w-ink);
+    outline: none;
+    border-color: var(--w-brand);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--w-brand) 18%, transparent);
   }
 
-  /* Ferry ticket: saffron card stock, punched notches, perforation and a tear-off stub. */
+  /* Ferry ticket: emerald card stock like a banknote, two punched notches where the stub tears off. */
   .ticket {
     position: relative;
-    background: var(--w-accent);
-    color: var(--w-ink);
-    border: 2px solid var(--w-ink);
+    background: var(--w-brand);
+    color: var(--w-on-brand);
     border-radius: var(--w-radius-md);
-    box-shadow: var(--w-shadow-2);
+    box-shadow: var(--w-shadow-lift);
   }
-  /* Two punched notches where the stub tears off: one on the top edge, one on the bottom. */
   .ticket::before,
   .ticket::after {
     content: "";
@@ -217,41 +250,41 @@
     height: 22px;
     border-radius: 50%;
     background: var(--notch-bg, var(--w-base));
-    border: 2px solid var(--w-ink);
     transform: translateX(-50%);
     z-index: 1;
   }
   .ticket::before {
-    top: -12px;
-    clip-path: inset(50% 0 0 0);
+    top: -11px;
   }
   .ticket::after {
-    bottom: -12px;
-    clip-path: inset(0 0 50% 0);
+    bottom: -11px;
+  }
+  .ticket .label {
+    color: var(--w-on-night-muted);
   }
   .perf {
-    border-top: 3px dotted var(--w-ink);
+    border-top: 2px dashed color-mix(in srgb, var(--w-on-brand) 45%, transparent);
   }
   .stamp {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
-    padding: 4px 12px;
-    border: 3px double var(--w-ok);
+    padding: 6px 14px;
+    border: 2px solid var(--w-spark);
     border-radius: var(--w-radius-sm);
-    color: var(--w-ok);
+    color: var(--w-spark);
     background: var(--w-surface);
     font: 700 var(--w-text-lg) / 1.05 var(--w-font-mono);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     transform: rotate(-8deg);
+    box-shadow: var(--w-shadow-2);
   }
-  /* ASCII art: Paper Mono, fixed cell, no ligatures. */
   .ascii {
     font-family: var(--w-font-mono);
     font-weight: 500;
     white-space: pre;
-    line-height: 1.15;
+    line-height: 1.2;
     font-variant-ligatures: none;
     letter-spacing: 0;
   }
@@ -266,6 +299,20 @@
     white-space: nowrap;
     border: 0;
   }
+}
+
+/* Doggett floats gently (the hero only). */
+@keyframes w-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+.w-float {
+  animation: w-float 5s var(--w-ease) infinite;
 }
 
 /* The collected stamp lands: drops from above the ticket and settles with a small kick. */
